@@ -138,7 +138,8 @@ input[type="text"], input[type="number"], select, textarea {
 }
 input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
-.field { display: flex; flex-direction: column; gap: 4px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 100%; }
+.field > select, .field > input { min-width: 0; }
 
 button, .btn {
   font: inherit; font-size: 15px; cursor: pointer;
