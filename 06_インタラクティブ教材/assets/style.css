@@ -8,6 +8,7 @@
   --border: #d9dee7;
   --accent: #2563eb;
   --accent-weak: #dbe6fd;
+  --on-accent: #ffffff;
   --ok: #15803d;
   --ok-weak: #dcfce7;
   --ng: #b91c1c;
@@ -33,6 +34,7 @@
     --border: #343c4a;
     --accent: #6ea2ff;
     --accent-weak: #1f3157;
+    --on-accent: #0b1220;
     --ok: #4ade80;
     --ok-weak: #163323;
     --ng: #f87171;
@@ -55,6 +57,7 @@
   --border: #343c4a;
   --accent: #6ea2ff;
   --accent-weak: #1f3157;
+  --on-accent: #0b1220;
   --ok: #4ade80;
   --ok-weak: #163323;
   --ng: #f87171;
@@ -142,7 +145,7 @@ button, .btn {
   border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
   border-radius: 8px; padding: 7px 16px;
 }
-button.primary, .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary, .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 button:disabled { opacity: .5; cursor: not-allowed; }
 
 /* 結果表示 */

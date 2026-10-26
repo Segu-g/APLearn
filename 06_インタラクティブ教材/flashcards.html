@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>略語・用語カード</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    [hidden] { display: none !important; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .flash {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+      width: 100%; min-height: 220px; padding: 20px 16px; margin: 14px 0;
+      background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer;
+      overflow-wrap: anywhere; line-height: 1.6;
+    }
+    .flash:hover { border-color: var(--accent); }
+    .flash .side { font-size: 12px; color: var(--text-sub); margin-bottom: 8px; }
+    .flash .big { font-size: 34px; font-weight: 700; font-family: var(--mono); line-height: 1.3; }
+    .flash .mid { font-size: 18px; }
+    .flash .full { color: var(--text-sub); font-size: 15px; margin-top: 6px; }
+    .flash .hint { margin-top: 14px; font-size: 13px; color: var(--text-sub); }
+    .flash.back { border-color: var(--accent); }
+    .deck-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+    .deck-bar .spacer { flex: 1; }
+    .judge { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .judge button { padding: 12px 8px; font-size: 16px; }
+    button.known { background: var(--ok-weak); border-color: var(--ok); color: var(--text); }
+    button.learning { background: var(--ng-weak); border-color: var(--ng); color: var(--text); }
+    .meter { height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+    .meter > div { height: 100%; background: var(--ok); width: 0; transition: width .2s; }
+    .list-table td:first-child { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
+    .list-table .st { white-space: nowrap; }
+    .list-table button { font-size: 13px; padding: 3px 10px; }
+    .kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface-2); }
+    @media (max-width: 600px) {
+      .flash .big { font-size: 28px; }
+      .list-table th:nth-child(2), .list-table td:nth-child(2) { display: none; }  /* 正式名称は狭い画面では省略（意味欄にも情報がある） */
+    }
+  </style>
+</head>
+<body data-root="./" data-title="略語・用語カード">
+  <main>
+    <h1>略語・用語カード</h1>
+    <p class="lead">頻出略語・用語集の約290語をフラッシュカードで覚えます。「覚えた／まだ」で仕分けると、このブラウザに保存され、未習得のカードだけをくり返し出題できます。</p>
+
+    <div class="card">
+      <div class="row">
+        <div class="field"><label for="sel-cat">カテゴリ</label><select id="sel-cat"></select></div>
+        <div class="field"><label for="sel-dir">出題の向き</label>
+          <select id="sel-dir">
+            <option value="abbr">略語 → 意味</option>
+            <option value="meaning">意味 → 略語</option>
+          </select></div>
+        <label><input type="checkbox" id="chk-unknown" checked> 未習得のみ出題</label>
+      </div>
+      <p class="muted" id="cat-info" style="margin-bottom:0"></p>
+      <div class="meter" aria-hidden="true"><div id="cat-meter"></div></div>
+    </div>
+
+    <div class="tabs" role="tablist" style="margin-top:16px">
+      <button type="button" role="tab" id="tab-cards" aria-selected="true">カード</button>
+      <button type="button" role="tab" id="tab-list" aria-selected="false">一覧・検索</button>
+    </div>
+
+    <!-- カード -->
+    <section id="view-cards">
+      <div class="card">
+        <div class="deck-bar">
+          <strong id="deck-progress"></strong>
+          <span id="deck-tag"></span>
+          <span class="spacer"></span>
+          <button type="button" id="btn-shuffle">シャッフルしてやり直す</button>
+        </div>
+        <button type="button" class="flash" id="flash" aria-live="polite"></button>
+        <div class="judge" id="judge">
+          <button type="button" class="learning" id="btn-learning">まだ（←）</button>
+          <button type="button" class="known" id="btn-known">覚えた（→）</button>
+        </div>
+        <div id="deck-done" hidden></div>
+        <p class="muted">キーボード：<span class="kbd">Space</span> 表裏を切替え、<span class="kbd">→</span> 覚えた、<span class="kbd">←</span> まだ。</p>
+      </div>
+    </section>
+
+    <!-- 一覧 -->
+    <section id="view-list" hidden>
+      <div class="card">
+        <div class="row">
+          <div class="field" style="flex:1; min-width: 200px"><label for="q-search">検索（略語・正式名称・意味）</label>
+            <input type="text" id="q-search" placeholder="例：DNS、暗号、Recovery" autocomplete="off"></div>
+          <div class="field"><label for="sel-status">状態</label>
+            <select id="sel-status">
+              <option value="">すべて</option>
+              <option value="unknown">未習得</option>
+              <option value="known">覚えた</option>
+            </select></div>
+        </div>
+        <p class="muted" id="list-info"></p>
+        <div class="table-wrap"><table class="list-table" id="list-table"></table></div>
+        <div class="actions" style="margin-top:14px">
+          <button type="button" id="btn-reset">このカテゴリの習得状況をリセット</button>
+        </div>
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../05_まとめ・横断資料/02_頻出略語・用語集.md">頻出略語・用語集（このカードの出典）</a></li>
+      <li><a href="../05_まとめ・横断資料/03_直前チェックリスト.md">直前チェックリスト（対になる用語の違い）</a></li>
+    </ul>
+  </main>
+  <script src="assets/common.js"></script>
+  <script src="data/glossary.js"></script>
+  <script>
+  /* CORE-BEGIN：DOM に依存しないロジック（Node の vm で検証できるようにまとめている） */
+  var FlashCore = (function () {
+    function keyOf(t) { return t.category + "|" + t.abbr; }
+    function categories(glossary) {
+      var out = [];
+      glossary.forEach(function (t) { if (out.indexOf(t.category) < 0) out.push(t.category); });
+      return out;
+    }
+    function inCategory(glossary, category) {
+      return glossary.filter(function (t) { return !category || t.category === category; });
+    }
+    function isKnown(status, t) { return !!(status && status[keyOf(t)] === "known"); }
+    function buildDeck(glossary, opt, shuffle) {
+      opt = opt || {};
+      var cards = inCategory(glossary, opt.category).filter(function (t) { return !opt.unknownOnly || !isKnown(opt.status, t); });
+      return shuffle ? shuffle(cards) : cards;
+    }
+    // 状態を更新した新しいオブジェクトを返す（"known" / "learning"、null で削除）
+    function setStatus(status, t, value) {
+      var s = {}, k;
+      for (k in status || {}) if (Object.prototype.hasOwnProperty.call(status, k)) s[k] = status[k];
+      if (value) s[keyOf(t)] = value; else delete s[keyOf(t)];
+      return s;
+    }
+    function resetCategory(status, glossary, category) {
+      var s = status || {};
+      inCategory(glossary, category).forEach(function (t) { s = setStatus(s, t, null); });
+      return s;
+    }
+    function counts(glossary, status, category) {
+      var list = inCategory(glossary, category), known = list.filter(function (t) { return isKnown(status, t); }).length;
+      return { total: list.length, known: known, unknown: list.length - known };
+    }
+    function norm(s) { return String(s).normalize ? String(s).normalize("NFKC").toLowerCase() : String(s).toLowerCase(); }
+    function search(glossary, query, opt) {
+      opt = opt || {};
+      var words = norm(query || "").split(/\s+/).filter(Boolean);
+      return inCategory(glossary, opt.category).filter(function (t) {
+        if (opt.state === "known" && !isKnown(opt.status, t)) return false;
+        if (opt.state === "unknown" && isKnown(opt.status, t)) return false;
+        var hay = norm(t.abbr + " " + t.full + " " + t.meaning);
+        return words.every(function (w) { return hay.indexOf(w) >= 0; });
+      });
+    }
+    return { keyOf: keyOf, categories: categories, inCategory: inCategory, isKnown: isKnown, buildDeck: buildDeck,
+      setStatus: setStatus, resetCategory: resetCategory, counts: counts, search: search };
+  })();
+  /* CORE-END */
+
+  (function () {
+    var G = window.APL_DATA_GLOSSARY || [];
+    var store = APL.store, esc = APL.esc, F = FlashCore;
+    var KEY = "flash-status", PREF = "flash-pref";
+    var $ = function (id) { return document.getElementById(id); };
+    var status = store.get(KEY, {}) || {};
+    var deck = [], pos = 0, flipped = false, sessionKnown = 0, sessionLearning = 0;
+
+    if (!G.length) {
+      document.querySelector("main").insertAdjacentHTML("beforeend", '<div class="box-ng">用語データ（data/glossary.js）を読み込めませんでした。</div>');
+      return;
+    }
+
+    // ---- 設定 ----
+    $("sel-cat").innerHTML = '<option value="">すべてのカテゴリ</option>' + F.categories(G).map(function (c) {
+      return '<option value="' + esc(c) + '">' + esc(c) + "</option>";
+    }).join("");
+    var pref = store.get(PREF, {}) || {};
+    if (pref.category && F.categories(G).indexOf(pref.category) >= 0) $("sel-cat").value = pref.category;
+    if (pref.dir === "meaning") $("sel-dir").value = "meaning";
+    if (pref.unknownOnly === false) $("chk-unknown").checked = false;
+    function savePref() { store.set(PREF, { category: $("sel-cat").value, dir: $("sel-dir").value, unknownOnly: $("chk-unknown").checked }); }
+    function cat() { return $("sel-cat").value; }
+
+    function refreshInfo() {
+      var c = F.counts(G, status, cat());
+      $("cat-info").textContent = (cat() || "すべてのカテゴリ") + "：" + c.total + "語中 覚えた " + c.known + "語・未習得 " + c.unknown + "語";
+      $("cat-meter").style.width = (c.total ? (c.known / c.total) * 100 : 0) + "%";
+    }
+
+    // ---- カード ----
+    function newDeck() {
+      deck = F.buildDeck(G, { category: cat(), unknownOnly: $("chk-unknown").checked, status: status }, APL.shuffle);
+      pos = 0; flipped = false; sessionKnown = 0; sessionLearning = 0;
+      renderCard();
+    }
+    function renderCard() {
+      refreshInfo();
+      var done = pos >= deck.length;
+      $("flash").hidden = done; $("judge").hidden = done; $("deck-done").hidden = !done;
+      if (done) {
+        $("deck-progress").textContent = "";
+        $("deck-tag").innerHTML = "";
+        var c = F.counts(G, status, cat());
+        $("deck-done").innerHTML = deck.length
+          ? '<div class="box-ok" style="margin:14px 0"><strong>このデッキは終わりです。</strong>（覚えた ' + sessionKnown + "・まだ " + sessionLearning + "）</div>" +
+            (c.unknown && $("chk-unknown").checked ? '<button class="primary" type="button" id="btn-again">未習得のカードでもう一度（' + c.unknown + "枚）</button>" : "")
+          : '<div class="box-note" style="margin:14px 0">' + ($("chk-unknown").checked ? "このカテゴリはすべて「覚えた」になっています。「未習得のみ出題」を外すと全カードを復習できます。" : "カードがありません。") + "</div>";
+        var again = $("btn-again"); if (again) again.addEventListener("click", newDeck);
+        return;
+      }
+      var t = deck[pos], dirAbbr = $("sel-dir").value === "abbr";
+      $("deck-progress").textContent = (pos + 1) + " / " + deck.length;
+      $("deck-tag").innerHTML = '<span class="tag">' + esc(t.category) + "</span>" + (F.isKnown(status, t) ? ' <span class="tag ok">覚えた</span>' : "");
+      var front = dirAbbr
+        ? '<div class="big">' + esc(t.abbr) + "</div>"
+        : '<div class="mid">' + esc(t.meaning) + "</div>";
+      var back = '<div class="big">' + esc(t.abbr) + '</div><div class="full">' + esc(t.full) + '</div><div class="mid" style="margin-top:10px">' + esc(t.meaning) + "</div>";
+      $("flash").classList.toggle("back", flipped);
+      $("flash").innerHTML = '<span class="side">' + (flipped ? "裏（答え）" : "表") + "</span>" + (flipped ? back : front) +
+        '<span class="hint">' + (flipped ? "クリックで表に戻る" : "クリックまたは Space で答えを表示") + "</span>";
+    }
+    function flip() { if (pos < deck.length) { flipped = !flipped; renderCard(); } }
+    function judge(known) {
+      if (pos >= deck.length) return;
+      var t = deck[pos];
+      status = F.setStatus(status, t, known ? "known" : "learning");
+      store.set(KEY, status);
+      if (known) sessionKnown++; else sessionLearning++;
+      pos++; flipped = false;
+      renderCard();
+    }
+
+    // ---- 一覧 ----
+    function renderList() {
+      refreshInfo();
+      var rows = F.search(G, $("q-search").value, { category: cat(), state: $("sel-status").value, status: status });
+      $("list-info").textContent = rows.length + "語を表示";
+      $("list-table").innerHTML = "<tr><th>略語</th><th>正式名称</th><th>意味</th><th>状態</th></tr>" + rows.map(function (t) {
+        var k = F.isKnown(status, t);
+        return "<tr><td>" + esc(t.abbr) + "</td><td>" + esc(t.full) + "</td><td>" + esc(t.meaning) +
+          (cat() ? "" : '<br><span class="tag">' + esc(t.category) + "</span>") + '</td><td class="st">' +
+          '<button type="button" class="' + (k ? "known" : "") + '" data-key="' + esc(F.keyOf(t)) + '" aria-pressed="' + k + '">' + (k ? "覚えた" : "未習得") + "</button></td></tr>";
+      }).join("");
+    }
+
+    // ---- タブ ----
+    function tab(name) {
+      $("tab-cards").setAttribute("aria-selected", String(name === "cards"));
+      $("tab-list").setAttribute("aria-selected", String(name === "list"));
+      $("view-cards").hidden = name !== "cards";
+      $("view-list").hidden = name !== "list";
+      if (name === "list") renderList(); else newDeck();
+    }
+
+    // ---- イベント ----
+    $("sel-cat").addEventListener("change", function () { savePref(); if ($("view-list").hidden) newDeck(); else renderList(); });
+    $("sel-dir").addEventListener("change", function () { savePref(); flipped = false; renderCard(); });
+    $("chk-unknown").addEventListener("change", function () { savePref(); newDeck(); });
+    $("btn-shuffle").addEventListener("click", newDeck);
+    $("flash").addEventListener("click", flip);
+    $("btn-known").addEventListener("click", function () { judge(true); });
+    $("btn-learning").addEventListener("click", function () { judge(false); });
+    $("tab-cards").addEventListener("click", function () { tab("cards"); });
+    $("tab-list").addEventListener("click", function () { tab("list"); });
+    $("q-search").addEventListener("input", renderList);
+    $("sel-status").addEventListener("change", renderList);
+    $("list-table").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-key]"); if (!b) return;
+      var t = G.filter(function (x) { return F.keyOf(x) === b.dataset.key; })[0]; if (!t) return;
+      status = F.setStatus(status, t, F.isKnown(status, t) ? "learning" : "known");
+      store.set(KEY, status);
+      renderList();
+    });
+    $("btn-reset").addEventListener("click", function () {
+      if (!confirm((cat() || "すべてのカテゴリ") + " の習得状況をリセットしますか？")) return;
+      status = F.resetCategory(status, G, cat());
+      store.set(KEY, status);
+      renderList();
+    });
+    document.addEventListener("keydown", function (e) {
+      if ($("view-cards").hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+      var tag = (e.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "select" || tag === "textarea") return;
+      if (tag === "button" && e.target.id !== "flash" && (e.key === " " || e.key === "Enter")) return;  // 他のボタンは通常どおり押せるように
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); judge(true); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); judge(false); }
+    });
+
+    newDeck();
+  })();
+  </script>
+</body>
+</html>
