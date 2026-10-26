@@ -56,6 +56,11 @@ def source_line(exam, n, area):
     return s
 
 
+def clean_expl(text):
+    """解説の先頭にある「正解：ア」の重複表示を取り除く（正解は別に表示するため）"""
+    return re.sub(r"^\*\*正解[：:]\s*[アイウエ]\*\*[ 　]*", "", text.strip())
+
+
 def write(path, text):
     with open(path, "w", encoding="utf-8") as f:
         f.write(text.rstrip() + "\n")
@@ -95,7 +100,7 @@ def build_a(exams):
                 "",
                 f"**正解：{KANA[q['answer']]}**",
                 "",
-                q["explanation"],
+                clean_expl(q["explanation"]),
                 "",
                 "</details>",
                 "",
@@ -148,7 +153,7 @@ def build_a(exams):
                 "figures": ["../08_過去問解説/科目A/" + f for f in q["figures"]],
                 "calc": q["calc"],
                 "keywords": q["keywords"],
-                "explanation": q["explanation"].replace("](../../", "](../"),
+                "explanation": clean_expl(q["explanation"]).replace("](../../", "](../"),
                 "source": source_line(ex, q["no"], "午前") + ("（" + q["modified"] + "）" if q["modified"] else ""),
             })
     os.makedirs(os.path.dirname(QUIZ_JS), exist_ok=True)
