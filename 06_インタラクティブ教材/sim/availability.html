@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>稼働率シミュレータ</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ex-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ex-buttons button { font-size: 14px; padding: 5px 12px; }
+    input.num { width: 7.5em; }
+    input.name { width: 5.5em; }
+    .grp { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; padding: 8px 10px; margin-top: 8px; background: var(--surface); }
+    .grp.parallel { border-left-color: var(--ok); }
+    .grp.kofn { border-left-color: var(--mgmt); }
+    .grp > .ghead { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .grp > .gbody { margin-left: 6px; }
+    .unit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+    .unit:last-child { border-bottom: none; }
+    .grp button, .unit button, .grp select, .unit select { font-size: 13px; padding: 3px 8px; }
+    .grp input, .unit input { padding: 4px 6px; font-size: 14px; }
+    .kfield input { width: 3.5em; }
+    .del { color: var(--ng); }
+    .diagram svg { width: 100%; height: auto; display: block; }
+    .diagram { overflow: hidden; }
+    .big { font-size: 22px; font-weight: 700; }
+    .expr { font-family: var(--mono); font-size: 14px; word-break: break-all; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .two { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-root="../" data-title="稼働率シミュレータ">
+  <main>
+    <h1>稼働率シミュレータ</h1>
+    <p class="lead">MTBF・MTTR から稼働率を求めたり、直列・並列・k-out-of-n を組み合わせた構成図を組み立てて、全体の稼働率を途中式つきで計算できます。</p>
+
+    <h2>1. MTBF・MTTR から稼働率</h2>
+    <div class="two">
+      <section class="card">
+        <h3 style="margin-top:0">MTBF と MTTR を入力</h3>
+        <div class="row">
+          <div class="field"><label for="mtbf">MTBF（平均故障間隔）［時間］</label><input id="mtbf" class="num" type="number" min="0" step="any" value="480"></div>
+          <div class="field"><label for="mttr">MTTR（平均修復時間）［時間］</label><input id="mttr" class="num" type="number" min="0" step="any" value="20"></div>
+        </div>
+        <div class="result" id="mtbf-result" aria-live="polite"></div>
+      </section>
+      <section class="card">
+        <h3 style="margin-top:0">運用実績から求める</h3>
+        <div class="row">
+          <div class="field"><label for="rec-total">運用期間［時間］</label><input id="rec-total" class="num" type="number" min="0" step="any" value="1000"></div>
+          <div class="field"><label for="rec-fail">故障回数</label><input id="rec-fail" class="num" type="number" min="1" step="1" value="4"></div>
+          <div class="field"><label for="rec-repair">修理時間の合計［時間］</label><input id="rec-repair" class="num" type="number" min="0" step="any" value="40"></div>
+        </div>
+        <div class="result" id="rec-result" aria-live="polite"></div>
+      </section>
+    </div>
+
+    <h2>2. 構成図を組み立てて全体の稼働率を計算</h2>
+    <section class="card">
+      <div class="row" style="align-items:center">
+        <strong>例題を読み込む：</strong>
+        <div class="ex-buttons" id="examples"></div>
+      </div>
+      <p class="muted" style="margin:10px 0 0">グループの種類（直列／並列／k-out-of-n）を切り替えたり、グループの中にグループを入れたりできます。装置の稼働率は「稼働率を直接入力」か「MTBF・MTTR から計算」を選べます。</p>
+      <div id="editor"></div>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-top:0">構成図</h3>
+      <div class="diagram" id="diagram" role="img" aria-label="システム構成図"></div>
+      <p class="expr" id="expr"></p>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-top:0">計算結果</h3>
+      <div id="total"></div>
+      <h3>途中式（内側のグループから順に計算）</h3>
+      <div class="steps" id="steps"></div>
+      <div class="box-note" style="margin-top:12px">
+        💡 <strong>手順</strong>：内側の並列部分を1つの装置とみなして稼働率を求め、それを外側の直列計算に使います。<br>
+        直列は <strong>掛ける</strong>、並列は <strong>1 から（1 − 稼働率）の積を引く</strong>。
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../../01_テクノロジ系/04_システム構成要素.md">01_テクノロジ系/04_システム構成要素.md</a>（5. 信頼性の評価：MTBF・MTTR・稼働率、直列・並列・混合・n台中k台）</li>
+      <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（3. システム構成・信頼性）</li>
+    </ul>
+  </main>
+
+  <script src="../assets/common.js"></script>
+  <script id="calc">
+  /* ===== 計算ロジック（DOM に依存しない） ===== */
+  var Calc = (function () {
+    function availability(mtbf, mttr) {
+      if (!(mtbf >= 0) || !(mttr >= 0) || mtbf + mttr <= 0) return NaN;
+      return mtbf / (mtbf + mttr);
+    }
+    // 運用実績から MTBF・MTTR・稼働率を求める
+    function fromRecord(totalTime, failures, repairTotal) {
+      var up = totalTime - repairTotal;
+      var mtbf = up / failures, mttr = repairTotal / failures;
+      return { up: up, mtbf: mtbf, mttr: mttr, a: availability(mtbf, mttr) };
+    }
+    function series(list) { return list.reduce(function (p, a) { return p * a; }, 1); }
+    function parallel(list) { return 1 - list.reduce(function (p, a) { return p * (1 - a); }, 1); }
+    function comb(n, r) {
+      if (r < 0 || r > n) return 0;
+      var c = 1;
+      for (var i = 1; i <= r; i++) c = c * (n - r + i) / i;
+      return Math.round(c);
+    }
+    // n 個の要素（稼働率は異なってよい）のうち k 個以上が稼働している確率（動的計画法）
+    function kOfN(k, list) {
+      var dp = [1]; // dp[j] = ちょうど j 個稼働している確率
+      list.forEach(function (a) {
+        var next = new Array(dp.length + 1).fill(0);
+        for (var j = 0; j < dp.length; j++) {
+          next[j] += dp[j] * (1 - a);
+          next[j + 1] += dp[j] * a;
+        }
+        dp = next;
+      });
+      var s = 0;
+      for (var j = Math.max(0, k); j < dp.length; j++) s += dp[j];
+      return s;
+    }
+    // 同じ稼働率 a の n 台のうち k 台以上：Σ nCi a^i (1−a)^(n−i)
+    function kOfNSame(k, n, a) {
+      var s = 0;
+      for (var i = k; i <= n; i++) s += comb(n, i) * Math.pow(a, i) * Math.pow(1 - a, n - i);
+      return s;
+    }
+
+    function fmt(x, d) {
+      if (!isFinite(x)) return String(x);
+      d = d === undefined ? 6 : d;
+      var r = Math.round(x * Math.pow(10, d)) / Math.pow(10, d);
+      var s = r.toFixed(d).replace(/\.?0+$/, "");
+      return s === "-0" ? "0" : s;
+    }
+
+    function unitValue(u) {
+      return u.mode === "mtbf" ? availability(Number(u.mtbf), Number(u.mttr)) : Number(u.a);
+    }
+
+    // 構成ツリーを評価し、値・途中式・表記を返す
+    // node: {type:'unit'|'series'|'parallel'|'kofn', name, a, mode, mtbf, mttr, k, children}
+    function evaluate(root) {
+      var steps = [], errors = [], counter = { n: 0 };
+      var marks = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
+      function mark(i) { return i < marks.length ? marks[i] : "(" + (i + 1) + ")"; }
+      function rec(node, isRoot) {
+        if (node.type === "unit") {
+          var v = unitValue(node);
+          if (node.mode === "mtbf") {
+            if (!isFinite(v)) errors.push("装置 " + node.name + " の MTBF・MTTR が正しくありません");
+            else steps.push("装置" + node.name + "：MTBF ÷ (MTBF + MTTR) = " + fmt(node.mtbf) + " ÷ (" + fmt(node.mtbf) + " + " + fmt(node.mttr) + ") = " + fmt(v));
+          } else if (!(v >= 0 && v <= 1) || node.a === "" || node.a === null) {
+            errors.push("装置 " + node.name + " の稼働率は 0〜1 の数で入力してください");
+          }
+          node._value = v;
+          node._label = node.name;
+          node._expr = node.name;
+          return v;
+        }
+        var kids = node.children || [];
+        if (kids.length === 0) { errors.push("空のグループがあります（装置を追加するか、グループを削除してください）"); node._value = NaN; node._label = "空"; node._expr = "()"; return NaN; }
+        var vals = kids.map(function (c) { return rec(c, false); });
+        var labels = kids.map(function (c) { return c._label; });
+        var exprs = kids.map(function (c) { return c._expr; });
+        var v, line;
+        if (kids.length === 1) {
+          v = vals[0];
+          node._expr = exprs[0];
+          node._value = v;
+          node._label = kids[0]._label;
+          return v;
+        }
+        var idx = counter.n++;
+        var tag = isRoot ? "全体" : "グループ" + (idx + 1);
+        if (node.type === "series") {
+          v = series(vals);
+          node._expr = (isRoot ? "" : "(") + exprs.join(" – ") + (isRoot ? "" : ")");
+          line = mark(idx) + " " + tag + "（直列：" + labels.join("・") + "）\n   " +
+            vals.map(function (x) { return fmt(x); }).join(" × ") + " = " + fmt(v);
+        } else if (node.type === "parallel") {
+          v = parallel(vals);
+          var prod = 1 - v;
+          node._expr = "(" + exprs.join(" ∥ ") + ")";
+          line = mark(idx) + " " + tag + "（並列：" + labels.join("・") + "）\n   1 − " +
+            vals.map(function (x) { return "(1 − " + fmt(x) + ")"; }).join(" × ") +
+            " = 1 − " + fmt(prod, 8) + " = " + fmt(v);
+        } else if (node.type === "kofn") {
+          var n = kids.length, k = Math.round(Number(node.k));
+          if (!(k >= 1 && k <= n)) { errors.push("k-out-of-n の k は 1〜" + n + " の整数にしてください"); k = Math.min(Math.max(k || 1, 1), n); }
+          v = kOfN(k, vals);
+          node._expr = k + "/" + n + "[" + exprs.join(", ") + "]";
+          var same = vals.every(function (x) { return Math.abs(x - vals[0]) < 1e-12; });
+          line = mark(idx) + " " + tag + "（" + n + "台中" + k + "台以上：" + labels.join("・") + "）\n";
+          if (same) {
+            var a = vals[0], terms = [], nums = [];
+            for (var i = k; i <= n; i++) {
+              var t = comb(n, i) * Math.pow(a, i) * Math.pow(1 - a, n - i);
+              terms.push(n + "C" + i + " × " + fmt(a) + (i > 1 ? "^" + i : "") + (n - i > 0 ? " × " + fmt(1 - a) + (n - i > 1 ? "^" + (n - i) : "") : ""));
+              nums.push(fmt(t, 8));
+            }
+            line += "   （ちょうど i 台稼働する確率 nCi × a^i × (1−a)^(n−i) を i = " + k + "〜" + n + " で合計）\n   " +
+              terms.join(" + ") + "\n   = " + nums.join(" + ") + " = " + fmt(v);
+          } else {
+            line += "   （稼働率が異なるので、" + k + "台以上が稼働する組合せの確率をすべて合計）\n   = " + fmt(v);
+          }
+        }
+        steps.push(line);
+        node._value = v;
+        node._label = isRoot ? "全体" : "G" + (idx + 1);
+        return v;
+      }
+      var value = rec(root, true);
+      return { value: value, steps: steps, errors: errors, expr: root._expr };
+    }
+
+    return { availability: availability, fromRecord: fromRecord, series: series, parallel: parallel,
+      comb: comb, kOfN: kOfN, kOfNSame: kOfNSame, evaluate: evaluate, fmt: fmt, unitValue: unitValue };
+  })();
+  </script>
+  <script>
+  (function () {
+    var fmt = Calc.fmt, esc = APL.esc;
+    var $ = function (id) { return document.getElementById(id); };
+    var uid = 0;
+    function U(name, a) { return { id: ++uid, type: "unit", name: name, mode: "a", a: a, mtbf: 480, mttr: 20 }; }
+    function UM(name, mtbf, mttr) { return { id: ++uid, type: "unit", name: name, mode: "mtbf", a: 0.9, mtbf: mtbf, mttr: mttr }; }
+    function G(type, children, k) { return { id: ++uid, type: type, children: children, k: k || 2 }; }
+
+    var EXAMPLES = [
+      { label: "直列（0.9 × 0.9）", build: function () { return G("series", [U("A", 0.9), U("B", 0.9)]); } },
+      { label: "並列（0.9 ∥ 0.9）", build: function () { return G("series", [G("parallel", [U("A", 0.9), U("B", 0.9)])]); } },
+      { label: "Aと(BとCの並列)の直列", build: function () { return G("series", [U("A", 0.9), G("parallel", [U("B", 0.8), U("C", 0.8)])]); } },
+      { label: "混合：A – (B1∥B2) – C", build: function () { return G("series", [U("A", 0.95), G("parallel", [U("B1", 0.9), U("B2", 0.9)]), U("C", 0.98)]); } },
+      { label: "3台中2台以上（a = 0.9）", build: function () { return G("series", [G("kofn", [U("A", 0.9), U("B", 0.9), U("C", 0.9)], 2)]); } },
+      { label: "(A–B) ∥ (C–D)", build: function () { return G("series", [G("parallel", [G("series", [U("A", 0.9), U("B", 0.9)]), G("series", [U("C", 0.9), U("D", 0.9)])])]); } },
+      { label: "MTBF・MTTR で指定", build: function () { return G("series", [UM("A", 480, 20), G("parallel", [UM("B", 240, 10), UM("C", 240, 10)])]); } }
+    ];
+
+    var root = EXAMPLES[2].build();
+
+    /* ---------- 1. MTBF/MTTR ---------- */
+    function updateMtbf() {
+      var mtbf = Number($("mtbf").value), mttr = Number($("mttr").value);
+      var a = Calc.availability(mtbf, mttr);
+      var box = $("mtbf-result");
+      if (!isFinite(a)) { box.innerHTML = '<span class="ng">MTBF・MTTR に 0 以上の数を入力してください（両方 0 は不可）。</span>'; return; }
+      box.innerHTML = '<div>稼働率 = <span class="big">' + fmt(a) + '</span>（' + fmt(a * 100, 4) + '%）</div>' +
+        '<div class="steps" style="margin-top:8px">稼働率 = MTBF ÷ (MTBF + MTTR)\n       = ' + fmt(mtbf) + ' ÷ (' + fmt(mtbf) + ' + ' + fmt(mttr) + ')\n       = ' + fmt(mtbf) + ' ÷ ' + fmt(mtbf + mttr) + '\n       = ' + fmt(a) +
+        '\n故障率 λ = 1 ÷ MTBF = ' + (mtbf > 0 ? fmt(1 / mtbf, 8) + ' 回/時間' : '（MTBF = 0 のため計算不可）') +
+        '\n年間停止時間の目安 = 8,760時間 × (1 − ' + fmt(a) + ') = ' + fmt(8760 * (1 - a), 3) + ' 時間</div>';
+    }
+    function updateRecord() {
+      var T = Number($("rec-total").value), n = Number($("rec-fail").value), R = Number($("rec-repair").value);
+      var box = $("rec-result");
+      if (!(T > 0) || !(n >= 1) || !(R >= 0) || R > T) { box.innerHTML = '<span class="ng">運用期間 &gt; 0、故障回数 ≧ 1、0 ≦ 修理時間 ≦ 運用期間 で入力してください。</span>'; return; }
+      var r = Calc.fromRecord(T, n, R);
+      box.innerHTML = '<div>稼働率 = <span class="big">' + fmt(r.a) + '</span></div>' +
+        '<div class="steps" style="margin-top:8px">総稼働時間 = ' + fmt(T) + ' − ' + fmt(R) + ' = ' + fmt(r.up) + ' 時間\nMTBF = ' + fmt(r.up) + ' ÷ ' + fmt(n) + ' = ' + fmt(r.mtbf) + ' 時間\nMTTR = ' + fmt(R) + ' ÷ ' + fmt(n) + ' = ' + fmt(r.mttr) + ' 時間\n稼働率 = ' + fmt(r.mtbf) + ' ÷ (' + fmt(r.mtbf) + ' + ' + fmt(r.mttr) + ') = ' + fmt(r.a) + '</div>';
+    }
+    ["mtbf", "mttr"].forEach(function (id) { $(id).addEventListener("input", updateMtbf); });
+    ["rec-total", "rec-fail", "rec-repair"].forEach(function (id) { $(id).addEventListener("input", updateRecord); });
+
+    /* ---------- 2. エディタ ---------- */
+    var TYPE_LABEL = { series: "直列", parallel: "並列", kofn: "k-out-of-n" };
+    function allNames(node, out) {
+      out = out || [];
+      if (node.type === "unit") out.push(node.name);
+      else node.children.forEach(function (c) { allNames(c, out); });
+      return out;
+    }
+    function nextName() {
+      var used = allNames(root);
+      for (var i = 0; i < 26; i++) { var c = String.fromCharCode(65 + i); if (used.indexOf(c) < 0) return c; }
+      return "X" + (used.length + 1);
+    }
+    function findParent(node, id) {
+      if (node.type === "unit") return null;
+      for (var i = 0; i < node.children.length; i++) {
+        if (node.children[i].id === id) return node;
+        var p = findParent(node.children[i], id);
+        if (p) return p;
+      }
+      return null;
+    }
+    function findById(node, id) {
+      if (node.id === id) return node;
+      if (node.type === "unit") return null;
+      for (var i = 0; i < node.children.length; i++) { var f = findById(node.children[i], id); if (f) return f; }
+      return null;
+    }
+
+    function renderEditor() {
+      $("editor").innerHTML = "";
+      $("editor").appendChild(buildGroup(root, true));
+    }
+    function buildGroup(g, isRoot) {
+      var div = document.createElement("div");
+      div.className = "grp " + g.type;
+      var head = document.createElement("div");
+      head.className = "ghead";
+      var opts = Object.keys(TYPE_LABEL).map(function (t) { return '<option value="' + t + '"' + (t === g.type ? " selected" : "") + ">" + TYPE_LABEL[t] + "</option>"; }).join("");
+      head.innerHTML = '<strong>' + (isRoot ? "全体" : "グループ") + '</strong>' +
+        '<select data-act="type" data-id="' + g.id + '" aria-label="グループの種類">' + opts + '</select>' +
+        (g.type === "kofn" ? '<span class="kfield">k = <input type="number" min="1" step="1" data-act="k" data-id="' + g.id + '" value="' + esc(g.k) + '" aria-label="k"> 台以上（n = ' + g.children.length + '）</span>' : "") +
+        '<button type="button" data-act="addUnit" data-id="' + g.id + '">＋装置</button>' +
+        '<button type="button" data-act="addGroup" data-id="' + g.id + '">＋グループ</button>' +
+        (isRoot ? "" : '<button type="button" class="del" data-act="del" data-id="' + g.id + '" aria-label="このグループを削除">削除</button>');
+      div.appendChild(head);
+      var body = document.createElement("div");
+      body.className = "gbody";
+      g.children.forEach(function (c) { body.appendChild(c.type === "unit" ? buildUnit(c) : buildGroup(c, false)); });
+      if (g.children.length === 0) { var p = document.createElement("div"); p.className = "muted"; p.textContent = "（空のグループ：装置を追加してください）"; body.appendChild(p); }
+      div.appendChild(body);
+      return div;
+    }
+    function buildUnit(u) {
+      var div = document.createElement("div");
+      div.className = "unit";
+      var html = '<input class="name" type="text" data-act="name" data-id="' + u.id + '" value="' + esc(u.name) + '" aria-label="装置名">' +
+        '<select data-act="mode" data-id="' + u.id + '" aria-label="入力方法"><option value="a"' + (u.mode === "a" ? " selected" : "") + '>稼働率</option><option value="mtbf"' + (u.mode === "mtbf" ? " selected" : "") + '>MTBF/MTTR</option></select>';
+      if (u.mode === "a") html += '<input class="num" type="number" min="0" max="1" step="0.01" data-act="a" data-id="' + u.id + '" value="' + esc(u.a) + '" aria-label="稼働率">';
+      else html += '<label>MTBF <input class="num" type="number" min="0" step="any" data-act="mtbf" data-id="' + u.id + '" value="' + esc(u.mtbf) + '"></label>' +
+        '<label>MTTR <input class="num" type="number" min="0" step="any" data-act="mttr" data-id="' + u.id + '" value="' + esc(u.mttr) + '"></label>';
+      html += '<button type="button" class="del" data-act="del" data-id="' + u.id + '" aria-label="この装置を削除">削除</button>';
+      div.innerHTML = html;
+      return div;
+    }
+
+    $("editor").addEventListener("input", function (e) {
+      var t = e.target, act = t.dataset.act, node = findById(root, Number(t.dataset.id));
+      if (!node) return;
+      if (act === "name") node.name = t.value.trim() || "?";
+      else if (act === "a") node.a = t.value;
+      else if (act === "mtbf") node.mtbf = t.value;
+      else if (act === "mttr") node.mttr = t.value;
+      else if (act === "k") node.k = t.value;
+      else return;
+      update();
+    });
+    $("editor").addEventListener("change", function (e) {
+      var t = e.target, act = t.dataset.act, node = findById(root, Number(t.dataset.id));
+      if (!node) return;
+      if (act === "type") {
+        node.type = t.value;
+        if (node.type === "kofn") node.k = Math.min(Math.max(Number(node.k) || 2, 1), Math.max(node.children.length, 1));
+      } else if (act === "mode") node.mode = t.value;
+      else return;
+      renderEditor(); update();
+    });
+    $("editor").addEventListener("click", function (e) {
+      var t = e.target.closest("button");
+      if (!t) return;
+      var act = t.dataset.act, id = Number(t.dataset.id), node = findById(root, id);
+      if (!node) return;
+      if (act === "addUnit") node.children.push(U(nextName(), 0.9));
+      else if (act === "addGroup") node.children.push(G(node.type === "parallel" ? "series" : "parallel", [U(nextName(), 0.9)]));
+      else if (act === "del") {
+        var p = findParent(root, id);
+        if (p) p.children.splice(p.children.indexOf(node), 1);
+      } else return;
+      renderEditor(); update();
+    });
+
+    /* ---------- 構成図（SVG） ---------- */
+    var UW = 92, UH = 50, GX = 22, GY = 12, P = 24, LBL = 20, PADX = 8;
+    function measure(n, isRoot) {
+      if (n.type === "unit") { n._w = UW; n._h = UH; n._cy = UH / 2; return; }
+      var kids = n.children;
+      if (kids.length === 0) { n._w = UW; n._h = UH; n._cy = UH / 2; return; }
+      kids.forEach(function (c) { measure(c, false); });
+      var lbl = isRoot ? 0 : LBL;
+      if (n.type === "series") {
+        var top = 0, bot = 0, w = 0;
+        kids.forEach(function (c, i) { top = Math.max(top, c._cy); bot = Math.max(bot, c._h - c._cy); w += c._w + (i ? GX : 0); });
+        var pad = isRoot ? 0 : PADX;
+        n._w = w + pad * 2; n._h = lbl + top + bot + (isRoot ? 0 : 6); n._cy = lbl + top; n._top = top; n._pad = pad;
+      } else {
+        var mw = 0, h = 0;
+        kids.forEach(function (c, i) { mw = Math.max(mw, c._w); h += c._h + (i ? GY : 0); });
+        n._w = mw + P * 2; n._h = lbl + h + 6; n._mw = mw;
+        var first = kids[0]._cy, last = h - (kids[kids.length - 1]._h - kids[kids.length - 1]._cy);
+        n._cy = lbl + (first + last) / 2;
+      }
+    }
+    function el(tag, attrs, text) {
+      var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function line(svg, x1, y1, x2, y2) { svg.appendChild(el("line", { x1: x1, y1: y1, x2: x2, y2: y2, stroke: "var(--text-sub)", "stroke-width": 1.6 })); }
+    function draw(svg, n, x, y, isRoot) {
+      if (n.type === "unit" || n.children.length === 0) {
+        var empty = n.type !== "unit";
+        svg.appendChild(el("rect", { x: x, y: y, width: UW, height: UH, rx: 8, fill: empty ? "none" : "var(--accent-weak)", stroke: empty ? "var(--ng)" : "var(--accent)", "stroke-width": 1.5, "stroke-dasharray": empty ? "4 3" : "" }));
+        svg.appendChild(el("text", { x: x + UW / 2, y: y + 20, "text-anchor": "middle", "font-size": 14, "font-weight": 700, fill: "var(--text)" }, empty ? "空" : n.name));
+        if (!empty) svg.appendChild(el("text", { x: x + UW / 2, y: y + 39, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)" }, isFinite(n._value) ? fmt(n._value, 4) : "?"));
+        return;
+      }
+      var kids = n.children, cyAbs = y + n._cy;
+      if (!isRoot) {
+        svg.appendChild(el("rect", { x: x, y: y, width: n._w, height: n._h, rx: 10, fill: "none", stroke: n.type === "series" ? "var(--border)" : n.type === "parallel" ? "var(--ok)" : "var(--mgmt)", "stroke-dasharray": "5 4", "stroke-width": 1.2 }));
+        var lab = n.type === "series" ? "直列" : n.type === "parallel" ? "並列" : (Math.round(Number(n.k)) + " out of " + kids.length);
+        svg.appendChild(el("text", { x: x + 6, y: y + 14, "font-size": 11, fill: "var(--text-sub)" }, (n._label && kids.length > 1 ? n._label + " " : "") + lab + (isFinite(n._value) ? " = " + fmt(n._value, 4) : "")));
+      }
+      if (n.type === "series") {
+        var cx = x + (n._pad || 0);
+        kids.forEach(function (c, i) {
+          if (i) line(svg, cx - GX, cyAbs, cx, cyAbs);
+          draw(svg, c, cx, cyAbs - c._cy, false);
+          cx += c._w + GX;
+        });
+        if (n._pad) { line(svg, x, cyAbs, x + n._pad, cyAbs); line(svg, x + n._w - n._pad, cyAbs, x + n._w, cyAbs); }
+      } else {
+        var cy = y + (isRoot ? 0 : LBL), lx = x + P / 2, rx = x + n._w - P / 2, ys = [];
+        kids.forEach(function (c, i) {
+          var cxk = x + P + (n._mw - c._w) / 2, ccy = cy + c._cy;
+          ys.push(ccy);
+          line(svg, lx, ccy, cxk, ccy);
+          line(svg, cxk + c._w, ccy, rx, ccy);
+          draw(svg, c, cxk, cy, false);
+          cy += c._h + GY;
+        });
+        line(svg, lx, ys[0], lx, ys[ys.length - 1]);
+        line(svg, rx, ys[0], rx, ys[ys.length - 1]);
+        line(svg, x, cyAbs, lx, cyAbs);
+        line(svg, rx, cyAbs, x + n._w, cyAbs);
+      }
+    }
+    function renderDiagram() {
+      measure(root, true);
+      var M = 44, W = root._w + M * 2, H = root._h + 24;
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, xmlns: "http://www.w3.org/2000/svg" });
+      svg.style.maxWidth = Math.max(W, 320) * 1.15 + "px";
+      var oy = 12, cy = oy + root._cy;
+      svg.appendChild(el("circle", { cx: 16, cy: cy, r: 9, fill: "var(--surface-2)", stroke: "var(--text-sub)" }));
+      svg.appendChild(el("text", { x: 16, y: cy - 14, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, "入口"));
+      svg.appendChild(el("circle", { cx: W - 16, cy: cy, r: 9, fill: "var(--surface-2)", stroke: "var(--text-sub)" }));
+      svg.appendChild(el("text", { x: W - 16, y: cy - 14, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, "出口"));
+      line(svg, 25, cy, M, cy);
+      line(svg, M + root._w, cy, W - 25, cy);
+      draw(svg, root, M, oy, true);
+      $("diagram").innerHTML = "";
+      $("diagram").appendChild(svg);
+    }
+
+    function update() {
+      var r = Calc.evaluate(root);
+      renderDiagram();
+      $("expr").textContent = "表記：" + (r.expr || "") + "　（– は直列、∥ は並列、k/n[…] は n 台中 k 台以上）";
+      if (r.errors.length) {
+        $("total").innerHTML = '<div class="box-ng">' + r.errors.map(esc).join("<br>") + "</div>";
+      } else {
+        $("total").innerHTML = '<div class="box-ok">全体の稼働率 = <span class="big">' + fmt(r.value) + '</span>（≒ ' + fmt(r.value, 3) + '、' + fmt(r.value * 100, 4) + '%）<br>' +
+          '<span class="muted">年間停止時間の目安：8,760時間 × (1 − ' + fmt(r.value) + ') ≒ ' + fmt(8760 * (1 - r.value), 2) + ' 時間</span></div>';
+      }
+      $("steps").textContent = r.steps.length ? r.steps.join("\n\n") : "（装置が1台だけなので、その稼働率がそのまま全体の稼働率です）";
+    }
+
+    EXAMPLES.forEach(function (ex) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = ex.label;
+      b.addEventListener("click", function () { root = ex.build(); renderEditor(); update(); });
+      $("examples").appendChild(b);
+    });
+
+    var hm = /ex=(\d+)/.exec(location.hash);
+    if (hm && EXAMPLES[Number(hm[1])]) root = EXAMPLES[Number(hm[1])].build();
+    updateMtbf(); updateRecord(); renderEditor(); update();
+  })();
+  </script>
+</body>
+</html>

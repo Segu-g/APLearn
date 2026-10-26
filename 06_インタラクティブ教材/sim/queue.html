@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>待ち行列（M/M/1）計算</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ex-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ex-buttons button { font-size: 14px; padding: 5px 12px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    input.num { width: 8em; }
+    .chart svg { width: 100%; height: auto; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-sub); margin-top: 6px; }
+    .legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 5px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .kpi { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; }
+    .kpi .k { font-size: 12px; color: var(--text-sub); }
+    .kpi .v { font-size: 19px; font-weight: 700; font-family: var(--mono); }
+    .rho-slider { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; margin-top: 12px; }
+    .rho-slider input { width: 100%; accent-color: var(--accent); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body data-root="../" data-title="待ち行列（M/M/1）">
+  <main>
+    <h1>待ち行列（M/M/1）計算</h1>
+    <p class="lead">到着率 λ・サービス率 μ（または平均到着間隔・平均サービス時間）から、利用率 ρ、平均待ち行列長、平均待ち時間、平均応答時間を途中式つきで計算します。ρ が 1 に近づくと待ち時間が急増する様子をグラフで確かめられます。</p>
+
+    <section class="card">
+      <div class="row" style="align-items:center">
+        <strong>例題を読み込む：</strong>
+        <div class="ex-buttons" id="examples"></div>
+      </div>
+      <div class="row" style="margin-top:12px;align-items:center">
+        <span class="muted">入力方法：</span>
+        <div class="tabs" role="group" aria-label="入力方法">
+          <button type="button" data-mode="time" aria-pressed="true">平均到着間隔・平均サービス時間</button>
+          <button type="button" data-mode="rate" aria-pressed="false">到着率 λ・サービス率 μ</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px" id="inputs-time">
+        <div class="field"><label for="ta">平均到着間隔 Ta</label><input id="ta" class="num" type="number" min="0" step="any" value="5"></div>
+        <div class="field"><label for="ts">平均サービス時間 Ts</label><input id="ts" class="num" type="number" min="0" step="any" value="4"></div>
+      </div>
+      <div class="row" style="margin-top:10px" id="inputs-rate" hidden>
+        <div class="field"><label for="lam">到着率 λ（単位時間あたりの到着数）</label><input id="lam" class="num" type="number" min="0" step="any" value="0.2"></div>
+        <div class="field"><label for="mu">サービス率 μ（単位時間あたりの処理数）</label><input id="mu" class="num" type="number" min="0" step="any" value="0.25"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><label for="tu">時間の単位</label><input id="tu" type="text" value="分" style="width:5em"></div>
+      </div>
+      <div class="rho-slider">
+        <label for="rho">ρ を直接動かす</label>
+        <input type="range" id="rho" min="0" max="0.99" step="0.01" value="0.8" aria-describedby="rho-help">
+        <span id="rho-val" class="mono">0.80</span>
+      </div>
+      <p class="muted" id="rho-help" style="margin:4px 0 0">スライダーは平均サービス時間（または μ）を固定し、到着側を変えて ρ を調整します。</p>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-top:0">計算結果</h3>
+      <div id="msg" aria-live="polite"></div>
+      <div class="kpis" id="kpis" style="margin-top:10px"></div>
+      <h3>途中式</h3>
+      <div class="steps" id="steps"></div>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-top:0">利用率 ρ と平均待ち時間 Wq の関係（Ts を固定）</h3>
+      <div class="chart" id="chart" role="img" aria-label="利用率と平均待ち時間のグラフ"></div>
+      <div class="legend">
+        <span><i style="border-color:var(--accent)"></i>平均待ち時間 Wq = ρ/(1−ρ) × Ts</span>
+        <span><i style="border-color:var(--mgmt);border-top-style:dashed"></i>平均応答時間 W = Wq + Ts</span>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table id="rho-table"></table>
+      </div>
+      <div class="box-note" style="margin-top:12px">
+        💡 <strong>覚え方</strong>：まず ρ/(1−ρ) を計算し、「×Ts で待ち時間、そのままで系内数」。<br>
+        ⚠️ <strong>ひっかけ注意</strong>：「待ち時間」と「応答時間（待ち＋処理）」を区別。応答時間なら Ts を足し忘れないこと。窓口を2つにすると M/M/2 になり、この式はそのまま使えません。
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../../01_テクノロジ系/01_基礎理論.md">01_テクノロジ系/01_基礎理論.md</a>（5. 待ち行列理論（M/M/1））</li>
+      <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（4. 待ち行列）</li>
+    </ul>
+  </main>
+
+  <script src="../assets/common.js"></script>
+  <script id="calc">
+  /* ===== 計算ロジック（DOM に依存しない） ===== */
+  var Calc = (function () {
+    // Ta: 平均到着間隔、Ts: 平均サービス時間
+    function mm1(Ta, Ts) {
+      var r = { Ta: Ta, Ts: Ts, lambda: 1 / Ta, mu: 1 / Ts };
+      r.rho = Ts / Ta;
+      r.stable = r.rho < 1;
+      if (r.stable) {
+        r.k = r.rho / (1 - r.rho);          // ρ/(1−ρ)
+        r.Wq = r.k * Ts;                    // 平均待ち時間
+        r.W = r.Wq + Ts;                    // 平均応答時間 = Ts/(1−ρ)
+        r.L = r.k;                          // 平均系内数
+        r.Lq = r.rho * r.rho / (1 - r.rho); // 平均待ち行列長
+      } else {
+        r.k = r.Wq = r.W = r.L = r.Lq = Infinity;
+      }
+      return r;
+    }
+    function fromRates(lambda, mu) { return mm1(1 / lambda, 1 / mu); }
+    return { mm1: mm1, fromRates: fromRates };
+  })();
+  </script>
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); }, esc = APL.esc;
+    function f(x, d) {
+      if (x === Infinity) return "∞";
+      if (!isFinite(x)) return "—";
+      d = d === undefined ? 4 : d;
+      return Number(x.toFixed(d)).toLocaleString("ja-JP", { maximumFractionDigits: d });
+    }
+    var mode = "time";
+    var EXAMPLES = [
+      { label: "窓口：間隔5分・処理4分", mode: "time", ta: 5, ts: 4, tu: "分" },
+      { label: "ρ = 0.5（間隔2秒・処理1秒）", mode: "time", ta: 2, ts: 1, tu: "秒" },
+      { label: "λ = 9件/秒・μ = 10件/秒", mode: "rate", lam: 9, mu: 10, tu: "秒" },
+      { label: "ρ ≧ 1（発散する例）", mode: "time", ta: 3, ts: 4, tu: "分" }
+    ];
+
+    function setMode(m) {
+      mode = m;
+      $("inputs-time").hidden = m !== "time";
+      $("inputs-rate").hidden = m !== "rate";
+      Array.prototype.forEach.call(document.querySelectorAll(".tabs button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.mode === m)); });
+    }
+    document.querySelector(".tabs").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b || b.dataset.mode === mode) return;
+      // 値を引き継ぐ
+      if (b.dataset.mode === "rate") { $("lam").value = round(1 / Number($("ta").value)); $("mu").value = round(1 / Number($("ts").value)); }
+      else { $("ta").value = round(1 / Number($("lam").value)); $("ts").value = round(1 / Number($("mu").value)); }
+      setMode(b.dataset.mode); update();
+    });
+    function round(x) { return isFinite(x) ? Math.round(x * 1e6) / 1e6 : ""; }
+    ["ta", "ts", "lam", "mu", "tu"].forEach(function (id) { $(id).addEventListener("input", update); });
+    $("rho").addEventListener("input", function () {
+      var rho = Number($("rho").value);
+      if (mode === "time") { var ts = Number($("ts").value); if (ts > 0 && rho > 0) $("ta").value = round(ts / rho); }
+      else { var mu = Number($("mu").value); if (mu > 0) $("lam").value = round(rho * mu); }
+      update(true);
+    });
+
+    function update(fromSlider) {
+      var tu = $("tu").value || "", r, errs = "";
+      if (mode === "time") {
+        var ta = Number($("ta").value), ts = Number($("ts").value);
+        if (!(ta > 0) || !(ts > 0)) errs = "平均到着間隔と平均サービス時間には 0 より大きい数を入力してください。";
+        else r = Calc.mm1(ta, ts);
+      } else {
+        var lam = Number($("lam").value), mu = Number($("mu").value);
+        if (!(lam > 0) || !(mu > 0)) errs = "λ と μ には 0 より大きい数を入力してください。";
+        else r = Calc.fromRates(lam, mu);
+      }
+      if (errs) { $("msg").innerHTML = '<div class="box-ng">' + esc(errs) + "</div>"; $("kpis").innerHTML = ""; $("steps").textContent = ""; drawChart(null, tu); return; }
+      if (fromSlider !== true) $("rho").value = Math.min(r.rho, 0.99);
+      $("rho-val").textContent = r.rho.toFixed(2);
+
+      if (!r.stable) {
+        $("msg").innerHTML = '<div class="box-ng"><strong>⚠ 行列が発散します（ρ = ' + f(r.rho) + ' ≧ 1）</strong><br>平均すると、処理できる量より多くの要求が到着しています。待ち行列は時間とともに限りなく長くなり、平均待ち時間は求められません（∞）。サービスを速くする（Ts を短く）か、到着を減らして ρ &lt; 1 にしてください。</div>';
+      } else if (r.rho >= 0.8) {
+        $("msg").innerHTML = '<div class="box-note">ρ = ' + f(r.rho) + '：利用率が高く、待ち時間はサービス時間の <strong>' + f(r.k, 2) + ' 倍</strong> です。ρ が少し上がるだけで待ち時間が急増する領域です。</div>';
+      } else {
+        $("msg").innerHTML = '<div class="box-ok">ρ = ' + f(r.rho) + '：待ち時間はサービス時間の ' + f(r.k, 2) + ' 倍です。</div>';
+      }
+      var kp = [["利用率 ρ", f(r.rho)], ["ρ/(1−ρ)", f(r.k)], ["平均待ち時間 Wq", f(r.Wq) + " " + tu], ["平均応答時間 W", f(r.W) + " " + tu],
+        ["平均待ち行列長 Lq", f(r.Lq) + " 人"], ["平均系内数 L", f(r.L) + " 人"]];
+      $("kpis").innerHTML = kp.map(function (k) { return '<div class="kpi"><div class="k">' + k[0] + '</div><div class="v ' + (r.stable ? "" : "ng") + '">' + esc(k[1]) + "</div></div>"; }).join("");
+
+      var S = [];
+      if (mode === "time") {
+        S.push("到着率     λ = 1 ÷ Ta = 1 ÷ " + f(r.Ta) + " = " + f(r.lambda) + "（1" + tu + "あたり）");
+        S.push("サービス率 μ = 1 ÷ Ts = 1 ÷ " + f(r.Ts) + " = " + f(r.mu) + "（1" + tu + "あたり）");
+      } else {
+        S.push("平均到着間隔     Ta = 1 ÷ λ = 1 ÷ " + f(r.lambda) + " = " + f(r.Ta) + " " + tu);
+        S.push("平均サービス時間 Ts = 1 ÷ μ = 1 ÷ " + f(r.mu) + " = " + f(r.Ts) + " " + tu);
+      }
+      S.push("");
+      S.push("① 利用率      ρ  = λ ÷ μ = Ts ÷ Ta = " + f(r.Ts) + " ÷ " + f(r.Ta) + " = " + f(r.rho));
+      if (!r.stable) {
+        S.push("   ρ ≧ 1 なので行列は発散します（M/M/1 の公式は 0 ≦ ρ < 1 のときだけ使えます）。");
+      } else {
+        S.push("② ρ/(1−ρ)        = " + f(r.rho) + " ÷ (1 − " + f(r.rho) + ") = " + f(r.rho) + " ÷ " + f(1 - r.rho) + " = " + f(r.k));
+        S.push("③ 平均待ち時間 Wq = ρ/(1−ρ) × Ts = " + f(r.k) + " × " + f(r.Ts) + " = " + f(r.Wq) + " " + tu);
+        S.push("④ 平均応答時間 W  = Wq + Ts = " + f(r.Wq) + " + " + f(r.Ts) + " = " + f(r.W) + " " + tu + "（= Ts ÷ (1 − ρ)）");
+        S.push("⑤ 平均待ち行列長 Lq = ρ² ÷ (1 − ρ) = " + f(r.rho * r.rho) + " ÷ " + f(1 - r.rho) + " = " + f(r.Lq) + " 人");
+        S.push("⑥ 平均系内数   L  = ρ/(1−ρ) = " + f(r.L) + " 人（待っている人＋サービス中の人）");
+        S.push("   検算（リトルの公式）：L = λ × W = " + f(r.lambda) + " × " + f(r.W) + " = " + f(r.lambda * r.W));
+      }
+      $("steps").textContent = S.join("\n");
+      drawChart(r, tu);
+    }
+
+    function el(tag, attrs, text) {
+      var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function drawChart(r, tu) {
+      var ts = r ? r.Ts : 1;
+      var W = 640, H = 340, L = 60, R = 20, T = 18, B = 44;
+      var capMul = 20;                    // 縦軸の上限：Ts の 20 倍
+      var ymax = ts * capMul;
+      function X(rho) { return L + (W - L - R) * rho; }
+      function Y(v) { return T + (H - T - B) * (1 - Math.min(v, ymax * 1.2) / ymax); }
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, xmlns: "http://www.w3.org/2000/svg" });
+      svg.style.maxWidth = "760px";
+      var defs = el("defs"), cp = el("clipPath", { id: "qplot" });
+      cp.appendChild(el("rect", { x: L, y: T, width: W - L - R, height: H - T - B }));
+      defs.appendChild(cp); svg.appendChild(defs);
+      for (var g = 0; g <= 4; g++) {
+        var v = ymax * g / 4;
+        svg.appendChild(el("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: "var(--border)" }));
+        svg.appendChild(el("text", { x: L - 6, y: Y(v) + 4, "text-anchor": "end", "font-size": 11, fill: "var(--text-sub)" }, f(v, 2)));
+      }
+      for (var i = 0; i <= 10; i++) {
+        svg.appendChild(el("text", { x: X(i / 10), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, (i / 10).toFixed(1)));
+        if (i) svg.appendChild(el("line", { x1: X(i / 10), x2: X(i / 10), y1: T, y2: H - B, stroke: "var(--border)", "stroke-dasharray": "2 4" }));
+      }
+      svg.appendChild(el("text", { x: (L + W - R) / 2, y: H - 8, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)" }, "利用率 ρ"));
+      svg.appendChild(el("text", { x: 12, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)", transform: "rotate(-90 12 " + (T + H - B) / 2 + ")" }, "時間（" + tu + "）"));
+      var g1 = el("g", { "clip-path": "url(#qplot)" });
+      var p1 = [], p2 = [];
+      for (var k = 0; k <= 200; k++) {
+        var rho = k / 200 * 0.995;
+        var wq = rho / (1 - rho) * ts;
+        p1.push(X(rho) + "," + Y(wq));
+        p2.push(X(rho) + "," + Y(wq + ts));
+      }
+      g1.appendChild(el("polyline", { points: p2.join(" "), fill: "none", stroke: "var(--mgmt)", "stroke-width": 2, "stroke-dasharray": "6 4" }));
+      g1.appendChild(el("polyline", { points: p1.join(" "), fill: "none", stroke: "var(--accent)", "stroke-width": 2.8 }));
+      svg.appendChild(g1);
+      svg.appendChild(el("line", { x1: X(1), x2: X(1), y1: T, y2: H - B, stroke: "var(--ng)", "stroke-width": 2, "stroke-dasharray": "5 4" }));
+      svg.appendChild(el("text", { x: X(1) - 4, y: T + 14, "text-anchor": "end", "font-size": 12, "font-weight": 700, fill: "var(--ng)" }, "ρ = 1：発散"));
+      svg.appendChild(el("line", { x1: L, x2: L, y1: T, y2: H - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: "var(--text-sub)" }));
+      if (r && r.stable) {
+        var cx = X(r.rho), cy = Y(r.Wq), off = cy < T + 4;
+        svg.appendChild(el("line", { x1: cx, x2: cx, y1: Math.max(cy, T), y2: H - B, stroke: "var(--text-sub)", "stroke-dasharray": "3 3" }));
+        if (!off) svg.appendChild(el("circle", { cx: cx, cy: cy, r: 6, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2 }));
+        var lbl = "現在 ρ = " + f(r.rho, 3) + "、Wq = " + f(r.Wq, 2) + tu + (off ? "（グラフ上端より上）" : "");
+        var right = cx < W / 2;
+        svg.appendChild(el("text", { x: cx + (right ? 10 : -10), y: off ? T + 34 : Math.max(cy - 10, T + 30), "text-anchor": right ? "start" : "end", "font-size": 12, "font-weight": 700, fill: "var(--text)" }, lbl));
+      } else if (r) {
+        svg.appendChild(el("text", { x: X(0.5), y: T + 40, "text-anchor": "middle", "font-size": 14, "font-weight": 700, fill: "var(--ng)" }, "現在 ρ = " + f(r.rho, 3) + " ≧ 1 → 行列が発散"));
+      }
+      $("chart").innerHTML = "";
+      $("chart").appendChild(svg);
+
+      var rows = [0.5, 0.6, 0.7, 0.8, 0.9, 0.95];
+      $("rho-table").innerHTML = "<tr><th>ρ</th>" + rows.map(function (x) { return "<th>" + x + "</th>"; }).join("") + "</tr>" +
+        "<tr><th>ρ/(1−ρ)</th>" + rows.map(function (x) { return "<td>" + f(x / (1 - x), 2) + "</td>"; }).join("") + "</tr>" +
+        "<tr><th>Wq（Ts = " + f(ts, 3) + "）</th>" + rows.map(function (x) { return "<td>" + f(x / (1 - x) * ts, 2) + "</td>"; }).join("") + "</tr>";
+    }
+
+    function loadEx(ex) {
+      setMode(ex.mode);
+      $("tu").value = ex.tu;
+      if (ex.mode === "time") { $("ta").value = ex.ta; $("ts").value = ex.ts; }
+      else { $("lam").value = ex.lam; $("mu").value = ex.mu; }
+      update();
+    }
+    EXAMPLES.forEach(function (ex) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = ex.label;
+      b.addEventListener("click", function () { loadEx(ex); });
+      $("examples").appendChild(b);
+    });
+    var hm = /ex=(\d+)/.exec(location.hash);
+    loadEx(EXAMPLES[hm && EXAMPLES[Number(hm[1])] ? Number(hm[1]) : 0]);
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>クリティカルパス計算</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ex-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ex-buttons button { font-size: 14px; padding: 5px 12px; }
+    #task-table input { width: 100%; padding: 4px 6px; font-size: 14px; }
+    #task-table td { padding: 4px 6px; vertical-align: middle; }
+    #task-table .c-name { width: 22%; }
+    #task-table .c-dur { width: 18%; }
+    #task-table .c-del { width: 1%; }
+    #task-table button { font-size: 13px; padding: 3px 8px; color: var(--ng); }
+    .net svg { width: 100%; height: auto; display: block; }
+    .crit { color: var(--ng); font-weight: 700; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-sub); margin-top: 6px; }
+    .legend span::before { content: ""; display: inline-block; width: 22px; height: 0; border-top: 2px solid var(--text-sub); vertical-align: middle; margin-right: 5px; }
+    .legend .l-crit::before { border-top: 3px solid var(--ng); }
+    .legend .l-dummy::before { border-top: 2px dashed var(--text-sub); }
+    .legend .l-node::before { display: none; }
+    #res-table td, #res-table th { text-align: right; white-space: nowrap; }
+    #res-table td:first-child, #res-table th:first-child, #res-table td:nth-child(3) { text-align: left; }
+    tr.is-crit td { background: var(--ng-weak); }
+    .big { font-size: 22px; font-weight: 700; }
+  </style>
+</head>
+<body data-root="../" data-title="クリティカルパス計算">
+  <main>
+    <h1>クリティカルパス計算（アローダイアグラム）</h1>
+    <p class="lead">作業名・所要日数・先行作業を表に入力すると、アローダイアグラムを自動で描き、最早・最遅の日程、全余裕・自由余裕、クリティカルパス（赤）を計算します。日数を変えると即座に再計算されます。</p>
+
+    <section class="card">
+      <div class="row" style="align-items:center">
+        <strong>例題を読み込む：</strong>
+        <div class="ex-buttons" id="examples"></div>
+      </div>
+      <h3>作業一覧</h3>
+      <p class="muted" style="margin-top:0">先行作業は「A, B」のようにカンマ区切りで入力します（なければ空欄）。</p>
+      <div class="table-wrap">
+        <table id="task-table">
+          <thead><tr><th class="c-name">作業</th><th class="c-dur">所要日数</th><th>先行作業</th><th class="c-del"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button type="button" id="add-row">＋作業を追加</button>
+      </div>
+      <div id="errors" style="margin-top:12px" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="sec-net">
+      <h3 style="margin-top:0">アローダイアグラム</h3>
+      <div class="net" id="net" role="img" aria-label="アローダイアグラム"></div>
+      <div class="legend">
+        <span class="l-crit">クリティカルパス上の作業</span>
+        <span>その他の作業</span>
+        <span class="l-dummy">ダミー作業（所要0）</span>
+        <span class="l-node">○の中＝結合点番号、上の「a / b」＝最早結合点時刻 / 最遅結合点時刻</span>
+      </div>
+    </section>
+
+    <section class="card" id="sec-res">
+      <h3 style="margin-top:0">計算結果</h3>
+      <div id="summary"></div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table id="res-table">
+          <thead><tr><th>作業</th><th>日数</th><th>結合点</th><th>最早開始</th><th>最早終了</th><th>最遅開始</th><th>最遅終了</th><th>全余裕</th><th>自由余裕</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="muted">赤い行がクリティカルパス上の作業（全余裕 0）です。</p>
+      <h3>途中式</h3>
+      <div class="steps" id="steps"></div>
+      <div class="box-note" style="margin-top:12px">
+        ⚠️ <strong>ひっかけ注意</strong>：結合点の最早＝最遅でも、その間の作業がクリティカルとは限りません。「前の最早 ＋ 所要日数 ＝ 後の最早」となる作業だけをたどります。
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../../02_マネジメント系/01_プロジェクトマネジメント.md">02_マネジメント系/01_プロジェクトマネジメント.md</a>（3.2 アローダイアグラムの計算、ダミー作業）</li>
+      <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（7.1 クリティカルパス）</li>
+    </ul>
+  </main>
+
+  <script src="../assets/common.js"></script>
+  <script id="calc">
+  /* ===== 計算ロジック（DOM に依存しない） ===== */
+  var Calc = (function () {
+    function splitPreds(s) {
+      return String(s || "").split(/[,、，\s]+/).map(function (x) { return x.trim(); })
+        .filter(function (x) { return x && x !== "-" && x !== "－" && x !== "―" && x !== "なし"; });
+    }
+    // rows: [{name, dur, preds(文字列 or 配列)}] → {tasks, errors}
+    function parseTasks(rows) {
+      var errors = [], tasks = [], seen = {};
+      rows.forEach(function (r, i) {
+        var name = String(r.name || "").trim();
+        if (!name) { errors.push((i + 1) + "行目：作業名が空です"); return; }
+        if (seen[name]) { errors.push("作業名「" + name + "」が重複しています"); return; }
+        seen[name] = true;
+        var d = Number(r.dur);
+        if (r.dur === "" || !isFinite(d) || d < 0) errors.push("作業「" + name + "」の所要日数は 0 以上の数にしてください");
+        var preds = Array.isArray(r.preds) ? r.preds.slice() : splitPreds(r.preds);
+        var uniq = [];
+        preds.forEach(function (p) { if (uniq.indexOf(p) < 0) uniq.push(p); });
+        tasks.push({ name: name, dur: isFinite(d) && d >= 0 ? d : 0, preds: uniq });
+      });
+      tasks.forEach(function (t) {
+        t.preds.forEach(function (p) {
+          if (p === t.name) errors.push("作業「" + t.name + "」が自分自身を先行作業にしています");
+          else if (!seen[p]) errors.push("作業「" + t.name + "」の先行作業「" + p + "」がありません");
+        });
+      });
+      return { tasks: tasks, errors: errors };
+    }
+    // 循環依存を探す。見つかれば ["A","B","C","A"] のような配列、なければ null
+    function findCycle(tasks) {
+      var map = {}, color = {}, stack = [], found = null;
+      tasks.forEach(function (t) { map[t.name] = t; color[t.name] = 0; });
+      function dfs(n) {
+        color[n] = 1; stack.push(n);
+        var ps = map[n].preds;
+        for (var i = 0; i < ps.length && !found; i++) {
+          var p = ps[i];
+          if (!map[p]) continue;
+          if (color[p] === 1) { found = stack.slice(stack.indexOf(p)).concat([p]).reverse(); return; }
+          if (color[p] === 0) dfs(p);
+        }
+        stack.pop(); color[n] = 2;
+      }
+      tasks.forEach(function (t) { if (!found && color[t.name] === 0) dfs(t.name); });
+      return found;
+    }
+    function topoOrder(tasks) {
+      var map = {}, done = {}, order = [];
+      tasks.forEach(function (t) { map[t.name] = t; });
+      function visit(n) {
+        if (done[n]) return;
+        done[n] = true;
+        map[n].preds.forEach(function (p) { if (map[p]) visit(p); });
+        order.push(n);
+      }
+      tasks.forEach(function (t) { visit(t.name); });
+      return order;
+    }
+    // 作業ベースの日程計算（ES/EF/LS/LF/全余裕/自由余裕）
+    function schedule(tasks) {
+      var map = {}, succ = {};
+      tasks.forEach(function (t) { map[t.name] = t; succ[t.name] = []; });
+      tasks.forEach(function (t) { t.preds.forEach(function (p) { succ[p].push(t.name); }); });
+      var order = topoOrder(tasks), r = {}, T = 0;
+      order.forEach(function (n) {
+        var es = 0;
+        map[n].preds.forEach(function (p) { es = Math.max(es, r[p].EF); });
+        r[n] = { ES: es, EF: es + map[n].dur };
+        T = Math.max(T, r[n].EF);
+      });
+      order.slice().reverse().forEach(function (n) {
+        var lf = T;
+        succ[n].forEach(function (s) { lf = Math.min(lf, r[s].LS); });
+        r[n].LF = lf; r[n].LS = lf - map[n].dur;
+        var minEs = T;
+        succ[n].forEach(function (s) { minEs = Math.min(minEs, r[s].ES); });
+        r[n].TF = round(r[n].LS - r[n].ES);
+        r[n].FF = round(minEs - r[n].EF);
+        r[n].critical = Math.abs(r[n].TF) < 1e-9;
+      });
+      return { result: r, duration: T, order: order, succ: succ };
+    }
+    function round(x) { return Math.round(x * 1e9) / 1e9; }
+
+    // 冗長な先行関係（推移的に含まれるもの）を除いた先行作業
+    function reducedPreds(tasks) {
+      var map = {}, anc = {};
+      tasks.forEach(function (t) { map[t.name] = t; });
+      function ancestors(n) {
+        if (anc[n]) return anc[n];
+        var s = {};
+        map[n].preds.forEach(function (p) { s[p] = true; var a = ancestors(p); for (var k in a) s[k] = true; });
+        return (anc[n] = s);
+      }
+      var red = {};
+      tasks.forEach(function (t) {
+        red[t.name] = t.preds.filter(function (p) {
+          return !t.preds.some(function (q) { return q !== p && ancestors(q)[p]; });
+        });
+      });
+      return red;
+    }
+
+    // アローダイアグラム（作業を矢印で表すネットワーク）を構築する。ダミー作業は必要な分だけ残す
+    function buildAOA(tasks) {
+      var red = reducedPreds(tasks), nid = 0, arcs = [];
+      var source = nid++, endNode = {}, setNode = {};
+      tasks.forEach(function (t) { endNode[t.name] = nid++; });
+      var hasSucc = {};
+      tasks.forEach(function (t) { red[t.name].forEach(function (p) { hasSucc[p] = true; }); });
+      function startOf(preds) {
+        if (preds.length === 0) return source;
+        if (preds.length === 1) return endNode[preds[0]];
+        var key = preds.slice().sort().join("\u0000");
+        if (setNode[key] === undefined) {
+          setNode[key] = nid++;
+          preds.forEach(function (p) { arcs.push({ from: endNode[p], to: setNode[key], task: null }); });
+        }
+        return setNode[key];
+      }
+      tasks.forEach(function (t) { arcs.push({ from: startOf(red[t.name]), to: endNode[t.name], task: t.name }); });
+      var terminals = tasks.filter(function (t) { return !hasSucc[t.name]; });
+      var sink;
+      if (terminals.length === 1) sink = endNode[terminals[0].name];
+      else { sink = nid++; terminals.forEach(function (t) { arcs.push({ from: endNode[t.name], to: sink, task: null }); }); }
+
+      function dedupe() {
+        // 同じ2点を結ぶダミーが他の矢印と重なっていれば、そのダミーは不要
+        var out = [];
+        arcs.forEach(function (a) {
+          if (a.from === a.to) return;
+          var dup = out.filter(function (b) { return b.from === a.from && b.to === a.to; });
+          if (dup.length && a.task === null) return;
+          if (dup.length && dup[0].task === null) { out.splice(out.indexOf(dup[0]), 1); }
+          out.push(a);
+        });
+        arcs = out;
+      }
+      function parallelTasks(list) {
+        var seen = {};
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].task === null) continue;
+          var k = list[i].from + "-" + list[i].to;
+          if (seen[k]) return true;
+          seen[k] = true;
+        }
+        return false;
+      }
+      function reachable(from, to, skip) {
+        var st = [from], vis = {};
+        while (st.length) {
+          var x = st.pop();
+          if (x === to) return true;
+          if (vis[x]) continue;
+          vis[x] = true;
+          arcs.forEach(function (a) { if (a !== skip && a.from === x) st.push(a.to); });
+        }
+        return false;
+      }
+      function tryMerge(d) {
+        var u = d.from, v = d.to;
+        var outU = arcs.filter(function (a) { return a.from === u; });
+        var inV = arcs.filter(function (a) { return a.to === v; });
+        var cand;
+        if (outU.length === 1) { // u の出口がこのダミーだけ → u を v に統合
+          cand = arcs.filter(function (a) { return a !== d; }).map(function (a) { return { from: a.from, to: a.to === u ? v : a.to, task: a.task }; });
+          if (!parallelTasks(cand)) { arcs = cand; if (sink === u) sink = v; if (source === u) source = v; return true; }
+        }
+        if (inV.length === 1) { // v の入口がこのダミーだけ → v を u に統合
+          cand = arcs.filter(function (a) { return a !== d; }).map(function (a) { return { from: a.from === v ? u : a.from, to: a.to, task: a.task }; });
+          if (!parallelTasks(cand)) { arcs = cand; if (sink === v) sink = u; if (source === v) source = u; return true; }
+        }
+        return false;
+      }
+      var changed = true, guard = 0;
+      while (changed && guard++ < 500) {
+        changed = false;
+        dedupe();
+        var dummies = arcs.filter(function (a) { return a.task === null; });
+        for (var i = 0; i < dummies.length; i++) {
+          var d = dummies[i];
+          if (reachable(d.from, d.to, d)) { arcs.splice(arcs.indexOf(d), 1); changed = true; break; }
+          if (tryMerge(d)) { changed = true; break; }
+        }
+      }
+      var ids = {};
+      arcs.forEach(function (a) { ids[a.from] = true; ids[a.to] = true; });
+      ids[source] = true; ids[sink] = true;
+      var nodes = Object.keys(ids).map(Number);
+      return { nodes: nodes, arcs: arcs, source: source, sink: sink };
+    }
+
+    // 結合点の最早・最遅時刻
+    function nodeTimes(aoa, durOf) {
+      var inA = {}, outA = {};
+      aoa.nodes.forEach(function (n) { inA[n] = []; outA[n] = []; });
+      aoa.arcs.forEach(function (a) { inA[a.to].push(a); outA[a.from].push(a); });
+      var order = [], indeg = {}, q = [];
+      aoa.nodes.forEach(function (n) { indeg[n] = inA[n].length; if (!indeg[n]) q.push(n); });
+      while (q.length) {
+        var n = q.shift(); order.push(n);
+        outA[n].forEach(function (a) { if (--indeg[a.to] === 0) q.push(a.to); });
+      }
+      var E = {}, L = {};
+      function d(a) { return a.task === null ? 0 : durOf(a.task); }
+      order.forEach(function (n) { E[n] = 0; inA[n].forEach(function (a) { E[n] = Math.max(E[n], E[a.from] + d(a)); }); });
+      var T = 0;
+      order.forEach(function (n) { T = Math.max(T, E[n]); });
+      order.slice().reverse().forEach(function (n) {
+        L[n] = outA[n].length ? Infinity : T;
+        outA[n].forEach(function (a) { L[n] = Math.min(L[n], L[a.to] - d(a)); });
+      });
+      return { E: E, L: L, order: order, inA: inA, outA: outA, T: T };
+    }
+
+    // 始点から終点までの全経路（作業名の列）
+    function allPaths(tasks, limit) {
+      limit = limit || 60;
+      var map = {}, succ = {}, out = [], over = false;
+      tasks.forEach(function (t) { map[t.name] = t; succ[t.name] = []; });
+      tasks.forEach(function (t) { t.preds.forEach(function (p) { if (succ[p]) succ[p].push(t.name); }); });
+      function go(n, path, len) {
+        if (out.length >= limit) { over = true; return; }
+        path = path.concat([n]); len += map[n].dur;
+        if (!succ[n].length) { out.push({ path: path, length: round(len) }); return; }
+        succ[n].forEach(function (s) { go(s, path, len); });
+      }
+      tasks.filter(function (t) { return !t.preds.length; }).forEach(function (t) { go(t.name, [], 0); });
+      out.sort(function (a, b) { return b.length - a.length; });
+      return { paths: out, truncated: over };
+    }
+
+    // 結合点の層（始点からの矢印の最大本数）と並び順を決めて座標を返す
+    function layout(aoa) {
+      var t = nodeTimes(aoa, function () { return 1; });
+      var layer = {};
+      t.order.forEach(function (n) { layer[n] = 0; t.inA[n].forEach(function (a) { layer[n] = Math.max(layer[n], layer[a.from] + 1); }); });
+      var maxL = 0;
+      aoa.nodes.forEach(function (n) { maxL = Math.max(maxL, layer[n]); });
+      var layers = [];
+      for (var i = 0; i <= maxL; i++) layers.push([]);
+      t.order.forEach(function (n) { layers[layer[n]].push(n); });
+      var pos = {};
+      function assign() { layers.forEach(function (ly) { ly.forEach(function (n, i) { pos[n] = i - (ly.length - 1) / 2; }); }); }
+      assign();
+      for (var it = 0; it < 6; it++) {
+        var down = it % 2 === 0;
+        var seq = down ? layers.slice(1) : layers.slice(0, -1).reverse();
+        seq.forEach(function (ly) {
+          var bc = {};
+          ly.forEach(function (n) {
+            var nb = (down ? t.inA[n].map(function (a) { return a.from; }) : t.outA[n].map(function (a) { return a.to; }));
+            bc[n] = nb.length ? nb.reduce(function (s, x) { return s + pos[x]; }, 0) / nb.length : pos[n];
+          });
+          ly.sort(function (a, b) { return bc[a] - bc[b]; });
+          ly.forEach(function (n, i) { pos[n] = i - (ly.length - 1) / 2; });
+        });
+      }
+      // 結合点番号：左の層から、上から順に 1, 2, 3, …
+      var num = {}, k = 1;
+      layers.forEach(function (ly) { ly.forEach(function (n) { num[n] = k++; }); });
+      return { layer: layer, pos: pos, layers: layers, num: num, maxLayer: maxL };
+    }
+
+    return { splitPreds: splitPreds, parseTasks: parseTasks, findCycle: findCycle, schedule: schedule,
+      reducedPreds: reducedPreds, buildAOA: buildAOA, nodeTimes: nodeTimes, allPaths: allPaths, layout: layout };
+  })();
+  </script>
+  <script>
+  (function () {
+    var esc = APL.esc, $ = function (id) { return document.getElementById(id); };
+    function f(x) { return String(Math.round(x * 1000) / 1000); }
+
+    var EXAMPLES = [
+      { label: "教材の例題（12日）", rows: [["A", 3, ""], ["B", 5, ""], ["C", 4, "A"], ["D", 6, "A"], ["E", 3, "B, C"], ["F", 2, "D, E"]] },
+      { label: "公式集の例（10日）", rows: [["A", 3, ""], ["B", 2, ""], ["C", 4, "A"], ["D", 6, "B"], ["E", 2, "C, D"]] },
+      { label: "ダミー作業が必要な例", rows: [["A", 3, ""], ["B", 4, ""], ["C", 2, "A"], ["D", 5, "A, B"], ["E", 2, "C, D"]] },
+      { label: "並行作業＋ダミー（終点）", rows: [["A", 2, ""], ["B", 4, "A"], ["C", 3, "A"], ["D", 5, "A"], ["E", 2, "B, C"]] },
+      { label: "システム開発（8作業）", rows: [["A", 5, ""], ["B", 3, "A"], ["C", 7, "A"], ["D", 4, "B"], ["E", 6, "B, C"], ["F", 2, "C"], ["G", 3, "D, E"], ["H", 4, "F, G"]] },
+      { label: "循環依存（エラー例）", rows: [["A", 2, ""], ["B", 3, "A, D"], ["C", 4, "B"], ["D", 1, "C"]] }
+    ];
+    var rows = [];
+    function load(ex) { rows = ex.rows.map(function (r) { return { name: r[0], dur: String(r[1]), preds: r[2] }; }); renderTable(); update(); }
+
+    function renderTable() {
+      var tb = $("task-table").querySelector("tbody");
+      tb.innerHTML = rows.map(function (r, i) {
+        return '<tr><td><input type="text" data-i="' + i + '" data-k="name" value="' + esc(r.name) + '" aria-label="作業名"></td>' +
+          '<td><input type="number" min="0" step="any" inputmode="decimal" data-i="' + i + '" data-k="dur" value="' + esc(r.dur) + '" aria-label="所要日数"></td>' +
+          '<td><input type="text" data-i="' + i + '" data-k="preds" value="' + esc(r.preds) + '" aria-label="先行作業" placeholder="なし"></td>' +
+          '<td><button type="button" data-del="' + i + '" aria-label="この作業を削除">✕</button></td></tr>';
+      }).join("");
+    }
+    $("task-table").addEventListener("input", function (e) {
+      var t = e.target;
+      if (t.dataset.i === undefined) return;
+      rows[Number(t.dataset.i)][t.dataset.k] = t.value;
+      update();
+    });
+    $("task-table").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-del]");
+      if (!b) return;
+      rows.splice(Number(b.dataset.del), 1);
+      renderTable(); update();
+    });
+    $("add-row").addEventListener("click", function () {
+      var used = rows.map(function (r) { return r.name; }), name = "";
+      for (var i = 0; i < 26; i++) { var c = String.fromCharCode(65 + i); if (used.indexOf(c) < 0) { name = c; break; } }
+      rows.push({ name: name || "X" + (rows.length + 1), dur: "1", preds: rows.length ? rows[rows.length - 1].name : "" });
+      renderTable(); update();
+      var inputs = $("task-table").querySelectorAll("tbody tr:last-child input");
+      if (inputs[0]) inputs[0].focus();
+    });
+
+    function showError(msgs) {
+      $("errors").innerHTML = '<div class="box-ng">' + msgs.map(esc).join("<br>") + "</div>";
+      $("sec-net").style.display = "none";
+      $("sec-res").style.display = "none";
+    }
+
+    function update() {
+      var p = Calc.parseTasks(rows);
+      if (!p.tasks.length) { showError(["作業を1つ以上入力してください"]); return; }
+      if (p.errors.length) { showError(p.errors); return; }
+      var cyc = Calc.findCycle(p.tasks);
+      if (cyc) { showError(["循環依存があります：" + cyc.join(" → ") + "（先行作業をたどると元の作業に戻ってしまうため、日程を計算できません）"]); return; }
+      $("errors").innerHTML = "";
+      $("sec-net").style.display = "";
+      $("sec-res").style.display = "";
+
+      var tasks = p.tasks, map = {};
+      tasks.forEach(function (t) { map[t.name] = t; });
+      var s = Calc.schedule(tasks), R = s.result;
+      var aoa = Calc.buildAOA(tasks);
+      var nt = Calc.nodeTimes(aoa, function (n) { return map[n].dur; });
+      var lay = Calc.layout(aoa);
+      var arcOf = {};
+      aoa.arcs.forEach(function (a) { if (a.task) arcOf[a.task] = a; });
+      function arcLabel(a) { return a.task === null ? "ダミー(0)" : a.task + "(" + f(map[a.task].dur) + ")"; }
+      function nn(n) { return "結合点" + lay.num[n]; }
+
+      drawNet(aoa, nt, lay, map, R);
+
+      // 概要
+      var paths = Calc.allPaths(tasks, 60);
+      var critPaths = paths.paths.filter(function (pp) { return pp.path.every(function (n) { return R[n].critical; }) && Math.abs(pp.length - s.duration) < 1e-9; });
+      $("summary").innerHTML = '<div class="box-ok">プロジェクト全体の所要日数 = <span class="big">' + f(s.duration) + ' 日</span><br>クリティカルパス：<span class="crit">' +
+        critPaths.map(function (pp) { return esc(pp.path.join(" → ")); }).join("　／　") + "</span></div>";
+
+      // 結果表
+      $("res-table").querySelector("tbody").innerHTML = s.order.slice().sort(function (a, b) { return tasks.indexOf(map[a]) - tasks.indexOf(map[b]); }).map(function (n) {
+        var r = R[n], a = arcOf[n];
+        return '<tr class="' + (r.critical ? "is-crit" : "") + '"><td>' + esc(n) + (r.critical ? ' <span class="crit">★</span>' : "") + "</td><td>" + f(map[n].dur) + "</td><td>" +
+          lay.num[a.from] + "→" + lay.num[a.to] + "</td><td>" + f(r.ES) + "</td><td>" + f(r.EF) + "</td><td>" + f(r.LS) + "</td><td>" + f(r.LF) + "</td><td>" + f(r.TF) + "</td><td>" + f(r.FF) + "</td></tr>";
+      }).join("");
+
+      // 途中式
+      var st = [];
+      st.push("手順1：最早結合点時刻を前向きに計算する（入ってくる矢印が複数なら最大値）");
+      var byNum = aoa.nodes.slice().sort(function (a, b) { return lay.num[a] - lay.num[b]; });
+      byNum.forEach(function (n) {
+        var ins = nt.inA[n];
+        if (!ins.length) { st.push("  " + nn(n) + ": 0"); return; }
+        var terms = ins.map(function (a) { return nn(a.from) + " + " + arcLabel(a); });
+        var vals = ins.map(function (a) { return f(nt.E[a.from] + (a.task ? map[a.task].dur : 0)); });
+        if (ins.length === 1) st.push("  " + nn(n) + ": " + f(nt.E[ins[0].from]) + " + " + arcLabel(ins[0]) + " = " + f(nt.E[n]));
+        else st.push("  " + nn(n) + ": max( " + terms.join(", ") + " ) = max( " + vals.join(", ") + " ) = " + f(nt.E[n]));
+      });
+      st.push("  → プロジェクト全体の所要日数は " + f(nt.T) + " 日");
+      st.push("");
+      st.push("手順2：最遅結合点時刻を後ろ向きに計算する（出ていく矢印が複数なら最小値）");
+      byNum.slice().reverse().forEach(function (n) {
+        var outs = nt.outA[n];
+        if (!outs.length) { st.push("  " + nn(n) + ": " + f(nt.L[n]) + "（最早と同じ値から始める）"); return; }
+        var terms = outs.map(function (a) { return nn(a.to) + " − " + arcLabel(a); });
+        var vals = outs.map(function (a) { return f(nt.L[a.to] - (a.task ? map[a.task].dur : 0)); });
+        if (outs.length === 1) st.push("  " + nn(n) + ": " + f(nt.L[outs[0].to]) + " − " + arcLabel(outs[0]) + " = " + f(nt.L[n]));
+        else st.push("  " + nn(n) + ": min( " + terms.join(", ") + " ) = min( " + vals.join(", ") + " ) = " + f(nt.L[n]));
+      });
+      st.push("");
+      st.push("手順3：経路ごとの所要日数（最長がクリティカルパス）");
+      paths.paths.forEach(function (pp) {
+        var isC = critPaths.indexOf(pp) >= 0;
+        st.push("  " + pp.path.join(" → ") + " ： " + pp.path.map(function (n) { return f(map[n].dur); }).join(" + ") + " = " + f(pp.length) + "日" + (isC ? "  ← クリティカルパス" : ""));
+      });
+      if (paths.truncated) st.push("  （経路が多いため、一部のみ表示しています）");
+      st.push("");
+      st.push("手順4：各作業の余裕日数");
+      st.push("  全余裕   = 後の結合点の最遅 − 前の結合点の最早 − 所要日数");
+      tasks.forEach(function (t) {
+        var a = arcOf[t.name];
+        st.push("    " + t.name + ": " + f(nt.L[a.to]) + " − " + f(nt.E[a.from]) + " − " + f(t.dur) + " = " + f(R[t.name].TF) + "日" + (R[t.name].critical ? "（クリティカル）" : ""));
+      });
+      st.push("  自由余裕 = 後続作業の最早開始 − 自分の最早終了（後続がなければ全体の所要日数 − 最早終了）");
+      tasks.forEach(function (t) {
+        var nexts = s.succ[t.name];
+        var minEs = nexts.length ? Math.min.apply(null, nexts.map(function (x) { return R[x].ES; })) : s.duration;
+        st.push("    " + t.name + ": " + f(minEs) + " − " + f(R[t.name].EF) + " = " + f(R[t.name].FF) + "日");
+      });
+      $("steps").textContent = st.join("\n");
+    }
+
+    function el(tag, attrs, text) {
+      var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function drawNet(aoa, nt, lay, map, R) {
+      var COLW = 140, ROWH = 96, NR = 17, MX = 40, MY = 52;
+      var minP = 0, maxP = 0;
+      aoa.nodes.forEach(function (n) { minP = Math.min(minP, lay.pos[n]); maxP = Math.max(maxP, lay.pos[n]); });
+      var W = MX * 2 + lay.maxLayer * COLW, H = MY * 2 + (maxP - minP) * ROWH;
+      var xy = {};
+      aoa.nodes.forEach(function (n) { xy[n] = { x: MX + lay.layer[n] * COLW, y: MY + (lay.pos[n] - minP) * ROWH }; });
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, xmlns: "http://www.w3.org/2000/svg" });
+      svg.style.maxWidth = Math.max(W * 1.1, 320) + "px";
+      var defs = el("defs");
+      [["ah", "var(--text-sub)"], ["ahc", "var(--ng)"]].forEach(function (m) {
+        var mk = el("marker", { id: m[0], viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 11, markerHeight: 11, markerUnits: "userSpaceOnUse", orient: "auto-start-reverse" });
+        mk.appendChild(el("path", { d: "M0,0 L10,5 L0,10 z", fill: m[1] }));
+        defs.appendChild(mk);
+      });
+      svg.appendChild(defs);
+
+      function hits(px, py, skip) {
+        return aoa.nodes.some(function (n) {
+          if (skip.indexOf(n) >= 0) return false;
+          var dx = xy[n].x - px, dy = xy[n].y - py, ey = dy - NR - 10;
+          return dx * dx + dy * dy < (NR + 10) * (NR + 10) || (Math.abs(dx) < 28 && Math.abs(ey) < 12);
+        });
+      }
+      function curveHits(p0, c, p2, skip) {
+        for (var i = 1; i < 20; i++) {
+          var t = i / 20, x = (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * c.x + t * t * p2.x, y = (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * c.y + t * t * p2.y;
+          if (hits(x, y, skip)) return true;
+        }
+        return false;
+      }
+      var used = [], bx0 = 0, by0 = 0, bx1 = W, by1 = H;
+      function grow(x, y, m) { bx0 = Math.min(bx0, x - m); bx1 = Math.max(bx1, x + m); by0 = Math.min(by0, y - m); by1 = Math.max(by1, y + m); }
+      var labels = el("g");
+      aoa.arcs.forEach(function (a) {
+        var p0 = xy[a.from], p2 = xy[a.to];
+        var mx = (p0.x + p2.x) / 2, my = (p0.y + p2.y) / 2;
+        var dx = p2.x - p0.x, dy = p2.y - p0.y, len = Math.sqrt(dx * dx + dy * dy) || 1;
+        var nx = -dy / len, ny = dx / len;
+        var txt = a.task ? a.task + "(" + (Math.round(map[a.task].dur * 1000) / 1000) + ")" : "ダミー";
+        var tw = Math.max(txt.length * 8 + 10, 34);
+        var offs = [0, -30, 30, -55, 55, -80, 80, -110, 110], c = { x: mx, y: my };
+        for (var i = 0; i < offs.length; i++) {
+          var cc = { x: mx + nx * offs[i] * 2, y: my + ny * offs[i] * 2 };
+          var qx = 0.25 * p0.x + 0.5 * cc.x + 0.25 * p2.x, qy = 0.25 * p0.y + 0.5 * cc.y + 0.25 * p2.y;
+          var clash = used.some(function (r) { return Math.abs(r.x - qx) < (r.w + tw) / 2 + 4 && Math.abs(r.y - qy) < 22; });
+          if (!curveHits(p0, cc, p2, [a.from, a.to]) && !clash) { c = cc; break; }
+        }
+        used.push({ x: 0.25 * p0.x + 0.5 * c.x + 0.25 * p2.x, y: 0.25 * p0.y + 0.5 * c.y + 0.25 * p2.y, w: tw });
+        function shorten(p, q, r) { var vx = q.x - p.x, vy = q.y - p.y, l = Math.sqrt(vx * vx + vy * vy) || 1; return { x: p.x + vx / l * r, y: p.y + vy / l * r }; }
+        var s0 = shorten(p0, c, NR), s2 = shorten(p2, c, NR + 1);
+        var crit;
+        if (a.task) crit = R[a.task].critical;
+        else crit = nt.E[a.from] === nt.L[a.from] && nt.E[a.to] === nt.L[a.to] && nt.E[a.from] === nt.E[a.to];
+        svg.appendChild(el("path", {
+          d: "M" + s0.x + "," + s0.y + " Q" + c.x + "," + c.y + " " + s2.x + "," + s2.y, fill: "none",
+          stroke: crit ? "var(--ng)" : "var(--text-sub)", "stroke-width": crit ? 3 : 1.6,
+          "stroke-dasharray": a.task ? "" : "6 4", "marker-end": "url(#" + (crit ? "ahc" : "ah") + ")"
+        }));
+        var lx = 0.25 * p0.x + 0.5 * c.x + 0.25 * p2.x, ly = 0.25 * p0.y + 0.5 * c.y + 0.25 * p2.y;
+        grow(lx, ly, tw / 2 + 4);
+        labels.appendChild(el("rect", { x: lx - tw / 2, y: ly - 10, width: tw, height: 20, rx: 4, fill: "var(--surface)", opacity: 0.92 }));
+        labels.appendChild(el("text", { x: lx, y: ly + 5, "text-anchor": "middle", "font-size": a.task ? 14 : 11, "font-weight": a.task ? 700 : 400, fill: crit ? "var(--ng)" : "var(--text)" }, txt));
+      });
+      svg.appendChild(labels);
+      aoa.nodes.forEach(function (n) {
+        var p = xy[n], onC = nt.E[n] === nt.L[n];
+        svg.appendChild(el("circle", { cx: p.x, cy: p.y, r: NR, fill: "var(--surface)", stroke: onC ? "var(--ng)" : "var(--accent)", "stroke-width": 2 }));
+        svg.appendChild(el("text", { x: p.x, y: p.y + 5, "text-anchor": "middle", "font-size": 14, "font-weight": 700, fill: "var(--text)" }, String(lay.num[n])));
+        svg.appendChild(el("text", { x: p.x, y: p.y - NR - 6, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)" },
+          (Math.round(nt.E[n] * 1000) / 1000) + " / " + (Math.round(nt.L[n] * 1000) / 1000)));
+      });
+      svg.setAttribute("viewBox", bx0 + " " + by0 + " " + (bx1 - bx0) + " " + (by1 - by0));
+      svg.style.maxWidth = Math.max((bx1 - bx0) * 1.1, 320) + "px";
+      $("net").innerHTML = "";
+      $("net").appendChild(svg);
+    }
+
+    EXAMPLES.forEach(function (ex) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = ex.label;
+      b.addEventListener("click", function () { load(ex); });
+      $("examples").appendChild(b);
+    });
+    var hm = /ex=(\d+)/.exec(location.hash);
+    load(EXAMPLES[hm && EXAMPLES[Number(hm[1])] ? Number(hm[1]) : 0]);
+  })();
+  </script>
+</body>
+</html>

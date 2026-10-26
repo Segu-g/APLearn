@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>会計・財務計算機</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ex-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ex-buttons button { font-size: 14px; padding: 5px 12px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    input.num { width: 9em; }
+    .chart svg { width: 100%; height: auto; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-sub); margin-top: 6px; }
+    .legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 5px; }
+    .legend b { display: inline-block; width: 12px; height: 12px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .kpi { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; }
+    .kpi .k { font-size: 12px; color: var(--text-sub); }
+    .kpi .v { font-size: 19px; font-weight: 700; font-family: var(--mono); }
+    .kpi .j { font-size: 12px; color: var(--text-sub); }
+    #dep-table td, #dep-table th { text-align: right; white-space: nowrap; }
+    #dep-table td:first-child, #dep-table th:first-child { text-align: left; }
+    #dep-table td.sw { background: var(--warn-weak); }
+    [hidden] { display: none !important; }
+    .row > .field { max-width: 100%; min-width: 0; }
+    .field select { max-width: 100%; }
+  </style>
+</head>
+<body data-root="../" data-title="会計・財務計算機">
+  <main>
+    <h1>会計・財務計算機</h1>
+    <p class="lead">減価償却（定額法と200%定率法の比較）、経済的発注量（EOQ）、財務指標（ROE・ROA・流動比率・自己資本比率など）を途中式つきで計算します。</p>
+
+    <div class="tabs" role="tablist" aria-label="計算機の切り替え">
+      <button type="button" role="tab" id="tab-dep" aria-controls="panel-dep" aria-selected="true">減価償却</button>
+      <button type="button" role="tab" id="tab-eoq" aria-controls="panel-eoq" aria-selected="false">経済的発注量（EOQ）</button>
+      <button type="button" role="tab" id="tab-fin" aria-controls="panel-fin" aria-selected="false">財務指標</button>
+    </div>
+
+    <!-- ===== 減価償却 ===== -->
+    <section id="panel-dep" role="tabpanel" aria-labelledby="tab-dep">
+      <div class="card">
+        <div class="row" style="align-items:center">
+          <strong>例題を読み込む：</strong>
+          <div class="ex-buttons" id="dep-examples"></div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div class="field"><label for="d-cost">取得原価（円）</label><input id="d-cost" class="num" type="number" min="0" step="1"></div>
+          <div class="field"><label for="d-life">耐用年数（年）</label><input id="d-life" class="num" type="number" min="1" max="50" step="1" style="width:6em"></div>
+          <div class="field"><label for="d-salvage">残存価額（円）</label><input id="d-salvage" class="num" type="number" min="0" step="1"></div>
+          <div class="field"><label for="d-memo">備忘価額</label><select id="d-memo"><option value="1">1円を残す（現行税法）</option><option value="0">残さない</option></select></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="field"><label for="d-method">定率法の計算方式</label>
+            <select id="d-method">
+              <option value="tax">税法方式（保証率・改定償却率を入力）</option>
+              <option value="simple">簡易方式（均等償却額を下回ったら切替え）</option>
+              <option value="none">切替えなし（期首帳簿価額 × 償却率のみ）</option>
+            </select></div>
+          <div class="field"><label for="d-rate">償却率</label><input id="d-rate" class="num" type="number" min="0" max="1" step="0.001" style="width:7em"></div>
+          <div class="field" data-tax><label for="d-rev">改定償却率</label><input id="d-rev" class="num" type="number" min="0" max="1" step="0.001" style="width:7em"></div>
+          <div class="field" data-tax><label for="d-guar">保証率</label><input id="d-guar" class="num" type="number" min="0" max="1" step="0.00001" style="width:8em"></div>
+        </div>
+        <p class="muted" style="margin:8px 0 0">償却率は耐用年数を変えると 200%定率法の値（2 ÷ 耐用年数、小数第3位に四捨五入）が自動で入ります。<strong>改定償却率・保証率は耐用年数ごとに国税庁の表で決まっている値</strong>なので、税法方式では問題文や耐用年数表の値を入力してください（例題「教材の例」は耐用年数5年の値 0.500・0.10800 を使用）。値が分からないときは「簡易方式」を選ぶと、表を使わずに近い結果を求められます（表の値と一致しない年数もあります）。1円未満は切り捨てます。</p>
+        <div id="dep-msg" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">年度別の比較</h3>
+        <div class="table-wrap"><table id="dep-table"></table></div>
+        <div class="chart" id="dep-chart" style="margin-top:14px" role="img" aria-label="減価償却費と帳簿価額のグラフ"></div>
+        <div class="legend">
+          <span><b style="background:var(--accent)"></b>定額法の償却費</span>
+          <span><b style="background:var(--mgmt)"></b>定率法の償却費</span>
+          <span><i style="border-color:var(--accent)"></i>定額法の期末帳簿価額</span>
+          <span><i style="border-color:var(--mgmt);border-top-style:dashed"></i>定率法の期末帳簿価額</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">途中式</h3>
+        <div class="steps" id="dep-steps"></div>
+        <div class="box-note" style="margin-top:12px">⚠️ 定率法は「<strong>期首の帳簿価額</strong> × 償却率」。取得原価に毎年償却率を掛けないように注意します（それは定額法の考え方です）。</div>
+      </div>
+    </section>
+
+    <!-- ===== EOQ ===== -->
+    <section id="panel-eoq" role="tabpanel" aria-labelledby="tab-eoq" hidden>
+      <div class="card">
+        <div class="row" style="align-items:center">
+          <strong>例題を読み込む：</strong>
+          <div class="ex-buttons" id="eoq-examples"></div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div class="field"><label for="e-d">年間需要量（個）</label><input id="e-d" class="num" type="number" min="0" step="any"></div>
+          <div class="field"><label for="e-s">1回当たりの発注費用（円）</label><input id="e-s" class="num" type="number" min="0" step="any"></div>
+          <div class="field"><label for="e-h">1個当たりの年間保管費用（円）</label><input id="e-h" class="num" type="number" min="0" step="any"></div>
+        </div>
+        <div id="eoq-result" class="result"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">発注量と年間費用</h3>
+        <div class="chart" id="eoq-chart" role="img" aria-label="発注量と年間費用のグラフ"></div>
+        <div class="legend">
+          <span><i style="border-color:var(--accent)"></i>年間発注費用（右下がり）</span>
+          <span><i style="border-color:var(--warn)"></i>年間保管費用（右上がり）</span>
+          <span><i style="border-color:var(--ng)"></i>合計（下に凸、EOQ で最小）</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">途中式</h3>
+        <div class="steps" id="eoq-steps"></div>
+      </div>
+    </section>
+
+    <!-- ===== 財務指標 ===== -->
+    <section id="panel-fin" role="tabpanel" aria-labelledby="tab-fin" hidden>
+      <div class="card">
+        <div class="row" style="align-items:center">
+          <strong>例題を読み込む：</strong>
+          <div class="ex-buttons" id="fin-examples"></div>
+        </div>
+        <h3>必須</h3>
+        <div class="row">
+          <div class="field"><label for="f-ni">当期純利益</label><input id="f-ni" class="num" type="number" step="any"></div>
+          <div class="field"><label for="f-eq">自己資本</label><input id="f-eq" class="num" type="number" step="any"></div>
+          <div class="field"><label for="f-ta">総資産（＝総資本）</label><input id="f-ta" class="num" type="number" step="any"></div>
+          <div class="field"><label for="f-ca">流動資産</label><input id="f-ca" class="num" type="number" step="any"></div>
+          <div class="field"><label for="f-cl">流動負債</label><input id="f-cl" class="num" type="number" step="any"></div>
+        </div>
+        <h3>任意（入力すると指標が増えます）</h3>
+        <div class="row">
+          <div class="field"><label for="f-sales">売上高</label><input id="f-sales" class="num" type="number" step="any"></div>
+          <div class="field"><label for="f-inv">棚卸資産</label><input id="f-inv" class="num" type="number" step="any"></div>
+          <div class="field"><label for="f-fa">固定資産</label><input id="f-fa" class="num" type="number" step="any"></div>
+          <div class="field"><label for="f-fl">固定負債</label><input id="f-fl" class="num" type="number" step="any"></div>
+        </div>
+        <div id="fin-msg" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">計算結果</h3>
+        <div class="kpis" id="fin-kpis"></div>
+        <h3>途中式</h3>
+        <div class="steps" id="fin-steps"></div>
+        <div class="box-note" style="margin-top:12px">⚠️ 借金（負債）を増やすと財務レバレッジが上がって ROE は上がりやすいですが、自己資本比率は下がり、安全性は低くなります。ROA の分子に経常利益や営業利益を使う問題もあるので、問題文の指示に従います。</div>
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../../03_ストラテジ系/03_企業活動と会計.md">03_ストラテジ系/03_企業活動と会計.md</a>（4.4 経済的発注量、10. 財務指標、11. 減価償却）</li>
+      <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（9.2 財務指標、9.3 減価償却、10. OR・IE）</li>
+    </ul>
+  </main>
+
+  <script src="../assets/common.js"></script>
+  <script id="calc">
+  /* ===== 計算ロジック（DOM に依存しない） ===== */
+  var Calc = (function () {
+    function floor(x) { return Math.floor(x + 1e-9); }
+    // 200%定率法の償却率（2 ÷ 耐用年数、小数第3位に四捨五入）
+    function dbRate(life) { return Math.round(2 / life * 1000) / 1000; }
+
+    // 定額法：(取得原価 − 残存価額) ÷ 耐用年数。最終年度は端数と備忘価額で調整
+    function straightLine(cost, salvage, life, memo) {
+      var floorVal = Math.max(salvage, memo || 0), book = cost, rows = [];
+      var annual = floor((cost - salvage) / life);
+      for (var y = 1; y <= life; y++) {
+        var amt = y === life ? book - floorVal : Math.min(annual, book - floorVal);
+        amt = Math.max(amt, 0);
+        rows.push({ year: y, begin: book, amount: amt, end: book - amt });
+        book -= amt;
+      }
+      return { annual: annual, rows: rows };
+    }
+
+    // 定率法。method: 'tax'（保証率・改定償却率）| 'simple'（均等償却額と比較）| 'none'（切替えなし）
+    function decliningBalance(cost, life, rate, opt) {
+      opt = opt || {};
+      var memo = opt.memo || 0, method = opt.method || "tax", book = cost, rows = [];
+      var guarantee = method === "tax" ? floor(cost * (opt.guaranteeRate || 0)) : null;
+      var switched = false, fixedAmt = null, switchYear = null, revisedBase = null;
+      for (var y = 1; y <= life; y++) {
+        var normal = floor(book * rate), amt = normal, note = "";
+        if (method === "tax") {
+          if (!switched && normal < guarantee) {
+            switched = true; switchYear = y; revisedBase = book;
+            fixedAmt = floor(revisedBase * (opt.revisedRate || 0));
+          }
+          if (switched) amt = fixedAmt;
+        } else if (method === "simple") {
+          var remain = life - y + 1;
+          var even = floor(book / remain);
+          if (!switched && normal < even) { switched = true; switchYear = y; revisedBase = book; fixedAmt = even; }
+          if (switched) amt = fixedAmt;
+        }
+        if (method !== "none") {
+          if (y === life) amt = book - memo;               // 最終年度は備忘価額まで
+          amt = Math.min(amt, book - memo);
+        }
+        amt = Math.max(amt, 0);
+        rows.push({ year: y, begin: book, normal: normal, amount: amt, end: book - amt, switched: switched, isSwitchYear: y === switchYear });
+        book -= amt;
+      }
+      return { rows: rows, guarantee: guarantee, switchYear: switchYear, revisedBase: revisedBase, fixedAmt: fixedAmt };
+    }
+
+    // 経済的発注量
+    function eoq(D, S, H) {
+      var q = Math.sqrt(2 * D * S / H);
+      return { q: q, orders: D / q, orderCost: D / q * S, holdCost: q / 2 * H, total: D / q * S + q / 2 * H };
+    }
+    function inventoryCost(D, S, H, Q) { return { order: D / Q * S, hold: Q / 2 * H, total: D / Q * S + Q / 2 * H }; }
+
+    // 財務指標（比率は 0〜1 の小数で返す。流動比率なども小数）
+    function ratios(v) {
+      var r = {};
+      r.roe = v.ni / v.eq;
+      r.roa = v.ni / v.ta;
+      r.current = v.ca / v.cl;
+      r.equityRatio = v.eq / v.ta;
+      if (v.inv !== null && v.inv !== undefined) r.quick = (v.ca - v.inv) / v.cl;
+      if (v.fa !== null && v.fa !== undefined) {
+        r.fixed = v.fa / v.eq;
+        if (v.fl !== null && v.fl !== undefined) r.fixedLong = v.fa / (v.eq + v.fl);
+      }
+      if (v.sales !== null && v.sales !== undefined) {
+        r.margin = v.ni / v.sales;
+        r.turnover = v.sales / v.ta;
+        r.leverage = v.ta / v.eq;
+        r.dupont = r.margin * r.turnover * r.leverage;
+      }
+      return r;
+    }
+    return { dbRate: dbRate, straightLine: straightLine, decliningBalance: decliningBalance, eoq: eoq, inventoryCost: inventoryCost, ratios: ratios };
+  })();
+  </script>
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); }, esc = APL.esc;
+    function f(x, d) {
+      if (!isFinite(x)) return "—";
+      d = d === undefined ? 2 : d;
+      return Number(x.toFixed(d)).toLocaleString("ja-JP", { maximumFractionDigits: d });
+    }
+    function pct(x, d) { return f(x * 100, d === undefined ? 2 : d) + "%"; }
+    function num(id) { var v = $(id).value; return v === "" || isNaN(Number(v)) ? null : Number(v); }
+    function el(tag, attrs, text) {
+      var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function niceMax(v) {
+      if (!(v > 0)) return 1;
+      var p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
+      return (m <= 1 ? 1 : m <= 1.5 ? 1.5 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 3 ? 3 : m <= 4 ? 4 : m <= 5 ? 5 : m <= 6 ? 6 : m <= 8 ? 8 : 10) * p;
+    }
+    function addExamples(boxId, list, load) {
+      list.forEach(function (ex) {
+        var b = document.createElement("button");
+        b.type = "button"; b.textContent = ex.label;
+        b.addEventListener("click", function () { load(ex); });
+        $(boxId).appendChild(b);
+      });
+    }
+
+    /* ---------- タブ ---------- */
+    var TABS = ["dep", "eoq", "fin"];
+    function showTab(name) {
+      TABS.forEach(function (t) {
+        $("tab-" + t).setAttribute("aria-selected", String(t === name));
+        $("panel-" + t).hidden = t !== name;
+      });
+      APL.store.set("finance-tab", name);
+    }
+    TABS.forEach(function (t) { $("tab-" + t).addEventListener("click", function () { showTab(t); }); });
+
+    /* ---------- 減価償却 ---------- */
+    var DEP_EX = [
+      { label: "教材の例（100万円・5年・税法方式）", cost: 1000000, life: 5, salvage: 0, memo: "1", method: "tax", rate: 0.4, rev: 0.5, guar: 0.108 },
+      { label: "公式集の例（償却率0.4・切替えなし）", cost: 10000000, life: 5, salvage: 0, memo: "0", method: "none", rate: 0.4, rev: "", guar: "" },
+      { label: "旧方式（残存価額10%・旧定率法0.369）", cost: 1000000, life: 5, salvage: 100000, memo: "0", method: "none", rate: 0.369, rev: "", guar: "" },
+      { label: "耐用年数8年（簡易方式）", cost: 2000000, life: 8, salvage: 0, memo: "1", method: "simple", rate: 0.25, rev: "", guar: "" }
+    ];
+    function loadDep(ex) {
+      $("d-cost").value = ex.cost; $("d-life").value = ex.life; $("d-salvage").value = ex.salvage; $("d-memo").value = ex.memo;
+      $("d-method").value = ex.method; $("d-rate").value = ex.rate; $("d-rev").value = ex.rev; $("d-guar").value = ex.guar;
+      updateDep();
+    }
+    ["d-cost", "d-salvage", "d-rate", "d-rev", "d-guar"].forEach(function (id) { $(id).addEventListener("input", updateDep); });
+    ["d-memo", "d-method"].forEach(function (id) { $(id).addEventListener("change", updateDep); });
+    $("d-life").addEventListener("input", function () {
+      var n = num("d-life");
+      if (n >= 1) { $("d-rate").value = Calc.dbRate(n); $("d-rev").value = ""; $("d-guar").value = ""; }
+      updateDep();
+    });
+
+    function updateDep() {
+      var cost = num("d-cost"), life = num("d-life"), salvage = num("d-salvage") || 0, memo = Number($("d-memo").value);
+      var method = $("d-method").value, rate = num("d-rate"), rev = num("d-rev"), guar = num("d-guar");
+      Array.prototype.forEach.call(document.querySelectorAll("[data-tax]"), function (e) { e.hidden = method !== "tax"; });
+      var errs = [];
+      if (!(cost > 0)) errs.push("取得原価を入力してください。");
+      if (!(life >= 1 && life <= 50 && Math.round(life) === life)) errs.push("耐用年数は 1〜50 の整数にしてください。");
+      if (salvage < 0 || salvage >= cost) errs.push("残存価額は 0 以上、取得原価未満にしてください。");
+      if (!(rate > 0 && rate <= 1)) errs.push("償却率は 0 より大きく 1 以下にしてください。");
+      if (method === "tax" && !(rev > 0 && guar > 0)) errs.push("税法方式では改定償却率と保証率を入力してください（分からないときは「簡易方式」を選んでください）。");
+      if (errs.length) { $("dep-msg").innerHTML = '<div class="box-ng">' + errs.map(esc).join("<br>") + "</div>"; $("dep-table").innerHTML = ""; $("dep-steps").textContent = ""; $("dep-chart").innerHTML = ""; return; }
+      $("dep-msg").innerHTML = method === "none" && salvage === 0 ? '<div class="box-note">「切替えなし」では最終年度でも帳簿価額が残ります（試験で償却率を与えて数年分だけ計算させる問題向け）。</div>' : "";
+      var sl = Calc.straightLine(cost, salvage, life, memo);
+      var db = Calc.decliningBalance(cost, life, rate, { method: method, revisedRate: rev, guaranteeRate: guar, memo: memo });
+
+      var h = "<tr><th>年度</th><th>定額法 償却費</th><th>定額法 期末帳簿価額</th><th>定率法 期首帳簿価額</th><th>定率法 償却費</th><th>定率法 期末帳簿価額</th></tr>";
+      var t1 = 0, t2 = 0;
+      for (var i = 0; i < life; i++) {
+        var a = sl.rows[i], b = db.rows[i];
+        t1 += a.amount; t2 += b.amount;
+        h += "<tr><td>" + (i + 1) + "年目</td><td>" + f(a.amount, 0) + "</td><td>" + f(a.end, 0) + "</td><td>" + f(b.begin, 0) + '</td><td class="' + (b.switched ? "sw" : "") + '">' + f(b.amount, 0) + "</td><td>" + f(b.end, 0) + "</td></tr>";
+      }
+      h += "<tr><th>合計</th><th>" + f(t1, 0) + "</th><th></th><th></th><th>" + f(t2, 0) + "</th><th></th></tr>";
+      $("dep-table").innerHTML = h;
+
+      var L = [];
+      L.push("【定額法】毎年の減価償却費 = (取得原価 − 残存価額) ÷ 耐用年数");
+      L.push("  = (" + f(cost, 0) + " − " + f(salvage, 0) + ") ÷ " + life + " = " + f((cost - salvage) / life, 2) + (sl.annual !== (cost - salvage) / life ? " → " + f(sl.annual, 0) + "円（1円未満切捨て）" : "円"));
+      if (memo && salvage < memo) L.push("  最終年度は備忘価額1円を残すので " + f(sl.rows[life - 1].amount, 0) + "円");
+      else if (sl.rows[life - 1].amount !== sl.annual) L.push("  最終年度は端数を調整して " + f(sl.rows[life - 1].amount, 0) + "円");
+      L.push("");
+      L.push("【定率法】毎年の減価償却費 = 期首の帳簿価額 × 償却率（" + rate + "）");
+      if (method === "tax") L.push("  償却保証額 = 取得原価 × 保証率 = " + f(cost, 0) + " × " + guar + " = " + f(db.guarantee, 0) + "円");
+      db.rows.forEach(function (r) {
+        var line = "  " + r.year + "年目：";
+        if (r.isSwitchYear) {
+          line += f(r.begin, 0) + " × " + rate + " = " + f(r.normal, 0) + " → " +
+            (method === "tax" ? "償却保証額 " + f(db.guarantee, 0) + "円を下回る\n         → 改定取得価額 " + f(db.revisedBase, 0) + " × 改定償却率 " + rev + " = " + f(db.fixedAmt, 0) + "円"
+              : "残り" + (life - r.year + 1) + "年で均等に償却する額 " + f(r.begin, 0) + " ÷ " + (life - r.year + 1) + " = " + f(db.fixedAmt, 0) + "円 を下回る\n         → 以後は " + f(db.fixedAmt, 0) + "円ずつ均等に償却");
+          if (r.amount !== db.fixedAmt) line += "\n         → 最終年度なので " + f(r.begin, 0) + (memo ? " − 備忘価額1" : "") + " = " + f(r.amount, 0) + "円";
+        } else if (r.switched) {
+          line += r.year === life && r.amount !== db.fixedAmt ? f(r.begin, 0) + (memo ? " − 備忘価額1円" : "") + " = " + f(r.amount, 0) + "円（最終年度）" : f(db.fixedAmt, 0) + "円（切替え後の均等額）";
+        } else if (r.year === life && method !== "none" && r.amount !== r.normal) {
+          line += f(r.begin, 0) + (memo ? " − 備忘価額1円" : "") + " = " + f(r.amount, 0) + "円（最終年度）";
+        } else {
+          line += f(r.begin, 0) + " × " + rate + " = " + f(r.amount, 0) + "円";
+        }
+        line += "（期末帳簿価額 " + f(r.end, 0) + "円）";
+        L.push(line);
+      });
+      L.push("  合計：" + db.rows.map(function (r) { return f(r.amount, 0); }).join(" + ") + " = " + f(t2, 0) + "円");
+      $("dep-steps").textContent = L.join("\n");
+      drawDep(cost, sl.rows, db.rows);
+    }
+    function drawDep(cost, a, b) {
+      var n = a.length, W = 640, H = 320, L = 74, R = 16, T = 16, B = 40;
+      var ymax = niceMax(cost);
+      var cw = (W - L - R) / n;
+      function Y(v) { return T + (H - T - B) * (1 - v / ymax); }
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, xmlns: "http://www.w3.org/2000/svg" });
+      svg.style.maxWidth = "760px";
+      for (var g = 0; g <= 4; g++) {
+        var v = ymax * g / 4;
+        svg.appendChild(el("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: "var(--border)" }));
+        svg.appendChild(el("text", { x: L - 6, y: Y(v) + 4, "text-anchor": "end", "font-size": 11, fill: "var(--text-sub)" }, f(v, 0)));
+      }
+      var bw = Math.min(26, cw * 0.32);
+      for (var i = 0; i < n; i++) {
+        var cx = L + cw * (i + 0.5);
+        svg.appendChild(el("rect", { x: cx - bw - 1, y: Y(a[i].amount), width: bw, height: Y(0) - Y(a[i].amount), fill: "var(--accent)", opacity: 0.85 }));
+        svg.appendChild(el("rect", { x: cx + 1, y: Y(b[i].amount), width: bw, height: Y(0) - Y(b[i].amount), fill: "var(--mgmt)", opacity: 0.85 }));
+        if (n <= 20 || i % Math.ceil(n / 20) === 0) svg.appendChild(el("text", { x: cx, y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, String(i + 1)));
+      }
+      function line(rows, color, dash) {
+        var pts = [(L) + "," + Y(cost)];
+        rows.forEach(function (r, i) { pts.push((L + cw * (i + 1)) + "," + Y(r.end)); });
+        svg.appendChild(el("polyline", { points: pts.join(" "), fill: "none", stroke: color, "stroke-width": 2.4, "stroke-dasharray": dash || "" }));
+      }
+      line(a, "var(--accent)"); line(b, "var(--mgmt)", "6 4");
+      svg.appendChild(el("line", { x1: L, x2: L, y1: T, y2: H - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)" }, "年度（帳簿価額の線は各年度末）"));
+      $("dep-chart").innerHTML = ""; $("dep-chart").appendChild(svg);
+    }
+
+    /* ---------- EOQ ---------- */
+    var EOQ_EX = [
+      { label: "教材の例（4,000個・500円・100円）", d: 4000, s: 500, h: 100 },
+      { label: "公式集の例（3,600個・500円・40円）", d: 3600, s: 500, h: 40 }
+    ];
+    function loadEoq(ex) { $("e-d").value = ex.d; $("e-s").value = ex.s; $("e-h").value = ex.h; updateEoq(); }
+    ["e-d", "e-s", "e-h"].forEach(function (id) { $(id).addEventListener("input", updateEoq); });
+    function updateEoq() {
+      var D = num("e-d"), S = num("e-s"), H = num("e-h");
+      if (!(D > 0 && S > 0 && H > 0)) { $("eoq-result").innerHTML = '<span class="ng">3つとも 0 より大きい数を入力してください。</span>'; $("eoq-steps").textContent = ""; $("eoq-chart").innerHTML = ""; return; }
+      var r = Calc.eoq(D, S, H);
+      $("eoq-result").innerHTML = '経済的発注量 EOQ = <strong style="font-size:22px">' + f(r.q, 2) + ' 個</strong>　（年間 ' + f(r.orders, 2) + ' 回発注、在庫総費用 ' + f(r.total, 0) + ' 円で最小）';
+      var L = [];
+      L.push("EOQ = √( 2 × 年間需要量 × 1回当たりの発注費用 ÷ 1個当たりの年間保管費用 )");
+      L.push("    = √( 2 × " + f(D) + " × " + f(S) + " ÷ " + f(H) + " )");
+      L.push("    = √( " + f(2 * D * S) + " ÷ " + f(H) + " )");
+      L.push("    = √" + f(2 * D * S / H) + "");
+      L.push("    = " + f(r.q, 2) + " 個");
+      L.push("");
+      L.push("検算：");
+      L.push("  発注回数     = " + f(D) + " ÷ " + f(r.q, 2) + " = " + f(r.orders, 2) + " 回");
+      L.push("  年間発注費用 = " + f(r.orders, 2) + " × " + f(S) + " = " + f(r.orderCost, 0) + " 円");
+      L.push("  年間保管費用 = (" + f(r.q, 2) + " ÷ 2) × " + f(H) + " = " + f(r.holdCost, 0) + " 円   ※平均在庫は発注量の半分");
+      L.push("  → 2つの費用が等しい（合計 " + f(r.total, 0) + " 円で最小）");
+      $("eoq-steps").textContent = L.join("\n");
+      drawEoq(D, S, H, r);
+    }
+    function drawEoq(D, S, H, r) {
+      var W = 640, Hh = 320, L = 70, R = 16, T = 16, B = 42;
+      var qmax = niceMax(r.q * 2.2), qmin = qmax / 40;
+      var ymax = niceMax(Math.max(Calc.inventoryCost(D, S, H, r.q * 0.4).total, Calc.inventoryCost(D, S, H, qmax).total) * 1.05);
+      function X(q) { return L + (W - L - R) * q / qmax; }
+      function Y(v) { return T + (Hh - T - B) * (1 - Math.min(v, ymax * 1.5) / ymax); }
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + Hh, xmlns: "http://www.w3.org/2000/svg" });
+      svg.style.maxWidth = "760px";
+      var defs = el("defs"), cp = el("clipPath", { id: "eoqclip" });
+      cp.appendChild(el("rect", { x: L, y: T, width: W - L - R, height: Hh - T - B }));
+      defs.appendChild(cp); svg.appendChild(defs);
+      for (var g = 0; g <= 4; g++) {
+        var v = ymax * g / 4, q = qmax * g / 4;
+        svg.appendChild(el("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: "var(--border)" }));
+        svg.appendChild(el("text", { x: L - 6, y: Y(v) + 4, "text-anchor": "end", "font-size": 11, fill: "var(--text-sub)" }, f(v, 0)));
+        svg.appendChild(el("text", { x: X(q), y: Hh - B + 16, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, f(q, 0)));
+      }
+      var gp = el("g", { "clip-path": "url(#eoqclip)" });
+      var po = [], ph = [], pt = [];
+      for (var k = 0; k <= 200; k++) {
+        var qq = qmin + (qmax - qmin) * k / 200, c = Calc.inventoryCost(D, S, H, qq);
+        po.push(X(qq) + "," + Y(c.order)); ph.push(X(qq) + "," + Y(c.hold)); pt.push(X(qq) + "," + Y(c.total));
+      }
+      gp.appendChild(el("polyline", { points: po.join(" "), fill: "none", stroke: "var(--accent)", "stroke-width": 2.2 }));
+      gp.appendChild(el("polyline", { points: ph.join(" "), fill: "none", stroke: "var(--warn)", "stroke-width": 2.2 }));
+      gp.appendChild(el("polyline", { points: pt.join(" "), fill: "none", stroke: "var(--ng)", "stroke-width": 2.8 }));
+      svg.appendChild(gp);
+      svg.appendChild(el("line", { x1: X(r.q), x2: X(r.q), y1: Y(r.total), y2: Hh - B, stroke: "var(--text)", "stroke-dasharray": "3 3" }));
+      svg.appendChild(el("circle", { cx: X(r.q), cy: Y(r.total), r: 5.5, fill: "var(--ng)" }));
+      svg.appendChild(el("text", { x: X(r.q) + 8, y: Y(r.total) + 24, "font-size": 12, "font-weight": 700, fill: "var(--text)" }, "EOQ = " + f(r.q, 1) + " 個（合計 " + f(r.total, 0) + " 円）"));
+      svg.appendChild(el("line", { x1: L, x2: L, y1: T, y2: Hh - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: Hh - B, y2: Hh - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("text", { x: (L + W - R) / 2, y: Hh - 6, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)" }, "1回の発注量（個）"));
+      $("eoq-chart").innerHTML = ""; $("eoq-chart").appendChild(svg);
+    }
+
+    /* ---------- 財務指標 ---------- */
+    var FIN_EX = [
+      { label: "公式集の例（百万円）", v: { ni: 50, eq: 500, ta: 2000, ca: 300, cl: 200, sales: "", inv: "", fa: "", fl: "" } },
+      { label: "教材の例（売上高10,000）", v: { ni: 420, eq: 5000, ta: 10000, ca: 3000, cl: 2000, sales: 10000, inv: 800, fa: 7000, fl: 3000 } }
+    ];
+    var FIN_IDS = { ni: "f-ni", eq: "f-eq", ta: "f-ta", ca: "f-ca", cl: "f-cl", sales: "f-sales", inv: "f-inv", fa: "f-fa", fl: "f-fl" };
+    function loadFin(ex) { for (var k in FIN_IDS) $(FIN_IDS[k]).value = ex.v[k]; updateFin(); }
+    Object.keys(FIN_IDS).forEach(function (k) { $(FIN_IDS[k]).addEventListener("input", updateFin); });
+    function updateFin() {
+      var v = {};
+      for (var k in FIN_IDS) v[k] = num(FIN_IDS[k]);
+      var errs = [];
+      if (v.ni === null) errs.push("当期純利益を入力してください。");
+      ["eq", "ta", "cl"].forEach(function (k) { if (!(v[k] > 0)) errs.push({ eq: "自己資本", ta: "総資産", cl: "流動負債" }[k] + "は 0 より大きい数にしてください。"); });
+      if (v.ca === null) errs.push("流動資産を入力してください。");
+      if (errs.length) { $("fin-msg").innerHTML = '<div class="box-ng">' + errs.map(esc).join("<br>") + "</div>"; $("fin-kpis").innerHTML = ""; $("fin-steps").textContent = ""; return; }
+      var notes = [];
+      if (v.eq > v.ta) notes.push("自己資本が総資産より大きくなっています（入力を確認してください）。");
+      if (v.fa !== null && Math.abs(v.ca + v.fa - v.ta) > 1e-9) notes.push("流動資産 + 固定資産（" + f(v.ca + v.fa) + "）が総資産（" + f(v.ta) + "）と一致しません。");
+      if (v.fl !== null && Math.abs(v.cl + v.fl + v.eq - v.ta) > 1e-9) notes.push("流動負債 + 固定負債 + 自己資本（" + f(v.cl + v.fl + v.eq) + "）が総資本（" + f(v.ta) + "）と一致しません。");
+      $("fin-msg").innerHTML = notes.length ? '<div class="box-note">' + notes.map(esc).join("<br>") + "</div>" : "";
+      var r = Calc.ratios(v);
+      var kp = [
+        ["ROE（自己資本利益率）", pct(r.roe), "収益性：高いほど良い"],
+        ["ROA（総資産利益率）", pct(r.roa), "収益性：高いほど良い"],
+        ["流動比率", pct(r.current), "安全性：高いほど良い（200%以上が理想）"],
+        ["自己資本比率", pct(r.equityRatio), "安全性：高いほど良い"]
+      ];
+      if (r.quick !== undefined) kp.push(["当座比率", pct(r.quick), "安全性：高いほど良い"]);
+      if (r.fixed !== undefined) kp.push(["固定比率", pct(r.fixed), "安全性：低いほど良い（100%以下が理想）"]);
+      if (r.fixedLong !== undefined) kp.push(["固定長期適合率", pct(r.fixedLong), "安全性：低いほど良い（100%以下が望ましい）"]);
+      if (r.turnover !== undefined) kp.push(["総資本回転率", f(r.turnover, 3) + " 回", "効率性：高いほど良い"]);
+      $("fin-kpis").innerHTML = kp.map(function (k) { return '<div class="kpi"><div class="k">' + k[0] + '</div><div class="v">' + esc(k[1]) + '</div><div class="j">' + k[2] + "</div></div>"; }).join("");
+      var L = [];
+      L.push("ROE          = 当期純利益 ÷ 自己資本 × 100 = " + f(v.ni) + " ÷ " + f(v.eq) + " × 100 = " + pct(r.roe));
+      L.push("ROA          = 当期純利益 ÷ 総資産 × 100   = " + f(v.ni) + " ÷ " + f(v.ta) + " × 100 = " + pct(r.roa));
+      L.push("流動比率     = 流動資産 ÷ 流動負債 × 100   = " + f(v.ca) + " ÷ " + f(v.cl) + " × 100 = " + pct(r.current));
+      L.push("自己資本比率 = 自己資本 ÷ 総資本 × 100     = " + f(v.eq) + " ÷ " + f(v.ta) + " × 100 = " + pct(r.equityRatio));
+      if (r.quick !== undefined) L.push("当座比率     = (流動資産 − 棚卸資産) ÷ 流動負債 × 100 = (" + f(v.ca) + " − " + f(v.inv) + ") ÷ " + f(v.cl) + " × 100 = " + pct(r.quick));
+      if (r.fixed !== undefined) L.push("固定比率     = 固定資産 ÷ 自己資本 × 100   = " + f(v.fa) + " ÷ " + f(v.eq) + " × 100 = " + pct(r.fixed));
+      if (r.fixedLong !== undefined) L.push("固定長期適合率 = 固定資産 ÷ (自己資本 + 固定負債) × 100 = " + f(v.fa) + " ÷ " + f(v.eq + v.fl) + " × 100 = " + pct(r.fixedLong));
+      if (r.dupont !== undefined) {
+        L.push("");
+        L.push("ROE の分解（デュポン分析）");
+        L.push("ROE = 売上高当期純利益率 × 総資本回転率 × 財務レバレッジ");
+        L.push("    = (" + f(v.ni) + " ÷ " + f(v.sales) + ") × (" + f(v.sales) + " ÷ " + f(v.ta) + ") × (" + f(v.ta) + " ÷ " + f(v.eq) + ")");
+        L.push("    = " + f(r.margin, 4) + " × " + f(r.turnover, 4) + " × " + f(r.leverage, 4));
+        L.push("    = " + f(r.dupont, 4) + " → " + pct(r.dupont) + "（上の ROE と一致 ✓）");
+      }
+      $("fin-steps").textContent = L.join("\n");
+    }
+
+    addExamples("dep-examples", DEP_EX, loadDep);
+    addExamples("eoq-examples", EOQ_EX, loadEoq);
+    addExamples("fin-examples", FIN_EX, loadFin);
+    loadDep(DEP_EX[0]); loadEoq(EOQ_EX[0]); loadFin(FIN_EX[0]);
+    var hm = /tab=(\w+)/.exec(location.hash);
+    var tab = hm && TABS.indexOf(hm[1]) >= 0 ? hm[1] : APL.store.get("finance-tab", "dep");
+    showTab(TABS.indexOf(tab) >= 0 ? tab : "dep");
+  })();
+  </script>
+</body>
+</html>

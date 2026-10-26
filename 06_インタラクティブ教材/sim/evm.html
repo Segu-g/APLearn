@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EVM計算</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ex-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ex-buttons button { font-size: 14px; padding: 5px 12px; }
+    #period-table input { width: 100%; min-width: 4.5em; padding: 4px 6px; font-size: 14px; text-align: right; }
+    #period-table td, #period-table th { padding: 4px 6px; text-align: center; vertical-align: middle; }
+    #period-table tr.is-now td { background: var(--accent-weak); }
+    .chart svg { width: 100%; height: auto; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-sub); margin-top: 6px; }
+    .legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 5px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .kpi { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; }
+    .kpi .k { font-size: 12px; color: var(--text-sub); }
+    .kpi .v { font-size: 20px; font-weight: 700; font-family: var(--mono); }
+    input.num { width: 8em; }
+    .verdict { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; margin-top: 12px; }
+    @media (max-width: 640px) { .verdict { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-root="../" data-title="EVM計算">
+  <main>
+    <h1>EVM（アーンドバリューマネジメント）計算</h1>
+    <p class="lead">期間ごとの PV（計画価値）・EV（出来高）・AC（実コスト）を入力すると、S曲線を描き、SV・CV・SPI・CPI・EAC・ETC・VAC を途中式つきで計算し、「遅れ／進み」「超過／効率的」を言葉で解説します。</p>
+
+    <section class="card">
+      <div class="row" style="align-items:center">
+        <strong>例題を読み込む：</strong>
+        <div class="ex-buttons" id="examples"></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div class="field"><label for="mode">入力する値</label>
+          <select id="mode"><option value="cum">累積値（その期末までの合計）</option><option value="per">期間ごとの値（その期だけの額）</option></select></div>
+        <div class="field"><label for="bac">BAC（完成時総予算）</label><input id="bac" class="num" type="number" min="0" step="any" placeholder="空欄＝PVの最終累積値"></div>
+        <div class="field"><label for="unit">単位</label><input id="unit" type="text" value="万円" style="width:5em"></div>
+        <div class="field"><label for="now">評価時点</label><select id="now"></select></div>
+      </div>
+      <p class="muted" style="margin:8px 0 0">EV・AC は評価時点までを入力し、それ以降は空欄のままにします（PV は最後の期まで入力）。</p>
+      <div class="table-wrap" style="margin-top:8px">
+        <table id="period-table">
+          <thead><tr><th>期</th><th>PV</th><th>EV</th><th>AC</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button type="button" id="add">＋期を追加</button>
+        <button type="button" id="remove">－最後の期を削除</button>
+      </div>
+      <div id="errors" style="margin-top:12px" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="sec-chart">
+      <h3 style="margin-top:0">S曲線（累積）</h3>
+      <div class="chart" id="chart" role="img" aria-label="PV・EV・ACの累積グラフ"></div>
+      <div class="legend">
+        <span><i style="border-color:var(--accent)"></i>PV（計画価値）</span>
+        <span><i style="border-color:var(--ok)"></i>EV（出来高）</span>
+        <span><i style="border-color:var(--ng)"></i>AC（実コスト）</span>
+        <span><i style="border-color:var(--ng);border-top-style:dashed"></i>AC の予測（EAC = BAC ÷ CPI へ）</span>
+        <span><i style="border-color:var(--text-sub);border-top-style:dotted"></i>BAC</span>
+      </div>
+    </section>
+
+    <section class="card" id="sec-res">
+      <h3 style="margin-top:0">評価結果</h3>
+      <div class="kpis" id="kpis"></div>
+      <div class="verdict" id="verdict"></div>
+      <h3>途中式</h3>
+      <div class="steps" id="steps"></div>
+      <div class="box-note" style="margin-top:12px">
+        💡 <strong>覚え方</strong>：すべて EV が主役。差異は「EV − ○○」、指数は「EV ÷ ○○」。S（スケジュール）は <strong>P</strong>V と、C（コスト）は <strong>A</strong>C と比べる。<br>
+        ⚠️ PV と AC を直接比べても意味がありません（進みすぎたせいか非効率のせいか区別できないため）。
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../../02_マネジメント系/01_プロジェクトマネジメント.md">02_マネジメント系/01_プロジェクトマネジメント.md</a>（6. コストマネジメントとEVM）</li>
+      <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（7.2 EVM）</li>
+    </ul>
+  </main>
+
+  <script src="../assets/common.js"></script>
+  <script id="calc">
+  /* ===== 計算ロジック（DOM に依存しない） ===== */
+  var Calc = (function () {
+    // 期間ごとの値 → 累積値（空欄 null はそのまま null）
+    function cumulate(list) {
+      var s = 0, out = [];
+      list.forEach(function (v) { if (v === null || v === undefined || v === "" || isNaN(v)) out.push(null); else { s += Number(v); out.push(s); } });
+      return out;
+    }
+    // 累積値 → 期間ごとの値
+    function decumulate(list) {
+      var prev = 0;
+      return list.map(function (v) { if (v === null) return null; var d = v - prev; prev = v; return d; });
+    }
+    // EV と AC が両方入っている最後の期（1始まり）。なければ 0
+    function lastActual(ev, ac) {
+      var k = 0;
+      for (var i = 0; i < ev.length; i++) if (ev[i] !== null && ac[i] !== null) k = i + 1;
+      return k;
+    }
+    function round(x) { return Math.round(x * 1e9) / 1e9; }
+    // 主要指標
+    function indices(bac, pv, ev, ac) {
+      var r = { BAC: bac, PV: pv, EV: ev, AC: ac };
+      r.SV = round(ev - pv);
+      r.CV = round(ev - ac);
+      r.SPI = pv ? ev / pv : NaN;
+      r.CPI = ac ? ev / ac : NaN;
+      r.EAC_typical = r.CPI ? bac / r.CPI : NaN;          // 典型的：今のコスト効率が続く
+      r.EAC_atypical = ac + (bac - ev);                    // 非典型的：残りは計画どおりの効率
+      r.EAC_both = (r.CPI && r.SPI) ? ac + (bac - ev) / (r.CPI * r.SPI) : NaN; // 参考：SPI も影響する
+      r.ETC_typical = r.EAC_typical - ac;
+      r.ETC_atypical = r.EAC_atypical - ac;
+      r.VAC_typical = bac - r.EAC_typical;
+      r.VAC_atypical = bac - r.EAC_atypical;
+      r.progress = bac ? ev / bac : NaN;                   // 出来高ベースの進捗率
+      return r;
+    }
+    function judgeSchedule(sv) { return sv < -1e-9 ? "遅れ" : sv > 1e-9 ? "進み" : "計画どおり"; }
+    function judgeCost(cv) { return cv < -1e-9 ? "超過" : cv > 1e-9 ? "効率的" : "予算どおり"; }
+    return { cumulate: cumulate, decumulate: decumulate, lastActual: lastActual, indices: indices, judgeSchedule: judgeSchedule, judgeCost: judgeCost };
+  })();
+  </script>
+  <script>
+  (function () {
+    var esc = APL.esc, $ = function (id) { return document.getElementById(id); };
+    function f(x, d) {
+      if (!isFinite(x)) return "—";
+      d = d === undefined ? 2 : d;
+      return Number(x.toFixed(d)).toLocaleString("ja-JP", { maximumFractionDigits: d });
+    }
+    function sgn(x, d) { return (x > 1e-9 ? "+" : "") + f(x, d); }
+
+    // 例題はすべて累積値
+    var EXAMPLES = [
+      { label: "教材の例（4か月目末）", bac: "", unit: "万円",
+        pv: [50, 150, 280, 400, 520, 640, 760, 860, 940, 1000], ev: [40, 120, 220, 320], ac: [50, 140, 250, 360] },
+      { label: "公式集の例（PV500・EV400・AC500）", bac: "1000", unit: "万円",
+        pv: [100, 250, 500, 750, 900, 1000], ev: [80, 200, 400], ac: [100, 250, 500] },
+      { label: "進み＆効率的", bac: "", unit: "万円",
+        pv: [100, 200, 300, 400, 500, 600], ev: [110, 230, 350], ac: [100, 200, 300] },
+      { label: "遅れているが効率的", bac: "", unit: "万円",
+        pv: [100, 200, 300, 400, 500], ev: [90, 170, 240], ac: [80, 150, 200] }
+    ];
+    var pv = [], ev = [], ac = [];   // 画面の入力値（モードに応じて累積 or 期間ごと）。空欄は ""
+    var nowSel = null;
+
+    function loadEx(ex) {
+      $("mode").value = "cum";
+      $("bac").value = ex.bac; $("unit").value = ex.unit;
+      var n = ex.pv.length;
+      pv = ex.pv.map(String);
+      ev = []; ac = [];
+      for (var i = 0; i < n; i++) { ev.push(i < ex.ev.length ? String(ex.ev[i]) : ""); ac.push(i < ex.ac.length ? String(ex.ac[i]) : ""); }
+      nowSel = null;
+      renderTable(); update();
+    }
+    function num(v) { return v === "" || v === null || v === undefined || isNaN(Number(v)) ? null : Number(v); }
+    function cumOf(list) { var a = list.map(num); return $("mode").value === "cum" ? a : Calc.cumulate(a); }
+
+    function renderTable() {
+      var n = pv.length;
+      $("period-table").querySelector("tbody").innerHTML = pv.map(function (_, i) {
+        return '<tr data-row="' + i + '"><td>' + (i + 1) + '</td>' + ["pv", "ev", "ac"].map(function (k) {
+          var arr = k === "pv" ? pv : k === "ev" ? ev : ac;
+          return '<td><input type="number" step="any" inputmode="decimal" data-k="' + k + '" data-i="' + i + '" value="' + esc(arr[i]) + '" aria-label="' + (i + 1) + '期の' + k.toUpperCase() + '"></td>';
+        }).join("") + "</tr>";
+      }).join("");
+      $("remove").disabled = n <= 1;
+    }
+    $("period-table").addEventListener("input", function (e) {
+      var t = e.target; if (!t.dataset.k) return;
+      var arr = t.dataset.k === "pv" ? pv : t.dataset.k === "ev" ? ev : ac;
+      arr[Number(t.dataset.i)] = t.value;
+      update();
+    });
+    $("add").addEventListener("click", function () { pv.push(""); ev.push(""); ac.push(""); renderTable(); update(); });
+    $("remove").addEventListener("click", function () { if (pv.length > 1) { pv.pop(); ev.pop(); ac.pop(); renderTable(); update(); } });
+    $("mode").addEventListener("change", function () {
+      // 表示中の値を新しいモードに変換する
+      var toCum = $("mode").value === "cum";
+      [pv, ev, ac].forEach(function (arr) {
+        var a = arr.map(num);
+        var conv = toCum ? Calc.cumulate(a) : Calc.decumulate(a);
+        conv.forEach(function (v, i) { arr[i] = v === null ? "" : String(Math.round(v * 1e6) / 1e6); });
+      });
+      renderTable(); update();
+    });
+    ["bac", "unit"].forEach(function (id) { $(id).addEventListener("input", update); });
+    $("now").addEventListener("change", function () { nowSel = Number($("now").value); update(); });
+
+    function update() {
+      var unit = $("unit").value || "";
+      var P = cumOf(pv), E = cumOf(ev), A = cumOf(ac), n = P.length;
+      var errs = [];
+      var last = Calc.lastActual(E, A);
+      // 評価時点の選択肢
+      var opts = "";
+      for (var i = 1; i <= n; i++) if (E[i - 1] !== null && A[i - 1] !== null) opts += '<option value="' + i + '">' + i + "期末</option>";
+      $("now").innerHTML = opts || '<option value="0">（EV・AC 未入力）</option>';
+      var now = nowSel && E[nowSel - 1] !== null && A[nowSel - 1] !== null ? nowSel : last;
+      $("now").value = String(now);
+      Array.prototype.forEach.call($("period-table").querySelectorAll("tbody tr"), function (tr, i) { tr.classList.toggle("is-now", i + 1 === now); });
+
+      var lastPv = null;
+      for (i = n - 1; i >= 0; i--) if (P[i] !== null) { lastPv = P[i]; break; }
+      var bacIn = num($("bac").value);
+      var bac = bacIn !== null ? bacIn : lastPv;
+      if (!now) errs.push("EV と AC を少なくとも1期分入力してください。");
+      else if (P[now - 1] === null) errs.push(now + "期の PV が空欄です。");
+      if (bac === null || !(bac > 0)) errs.push("BAC（完成時総予算）を求められません。PV を最後の期まで入力するか、BAC を入力してください。");
+      if (errs.length) {
+        $("errors").innerHTML = '<div class="box-ng">' + errs.map(esc).join("<br>") + "</div>";
+        $("sec-res").style.display = "none";
+        drawChart(P, E, A, bac, now, null, unit);
+        return;
+      }
+      $("errors").innerHTML = "";
+      $("sec-res").style.display = "";
+      var r = Calc.indices(bac, P[now - 1], E[now - 1], A[now - 1]);
+      drawChart(P, E, A, bac, now, r, unit);
+
+      var u = unit;
+      var kp = [
+        ["SV（スケジュール差異）", sgn(r.SV) + " " + u, r.SV < 0], ["CV（コスト差異）", sgn(r.CV) + " " + u, r.CV < 0],
+        ["SPI", f(r.SPI, 3), r.SPI < 1], ["CPI", f(r.CPI, 3), r.CPI < 1],
+        ["EAC（典型的）", f(r.EAC_typical) + " " + u, r.EAC_typical > bac], ["ETC（典型的）", f(r.ETC_typical) + " " + u, false],
+        ["VAC（典型的）", sgn(r.VAC_typical) + " " + u, r.VAC_typical < 0]
+      ];
+      $("kpis").innerHTML = kp.map(function (k) { return '<div class="kpi"><div class="k">' + k[0] + '</div><div class="v ' + (k[2] ? "ng" : "") + '">' + esc(k[1]) + "</div></div>"; }).join("");
+
+      var js = Calc.judgeSchedule(r.SV), jc = Calc.judgeCost(r.CV);
+      var sText = js === "遅れ" ? "スケジュールが <strong>遅れ</strong> ています。" + now + "期末までに予定していた作業（PV " + f(r.PV) + u + "分）のうち、" + f(r.SPI * 100, 1) + "% 分（EV " + f(r.EV) + u + "）しか終わっていません。"
+        : js === "進み" ? "スケジュールは <strong>進んで</strong> います。予定（PV " + f(r.PV) + u + "）より多い " + f(r.EV) + u + " 分の作業が終わっています（SPI " + f(r.SPI, 3) + "）。"
+        : "スケジュールは <strong>計画どおり</strong> です（SPI = 1）。";
+      var cText = jc === "超過" ? "コストは <strong>予算超過</strong> です。" + f(r.EV) + u + " 分の作業に " + f(r.AC) + u + " かかっており、1" + u + " 使って約 " + f(r.CPI, 2) + u + " 分の出来高しか得られていません。"
+        : jc === "効率的" ? "コストは <strong>効率的</strong> です。" + f(r.EV) + u + " 分の作業を " + f(r.AC) + u + " で済ませています（1" + u + " あたり " + f(r.CPI, 2) + u + " 分の出来高）。"
+        : "コストは <strong>予算どおり</strong> です（CPI = 1）。";
+      var vText = r.VAC_typical < -1e-9 ? "今のコスト効率が続くと、完成時に <strong>" + f(-r.VAC_typical) + u + " の予算超過</strong>（EAC " + f(r.EAC_typical) + u + "）の見込みです。"
+        : r.VAC_typical > 1e-9 ? "今のコスト効率が続くと、完成時に <strong>" + f(r.VAC_typical) + u + " 予算が余る</strong>（EAC " + f(r.EAC_typical) + u + "）見込みです。"
+        : "今のコスト効率が続けば、ちょうど予算どおりに完成する見込みです。";
+      $("verdict").innerHTML =
+        '<div class="' + (js === "遅れ" ? "box-ng" : "box-ok") + '"><strong>スケジュール：' + js + "</strong><br>" + sText + "</div>" +
+        '<div class="' + (jc === "超過" ? "box-ng" : "box-ok") + '"><strong>コスト：' + jc + "</strong><br>" + cText + "</div>" +
+        '<div class="box-note" style="grid-column:1/-1">' + vText + "（出来高ベースの進捗率 EV ÷ BAC = " + f(r.progress * 100, 1) + "%）</div>";
+
+      var L = [];
+      L.push("評価時点：" + now + "期末　BAC = " + f(bac) + u + (bacIn === null ? "（PV の最終累積値）" : ""));
+      L.push("PV = " + f(r.PV) + "、EV = " + f(r.EV) + "、AC = " + f(r.AC) + "（いずれも" + now + "期末までの累積）");
+      L.push("");
+      L.push("SV  = EV − PV = " + f(r.EV) + " − " + f(r.PV) + " = " + sgn(r.SV) + u + "   → " + (r.SV < 0 ? "マイナスなので遅れ" : r.SV > 0 ? "プラスなので進み" : "計画どおり"));
+      L.push("CV  = EV − AC = " + f(r.EV) + " − " + f(r.AC) + " = " + sgn(r.CV) + u + "   → " + (r.CV < 0 ? "マイナスなので予算超過" : r.CV > 0 ? "プラスなので効率的" : "予算どおり"));
+      L.push("SPI = EV ÷ PV = " + f(r.EV) + " ÷ " + f(r.PV) + " = " + f(r.SPI, 4) + "   → " + (r.SPI < 1 ? "1未満なので遅れ" : r.SPI > 1 ? "1超なので進み" : "計画どおり"));
+      L.push("CPI = EV ÷ AC = " + f(r.EV) + " ÷ " + f(r.AC) + " = " + f(r.CPI, 4) + "   → " + (r.CPI < 1 ? "1未満なので予算超過" : r.CPI > 1 ? "1超なので効率的" : "予算どおり"));
+      L.push("");
+      L.push("【EAC①】典型的な場合（今のコスト効率が今後も続く）");
+      L.push("EAC = BAC ÷ CPI = " + f(bac) + " ÷ " + f(r.CPI, 4) + " = " + f(r.EAC_typical) + u);
+      L.push("      （= BAC × AC ÷ EV = " + f(bac) + " × " + f(r.AC) + " ÷ " + f(r.EV) + "）");
+      L.push("ETC = EAC − AC = " + f(r.EAC_typical) + " − " + f(r.AC) + " = " + f(r.ETC_typical) + u);
+      L.push("VAC = BAC − EAC = " + f(bac) + " − " + f(r.EAC_typical) + " = " + sgn(r.VAC_typical) + u);
+      L.push("");
+      L.push("【EAC②】非典型的な場合（これまでの差異は一時的で、残りは計画どおりの効率）");
+      L.push("EAC = AC + (BAC − EV) = " + f(r.AC) + " + (" + f(bac) + " − " + f(r.EV) + ") = " + f(r.EAC_atypical) + u);
+      L.push("ETC = BAC − EV = " + f(bac - r.EV) + u);
+      L.push("VAC = BAC − EAC = " + f(bac) + " − " + f(r.EAC_atypical) + " = " + sgn(r.VAC_atypical) + u);
+      L.push("");
+      L.push("【EAC③】参考：スケジュールの遅れもコストに影響する場合（CPI と SPI の両方を使う）");
+      L.push("EAC = AC + (BAC − EV) ÷ (CPI × SPI) = " + f(r.AC) + " + " + f(bac - r.EV) + " ÷ (" + f(r.CPI, 4) + " × " + f(r.SPI, 4) + ") = " + f(r.EAC_both) + u);
+      L.push("");
+      L.push("検算：EAC① は AC + (BAC − EV) ÷ CPI と同じ → " + f(r.AC) + " + " + f(bac - r.EV) + " ÷ " + f(r.CPI, 4) + " = " + f(r.AC + (bac - r.EV) / r.CPI) + u);
+      $("steps").textContent = L.join("\n");
+    }
+
+    function el(tag, attrs, text) {
+      var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function niceMax(v) {
+      if (!(v > 0)) return 1;
+      var p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
+      return (m <= 1 ? 1 : m <= 1.25 ? 1.25 : m <= 1.5 ? 1.5 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 3 ? 3 : m <= 4 ? 4 : m <= 5 ? 5 : m <= 6 ? 6 : m <= 8 ? 8 : 10) * p;
+    }
+    function drawChart(P, E, A, bac, now, r, unit) {
+      var n = P.length, W = 640, H = 360, L = 58, R = 20, T = 20, B = 44;
+      var vals = [bac || 0];
+      P.concat(E, A).forEach(function (v) { if (v !== null) vals.push(v); });
+      if (r && isFinite(r.EAC_typical)) vals.push(r.EAC_typical);
+      var ymax = niceMax(Math.max.apply(null, vals) * 1.05);
+      function X(i) { return L + (W - L - R) * i / n; }
+      function Y(v) { return T + (H - T - B) * (1 - v / ymax); }
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, xmlns: "http://www.w3.org/2000/svg" });
+      svg.style.maxWidth = "760px";
+      for (var g = 0; g <= 5; g++) {
+        var v = ymax * g / 5;
+        svg.appendChild(el("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: "var(--border)", "stroke-width": 1 }));
+        svg.appendChild(el("text", { x: L - 6, y: Y(v) + 4, "text-anchor": "end", "font-size": 11, fill: "var(--text-sub)" }, f(v, 1)));
+      }
+      var step = Math.max(1, Math.ceil(n / 12));
+      for (var i = 0; i <= n; i += step) svg.appendChild(el("text", { x: X(i), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, String(i)));
+      svg.appendChild(el("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)" }, "期（0 = 開始時点）"));
+      svg.appendChild(el("text", { x: 12, y: T + (H - T - B) / 2, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)", transform: "rotate(-90 12 " + (T + (H - T - B) / 2) + ")" }, "累積額（" + unit + "）"));
+      svg.appendChild(el("line", { x1: L, x2: L, y1: T, y2: H - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: "var(--text-sub)" }));
+      if (bac > 0) {
+        svg.appendChild(el("line", { x1: L, x2: W - R, y1: Y(bac), y2: Y(bac), stroke: "var(--text-sub)", "stroke-dasharray": "2 4", "stroke-width": 1.5 }));
+        svg.appendChild(el("text", { x: L + 4, y: Y(bac) - 5, "font-size": 11, fill: "var(--text-sub)" }, "BAC " + f(bac)));
+      }
+      if (now) svg.appendChild(el("line", { x1: X(now), x2: X(now), y1: T, y2: H - B, stroke: "var(--text-sub)", "stroke-dasharray": "4 4" }));
+      if (now) svg.appendChild(el("text", { x: X(now) + 4, y: T + 10, "font-size": 11, fill: "var(--text-sub)" }, "評価時点"));
+      function series(arr, color, upto) {
+        var pts = [[X(0), Y(0)]];
+        for (var i = 0; i < arr.length && (upto === undefined || i < upto); i++) { if (arr[i] === null) break; pts.push([X(i + 1), Y(arr[i])]); }
+        svg.appendChild(el("polyline", { points: pts.map(function (p) { return p.join(","); }).join(" "), fill: "none", stroke: color, "stroke-width": 2.5, "stroke-linejoin": "round" }));
+        pts.slice(1).forEach(function (p) { svg.appendChild(el("circle", { cx: p[0], cy: p[1], r: 3, fill: color })); });
+      }
+      series(P, "var(--accent)");
+      series(E, "var(--ok)", now || undefined);
+      series(A, "var(--ng)", now || undefined);
+      if (r && now && isFinite(r.EAC_typical) && now < n) {
+        svg.appendChild(el("line", { x1: X(now), y1: Y(r.AC), x2: X(n), y2: Y(r.EAC_typical), stroke: "var(--ng)", "stroke-width": 1.8, "stroke-dasharray": "6 4" }));
+        svg.appendChild(el("text", { x: X(n) - 4, y: Y(r.EAC_typical) - 7, "text-anchor": "end", "font-size": 11, fill: "var(--ng)" }, "EAC " + f(r.EAC_typical)));
+      }
+      if (r && now) {
+        // SV・CV を縦の矢印で示す
+        var x = X(now);
+        function bracket(y1, y2, dx, color, label) {
+          if (Math.abs(y1 - y2) < 2) return;
+          svg.appendChild(el("line", { x1: x + dx, x2: x + dx, y1: y1, y2: y2, stroke: color, "stroke-width": 2 }));
+          svg.appendChild(el("line", { x1: x + dx - 4, x2: x + dx + 4, y1: y1, y2: y1, stroke: color, "stroke-width": 2 }));
+          svg.appendChild(el("line", { x1: x + dx - 4, x2: x + dx + 4, y1: y2, y2: y2, stroke: color, "stroke-width": 2 }));
+          svg.appendChild(el("text", { x: x + dx + (dx < 0 ? -6 : 6), y: (y1 + y2) / 2 + 4, "text-anchor": dx < 0 ? "end" : "start", "font-size": 12, "font-weight": 700, fill: color }, label));
+        }
+        bracket(Y(r.PV), Y(r.EV), -10, "var(--accent)", "SV " + sgn(r.SV));
+        bracket(Y(r.AC), Y(r.EV), 10, "var(--ng)", "CV " + sgn(r.CV));
+      }
+      $("chart").innerHTML = "";
+      $("chart").appendChild(svg);
+    }
+
+    EXAMPLES.forEach(function (ex) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = ex.label;
+      b.addEventListener("click", function () { loadEx(ex); });
+      $("examples").appendChild(b);
+    });
+    var hm = /ex=(\d+)/.exec(location.hash);
+    loadEx(EXAMPLES[hm && EXAMPLES[Number(hm[1])] ? Number(hm[1]) : 0]);
+  })();
+  </script>
+</body>
+</html>

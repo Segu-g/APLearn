@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>損益分岐点シミュレータ</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ex-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ex-buttons button { font-size: 14px; padding: 5px 12px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .slider { display: grid; grid-template-columns: 9em 1fr 7.5em; gap: 10px; align-items: center; margin-top: 10px; }
+    .slider input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .slider input[type="number"] { width: 100%; }
+    @media (max-width: 560px) {
+      .slider { grid-template-columns: 1fr 7.5em; }
+      .slider input[type="range"] { grid-column: 1 / -1; grid-row: 2; }
+    }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+    @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+    .layout > .card + .card { margin-top: 0; }
+    .chart svg { width: 100%; height: auto; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-sub); margin-top: 6px; }
+    .legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 5px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .kpi { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; }
+    .kpi .k { font-size: 12px; color: var(--text-sub); }
+    .kpi .v { font-size: 19px; font-weight: 700; font-family: var(--mono); }
+  </style>
+</head>
+<body data-root="../" data-title="損益分岐点シミュレータ">
+  <main>
+    <h1>損益分岐点シミュレータ</h1>
+    <p class="lead">売上高・変動費・固定費（または販売単価・1個当たり変動費・販売数量）をスライダーで動かすと、損益分岐点図表を描き、損益分岐点売上高・変動費率・限界利益率・安全余裕率・目標利益達成売上高を途中式つきで表示します。</p>
+
+    <section class="card">
+      <div class="row" style="align-items:center">
+        <strong>例題を読み込む：</strong>
+        <div class="ex-buttons" id="examples"></div>
+      </div>
+      <div class="row" style="margin-top:12px;align-items:center">
+        <span class="muted">入力方法：</span>
+        <div class="tabs" role="group" aria-label="入力方法">
+          <button type="button" data-mode="total" aria-pressed="true">売上高・変動費・固定費</button>
+          <button type="button" data-mode="unit" aria-pressed="false">単価・数量で入力</button>
+        </div>
+        <div class="field" style="margin-left:auto"><label for="unit">金額の単位</label><input id="unit" type="text" value="万円" style="width:5em"></div>
+      </div>
+      <div id="sliders"></div>
+    </section>
+
+    <div class="layout" style="margin-top:16px">
+      <section class="card">
+        <h3 style="margin-top:0">損益分岐点図表</h3>
+        <div class="chart" id="chart" role="img" aria-label="損益分岐点図表"></div>
+        <div class="legend">
+          <span><i style="border-color:var(--accent)"></i>売上高線</span>
+          <span><i style="border-color:var(--ng)"></i>総費用線（固定費＋変動費）</span>
+          <span><i style="border-color:var(--warn);border-top-style:dashed"></i>固定費線</span>
+        </div>
+      </section>
+      <section class="card">
+        <h3 style="margin-top:0">計算結果</h3>
+        <div id="msg"></div>
+        <div class="kpis" id="kpis"></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">途中式</h3>
+      <div class="steps" id="steps"></div>
+      <div class="box-note" style="margin-top:12px">
+        💡 <strong>損益分岐点を下げる方法</strong>：①固定費を減らす、②変動費率を下げる、③販売価格を上げる（変動費率が下がる）。<br>
+        ⚠️ 問題が「販売数量」で与えられたときは <code>損益分岐点販売数量 = 固定費 ÷ (販売単価 − 1個当たりの変動費)</code> で求めます。
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../../03_ストラテジ系/03_企業活動と会計.md">03_ストラテジ系/03_企業活動と会計.md</a>（9. 損益分岐点）</li>
+      <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（9.1 損益分岐点）</li>
+    </ul>
+  </main>
+
+  <script src="../assets/common.js"></script>
+  <script id="calc">
+  /* ===== 計算ロジック（DOM に依存しない） ===== */
+  var Calc = (function () {
+    // sales: 売上高、vc: 変動費、fc: 固定費、target: 目標利益
+    function breakeven(sales, vc, fc, target) {
+      var r = { sales: sales, vc: vc, fc: fc, target: target || 0 };
+      r.vRate = sales > 0 ? vc / sales : NaN;              // 変動費率
+      r.marginal = sales - vc;                            // 限界利益
+      r.mRate = 1 - r.vRate;                               // 限界利益率
+      r.profit = sales - vc - fc;                          // 営業利益
+      r.ok = r.mRate > 0;
+      r.bep = r.ok ? fc / r.mRate : NaN;                   // 損益分岐点売上高
+      r.targetSales = r.ok ? (fc + r.target) / r.mRate : NaN; // 目標利益達成売上高
+      r.safety = r.ok && sales > 0 ? (sales - r.bep) / sales : NaN; // 安全余裕率
+      r.bepRatio = r.ok && sales > 0 ? r.bep / sales : NaN;          // 損益分岐点比率
+      return r;
+    }
+    // 単価・数量による入力
+    function fromUnit(price, unitVc, qty, fc, target) {
+      var r = breakeven(price * qty, unitVc * qty, fc, target);
+      r.price = price; r.unitVc = unitVc; r.qty = qty;
+      r.unitMargin = price - unitVc;                       // 1個当たり限界利益
+      r.bepQty = r.unitMargin > 0 ? fc / r.unitMargin : NaN;
+      r.targetQty = r.unitMargin > 0 ? (fc + (target || 0)) / r.unitMargin : NaN;
+      // 単価ベースでも変動費率は数量に依存しない
+      r.vRate = price > 0 ? unitVc / price : NaN;
+      r.mRate = 1 - r.vRate;
+      r.ok = r.mRate > 0;
+      r.bep = r.ok ? fc / r.mRate : NaN;
+      r.targetSales = r.ok ? (fc + (target || 0)) / r.mRate : NaN;
+      r.safety = r.ok && r.sales > 0 ? (r.sales - r.bep) / r.sales : NaN;
+      r.bepRatio = r.ok && r.sales > 0 ? r.bep / r.sales : NaN;
+      return r;
+    }
+    return { breakeven: breakeven, fromUnit: fromUnit };
+  })();
+  </script>
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); }, esc = APL.esc;
+    function f(x, d) {
+      if (!isFinite(x)) return "—";
+      d = d === undefined ? 2 : d;
+      return Number(x.toFixed(d)).toLocaleString("ja-JP", { maximumFractionDigits: d });
+    }
+    function pct(x, d) { return f(x * 100, d === undefined ? 1 : d) + "%"; }
+
+    var DEFS = {
+      total: [
+        { key: "sales", label: "売上高", max: 2000, step: 10 },
+        { key: "vc", label: "変動費", max: 2000, step: 10 },
+        { key: "fc", label: "固定費", max: 1000, step: 10 },
+        { key: "target", label: "目標利益", max: 1000, step: 10 }
+      ],
+      unit: [
+        { key: "price", label: "販売単価", max: 10000, step: 10, unit: "円" },
+        { key: "unitVc", label: "1個当たり変動費", max: 10000, step: 10, unit: "円" },
+        { key: "qty", label: "販売数量（個）", max: 10000, step: 10, unit: "個" },
+        { key: "fc", label: "固定費", max: 10000000, step: 10000, unit: "円" },
+        { key: "target", label: "目標利益", max: 10000000, step: 10000, unit: "円" }
+      ]
+    };
+    var EXAMPLES = [
+      { label: "教材の例（売上1,000・変動費600・固定費300）", mode: "total", unit: "万円", v: { sales: 1000, vc: 600, fc: 300, target: 100 } },
+      { label: "公式集の例（売上1,000・変動費400・固定費300）", mode: "total", unit: "万円", v: { sales: 1000, vc: 400, fc: 300, target: 300 } },
+      { label: "赤字の例", mode: "total", unit: "万円", v: { sales: 600, vc: 360, fc: 300, target: 0 } },
+      { label: "単価・数量の例（単価2,000円）", mode: "unit", unit: "円", v: { price: 2000, unitVc: 1200, qty: 5000, fc: 3000000, target: 1000000 } }
+    ];
+    var mode = "total", vals = {};
+
+    function buildSliders() {
+      $("sliders").innerHTML = DEFS[mode].map(function (d) {
+        var v = vals[d.key];
+        var max = Math.max(d.max, v * 1.5 || 0);
+        return '<div class="slider"><label for="n-' + d.key + '">' + d.label + '</label>' +
+          '<input type="range" id="r-' + d.key + '" data-key="' + d.key + '" min="0" max="' + max + '" step="' + d.step + '" value="' + v + '" aria-label="' + d.label + '">' +
+          '<input type="number" id="n-' + d.key + '" data-key="' + d.key + '" min="0" step="any" value="' + v + '"></div>';
+      }).join("");
+      Array.prototype.forEach.call(document.querySelectorAll(".tabs button"), function (b) { b.setAttribute("aria-pressed", String(b.dataset.mode === mode)); });
+    }
+    $("sliders").addEventListener("input", function (e) {
+      var t = e.target, k = t.dataset.key;
+      if (!k) return;
+      var v = Number(t.value);
+      if (!isFinite(v) || v < 0) return;
+      vals[k] = v;
+      if (t.type === "range") $("n-" + k).value = v;
+      else {
+        var r = $("r-" + k);
+        if (v > Number(r.max)) r.max = Math.ceil(v * 1.5);
+        r.value = v;
+      }
+      update();
+    });
+    document.querySelector(".tabs").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b || b.dataset.mode === mode) return;
+      var r = current();
+      if (b.dataset.mode === "unit") {
+        mode = "unit";
+        // 現在の値を単価1,000・数量=売上高÷1,000 として引き継ぐ
+        vals = { price: 1000, unitVc: Math.round(1000 * (isFinite(r.vRate) ? r.vRate : 0.6)), qty: Math.round((r.sales || 1000)), fc: r.fc * 1000, target: r.target * 1000 };
+        $("unit").value = "円";
+      } else {
+        mode = "total";
+        vals = { sales: r.sales, vc: r.vc, fc: r.fc, target: r.target };
+      }
+      buildSliders(); update();
+    });
+    $("unit").addEventListener("input", update);
+
+    function current() {
+      return mode === "total" ? Calc.breakeven(vals.sales, vals.vc, vals.fc, vals.target)
+        : Calc.fromUnit(vals.price, vals.unitVc, vals.qty, vals.fc, vals.target);
+    }
+
+    function update() {
+      var r = current(), u = $("unit").value || "";
+      drawChart(r, u);
+      var msg = "";
+      if (!(r.sales > 0) && mode === "total") msg = '<div class="box-ng">売上高を 0 より大きくしてください（変動費率が計算できません）。</div>';
+      else if (!r.ok) msg = '<div class="box-ng">変動費率が 1 以上（限界利益が 0 以下）なので、いくら売っても固定費を回収できず、損益分岐点はありません。</div>';
+      else if (r.profit > 1e-9) msg = '<div class="box-ok">現在は <strong>黒字</strong>（利益 ' + f(r.profit) + u + '）。売上が ' + pct(r.safety) + ' 減っても赤字になりません。</div>';
+      else if (r.profit < -1e-9) msg = '<div class="box-ng">現在は <strong>赤字</strong>（損失 ' + f(-r.profit) + u + '）。損益分岐点まであと ' + f(r.bep - r.sales) + u + ' の売上が必要です。</div>';
+      else msg = '<div class="box-note">現在の売上高がちょうど損益分岐点です（利益 0）。</div>';
+      $("msg").innerHTML = msg;
+      var kp = [
+        ["損益分岐点売上高", f(r.bep) + " " + u],
+        ["変動費率", f(r.vRate, 4)],
+        ["限界利益率", f(r.mRate, 4)],
+        ["安全余裕率", pct(r.safety)],
+        ["損益分岐点比率", pct(r.bepRatio)],
+        ["目標利益達成売上高", f(r.targetSales) + " " + u],
+        ["現在の利益", f(r.profit) + " " + u]
+      ];
+      if (mode === "unit") kp.splice(1, 0, ["損益分岐点販売数量", f(r.bepQty) + " 個"], ["目標利益達成数量", f(r.targetQty) + " 個"]);
+      $("kpis").innerHTML = kp.map(function (k) { return '<div class="kpi"><div class="k">' + k[0] + '</div><div class="v">' + esc(k[1]) + "</div></div>"; }).join("");
+
+      var L = [];
+      if (mode === "unit") {
+        L.push("売上高 = 販売単価 × 販売数量 = " + f(r.price) + " × " + f(r.qty) + " = " + f(r.sales) + u);
+        L.push("変動費 = 1個当たり変動費 × 販売数量 = " + f(r.unitVc) + " × " + f(r.qty) + " = " + f(r.vc) + u);
+        L.push("");
+        L.push("① 変動費率   = 1個当たり変動費 ÷ 販売単価 = " + f(r.unitVc) + " ÷ " + f(r.price) + " = " + f(r.vRate, 4));
+      } else {
+        L.push("① 変動費率   = 変動費 ÷ 売上高 = " + f(r.vc) + " ÷ " + f(r.sales) + " = " + f(r.vRate, 4));
+      }
+      L.push("② 限界利益率 = 1 − 変動費率 = 1 − " + f(r.vRate, 4) + " = " + f(r.mRate, 4));
+      L.push("   （限界利益 = 売上高 − 変動費 = " + f(r.sales) + " − " + f(r.vc) + " = " + f(r.marginal) + u + "）");
+      if (r.ok) {
+        L.push("③ 損益分岐点売上高 = 固定費 ÷ 限界利益率 = " + f(r.fc) + " ÷ " + f(r.mRate, 4) + " = " + f(r.bep) + u);
+        L.push("   検算：売上高 " + f(r.bep) + " のとき 変動費 = " + f(r.bep) + " × " + f(r.vRate, 4) + " = " + f(r.bep * r.vRate) +
+          "、利益 = " + f(r.bep) + " − " + f(r.bep * r.vRate) + " − " + f(r.fc) + " = " + f(r.bep - r.bep * r.vRate - r.fc) + " ✓");
+        if (mode === "unit") L.push("   損益分岐点販売数量 = 固定費 ÷ (販売単価 − 1個当たり変動費) = " + f(r.fc) + " ÷ (" + f(r.price) + " − " + f(r.unitVc) + ") = " + f(r.bepQty) + " 個");
+        L.push("④ 目標利益 " + f(r.target) + u + " を達成する売上高 = (固定費 + 目標利益) ÷ 限界利益率 = (" + f(r.fc) + " + " + f(r.target) + ") ÷ " + f(r.mRate, 4) + " = " + f(r.targetSales) + u);
+        if (mode === "unit") L.push("   目標利益達成数量 = (" + f(r.fc) + " + " + f(r.target) + ") ÷ " + f(r.unitMargin) + " = " + f(r.targetQty) + " 個");
+        L.push("⑤ 安全余裕率 = (売上高 − 損益分岐点売上高) ÷ 売上高 × 100 = (" + f(r.sales) + " − " + f(r.bep) + ") ÷ " + f(r.sales) + " × 100 = " + pct(r.safety, 2));
+        L.push("⑥ 損益分岐点比率 = 損益分岐点売上高 ÷ 売上高 × 100 = " + f(r.bep) + " ÷ " + f(r.sales) + " × 100 = " + pct(r.bepRatio, 2) + "（安全余裕率との合計は100%）");
+      } else {
+        L.push("③ 限界利益率が 0 以下なので、損益分岐点は存在しません。");
+      }
+      L.push("");
+      L.push("現在の利益 = 売上高 − 変動費 − 固定費 = " + f(r.sales) + " − " + f(r.vc) + " − " + f(r.fc) + " = " + f(r.profit) + u);
+      $("steps").textContent = L.join("\n");
+    }
+
+    function el(tag, attrs, text) {
+      var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function niceMax(v) {
+      if (!(v > 0)) return 1;
+      var p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
+      return (m <= 1 ? 1 : m <= 1.5 ? 1.5 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 3 ? 3 : m <= 4 ? 4 : m <= 5 ? 5 : m <= 6 ? 6 : m <= 8 ? 8 : 10) * p;
+    }
+    function drawChart(r, u) {
+      var W = 520, H = 440, L = 64, R = 18, T = 18, B = 46;
+      var cand = [r.sales, r.fc * 2];
+      if (isFinite(r.bep)) cand.push(r.bep * 1.25);
+      if (isFinite(r.targetSales) && r.targetSales < r.sales * 3) cand.push(r.targetSales * 1.05);
+      var xmax = niceMax(Math.max.apply(null, cand.filter(isFinite)) * 1.1);
+      var ymax = xmax;
+      var vr = isFinite(r.vRate) ? r.vRate : 0;
+      ymax = Math.max(ymax, niceMax(r.fc + vr * xmax));
+      function X(v) { return L + (W - L - R) * v / xmax; }
+      function Y(v) { return T + (H - T - B) * (1 - v / ymax); }
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, xmlns: "http://www.w3.org/2000/svg" });
+      svg.style.maxWidth = "620px";
+      var defs = el("defs"), cp = el("clipPath", { id: "plot" });
+      cp.appendChild(el("rect", { x: L, y: T, width: W - L - R, height: H - T - B }));
+      defs.appendChild(cp); svg.appendChild(defs);
+      for (var g = 0; g <= 5; g++) {
+        var gv = ymax * g / 5, gx = xmax * g / 5;
+        svg.appendChild(el("line", { x1: L, x2: W - R, y1: Y(gv), y2: Y(gv), stroke: "var(--border)" }));
+        svg.appendChild(el("text", { x: L - 6, y: Y(gv) + 4, "text-anchor": "end", "font-size": 11, fill: "var(--text-sub)" }, f(gv, 0)));
+        svg.appendChild(el("text", { x: X(gx), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, f(gx, 0)));
+      }
+      svg.appendChild(el("text", { x: (L + W - R) / 2, y: H - 8, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)" }, "売上高（" + u + "）"));
+      svg.appendChild(el("text", { x: 12, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 12, fill: "var(--text-sub)", transform: "rotate(-90 12 " + (T + H - B) / 2 + ")" }, "金額（" + u + "）"));
+      var plot = el("g", { "clip-path": "url(#plot)" });
+      svg.appendChild(plot);
+      // 利益・損失の領域
+      if (r.ok && isFinite(r.bep)) {
+        plot.appendChild(el("polygon", { points: [X(0), Y(0), X(r.bep), Y(r.bep), X(0), Y(r.fc)].join(" "), fill: "var(--ng-weak)", opacity: 0.9 }));
+        plot.appendChild(el("polygon", { points: [X(r.bep), Y(r.bep), X(xmax), Y(xmax), X(xmax), Y(r.fc + vr * xmax)].join(" "), fill: "var(--ok-weak)", opacity: 0.9 }));
+        if (X(r.bep) - X(0) > 60) plot.appendChild(el("text", { x: X(r.bep * 0.3), y: Y((r.fc + r.bep * 0.3 * vr + r.bep * 0.3) / 2) + 4, "text-anchor": "middle", "font-size": 12, fill: "var(--ng)" }, "損失"));
+        if (X(xmax) - X(r.bep) > 60) plot.appendChild(el("text", { x: X((r.bep + xmax) / 2 + (xmax - r.bep) * 0.25), y: Y(((r.bep + xmax) / 2 + (xmax - r.bep) * 0.25) * (1 + vr) / 2 + r.fc / 2) + 4, "text-anchor": "middle", "font-size": 12, fill: "var(--ok)" }, "利益"));
+      }
+      plot.appendChild(el("line", { x1: X(0), y1: Y(r.fc), x2: X(xmax), y2: Y(r.fc), stroke: "var(--warn)", "stroke-width": 2, "stroke-dasharray": "6 4" }));
+      plot.appendChild(el("line", { x1: X(0), y1: Y(r.fc), x2: X(xmax), y2: Y(r.fc + vr * xmax), stroke: "var(--ng)", "stroke-width": 2.5 }));
+      plot.appendChild(el("line", { x1: X(0), y1: Y(0), x2: X(xmax), y2: Y(xmax), stroke: "var(--accent)", "stroke-width": 2.5 }));
+      svg.appendChild(el("line", { x1: L, x2: L, y1: T, y2: H - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: "var(--text-sub)" }));
+      svg.appendChild(el("text", { x: W - R - 4, y: Y(r.fc) + 15, "text-anchor": "end", "font-size": 11, fill: "var(--warn)" }, "固定費 " + f(r.fc)));
+      // 現在の売上高
+      if (r.sales > 0 && r.sales <= xmax) {
+        svg.appendChild(el("line", { x1: X(r.sales), x2: X(r.sales), y1: T, y2: H - B, stroke: "var(--text-sub)", "stroke-dasharray": "3 4" }));
+        svg.appendChild(el("text", { x: X(r.sales) + 4, y: T + 12, "font-size": 11, fill: "var(--text-sub)" }, "現在の売上高 " + f(r.sales)));
+        var ys = Y(r.sales), yc = Y(r.fc + vr * r.sales);
+        if (Math.abs(ys - yc) > 6) {
+          svg.appendChild(el("line", { x1: X(r.sales), x2: X(r.sales), y1: ys, y2: yc, stroke: r.profit >= 0 ? "var(--ok)" : "var(--ng)", "stroke-width": 4 }));
+          svg.appendChild(el("text", { x: X(r.sales) - 6, y: (ys + yc) / 2 + 4, "text-anchor": "end", "font-size": 12, "font-weight": 700, fill: r.profit >= 0 ? "var(--ok)" : "var(--ng)" }, (r.profit >= 0 ? "利益 " : "損失 ") + f(Math.abs(r.profit))));
+        }
+      }
+      if (r.ok && isFinite(r.bep) && r.bep <= xmax) {
+        svg.appendChild(el("line", { x1: X(r.bep), x2: X(r.bep), y1: Y(r.bep), y2: H - B, stroke: "var(--text)", "stroke-dasharray": "2 3" }));
+        svg.appendChild(el("circle", { cx: X(r.bep), cy: Y(r.bep), r: 6, fill: "var(--surface)", stroke: "var(--text)", "stroke-width": 2.5 }));
+        svg.appendChild(el("text", { x: X(r.bep) - 10, y: Y(r.bep) - 12, "text-anchor": "end", "font-size": 13, "font-weight": 700, fill: "var(--text)" }, "損益分岐点 " + f(r.bep)));
+      }
+      $("chart").innerHTML = "";
+      $("chart").appendChild(svg);
+    }
+
+    function loadEx(ex) {
+      mode = ex.mode; vals = JSON.parse(JSON.stringify(ex.v)); $("unit").value = ex.unit;
+      buildSliders(); update();
+    }
+    EXAMPLES.forEach(function (ex) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = ex.label;
+      b.addEventListener("click", function () { loadEx(ex); });
+      $("examples").appendChild(b);
+    });
+    var hm = /ex=(\d+)/.exec(location.hash);
+    loadEx(EXAMPLES[hm && EXAMPLES[Number(hm[1])] ? Number(hm[1]) : 0]);
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>APLearn</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .hero { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+    .stats { display: flex; gap: 12px; flex-wrap: wrap; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 16px; min-width: 120px; }
+    .stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .stat .l { font-size: 12px; color: var(--text-sub); }
+    a.tile .tag { margin-left: 6px; vertical-align: 2px; }
+  </style>
+</head>
+<body data-root="./" data-title="APLearn">
+  <main>
+    <div class="hero">
+      <div>
+        <h1>応用情報技術者試験 インタラクティブ教材</h1>
+        <p class="lead" style="margin:0">クイズ・単語カード・計算シミュレータ・聞き流し講座。ブラウザで開くだけで、オフラインでも使えます。</p>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <h2>演習</h2>
+    <div class="grid">
+      <a class="tile" href="quiz.html"><span class="t">科目A 四択クイズ</span><span class="d">分野別・ランダム・本番モード（80問150分）・苦手問題の復習</span></a>
+      <a class="tile" href="flashcards.html"><span class="t">略語・用語カード</span><span class="d">頻出略語をフラッシュカードで。覚えた/まだで仕分け</span></a>
+      <a class="tile" href="audio.html"><span class="t">聞き流し講座</span><span class="d">めたん先生とずんだもんの掛け合い解説（VOICEVOX）。字幕つき</span></a>
+    </div>
+
+    <h2>テクノロジ系 シミュレータ</h2>
+    <div class="grid">
+      <a class="tile" href="sim/radix.html"><span class="t">基数変換・2の補数</span><span class="d">2/8/10/16進変換の筆算、ビット反転、シフト演算</span></a>
+      <a class="tile" href="sim/subnet.html"><span class="t">サブネット計算</span><span class="d">ネットワークアドレス・ホスト数をAND演算で。練習問題つき</span></a>
+      <a class="tile" href="sim/cache.html"><span class="t">キャッシュ</span><span class="d">実効アクセス時間とダイレクトマップのヒット/ミス</span></a>
+      <a class="tile" href="sim/page-replacement.html"><span class="t">ページ置換</span><span class="d">FIFO / LRU / OPT を1ステップずつ比較</span></a>
+      <a class="tile" href="sim/cpu-scheduling.html"><span class="t">CPUスケジューリング</span><span class="d">FCFS・SJF・SRT・RR・優先度のガントチャート</span></a>
+      <a class="tile" href="sim/sorting.html"><span class="t">整列アルゴリズム</span><span class="d">6種類の整列をアニメーションで比較</span></a>
+    </div>
+
+    <h2>システム構成・マネジメント・ストラテジ系 シミュレータ</h2>
+    <div class="grid">
+      <a class="tile" href="sim/availability.html"><span class="t">稼働率</span><span class="d">直列・並列を組み合わせた構成の稼働率</span></a>
+      <a class="tile" href="sim/queue.html"><span class="t">待ち行列（M/M/1）</span><span class="d">利用率と平均待ち時間の関係をグラフで</span></a>
+      <a class="tile" href="sim/critical-path.html"><span class="t">クリティカルパス</span><span class="d">アローダイアグラムを自動作図。余裕日数も計算</span></a>
+      <a class="tile" href="sim/evm.html"><span class="t">EVM</span><span class="d">PV・EV・ACのS曲線とSPI・CPI・EAC</span></a>
+      <a class="tile" href="sim/breakeven.html"><span class="t">損益分岐点</span><span class="d">スライダーで費用を動かして損益分岐点図を確認</span></a>
+      <a class="tile" href="sim/finance.html"><span class="t">減価償却・EOQ・財務指標</span><span class="d">定額法と定率法の比較、経済的発注量、ROEなど</span></a>
+    </div>
+
+    <p class="footer-note">
+      解説資料（Markdown）は <a href="../README.md">リポジトリの README</a> から。
+      学習の記録（クイズの成績・カードの習得状況・音声の再生位置）はこのブラウザ内にだけ保存されます。
+    </p>
+  </main>
+
+  <script src="assets/common.js"></script>
+  <script>
+  (function () {
+    const { store, esc } = APL;
+    // 各ページが保存した記録から、ざっくりした進み具合を表示する（キー名は各ページの実装に合わせて拡張）
+    const stats = [];
+    const quiz = store.get("quiz-history", null);
+    if (Array.isArray(quiz) && quiz.length) {
+      const ok = quiz.filter((h) => h.correct).length;
+      stats.push(["クイズ正答率", Math.round((ok / quiz.length) * 100) + "%"]);
+    }
+    const audio = store.get("audio-progress", {});
+    const heard = Object.values(audio).filter((p) => p && p.done).length;
+    if (heard) stats.push(["聴いた講座", heard + "回"]);
+    document.getElementById("stats").innerHTML = stats
+      .map(([l, v]) => '<div class="stat"><div class="v">' + esc(v) + '</div><div class="l">' + esc(l) + "</div></div>")
+      .join("");
+  })();
+  </script>
+</body>
+</html>
