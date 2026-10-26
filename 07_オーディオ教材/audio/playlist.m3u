@@ -29,5 +29,53 @@ ep13_pm-evm-cpm.mp3
 ep14_service-audit.mp3
 #EXTINF:297,第15回 経営戦略と会計
 ep15_strategy-accounting.mp3
-#EXTINF:282,第16回 法務
+#EXTINF:289,第16回 法務
 ep16_law.mp3
+#EXTINF:330,第17回 アルゴリズムと擬似言語の読み方
+ep17_algorithm-pseudocode.mp3
+#EXTINF:360,第18回 データ構造と計算量
+ep18_data-structure.mp3
+#EXTINF:389,第19回 論理演算・確率・待ち行列
+ep19_logic-probability-queue.mp3
+#EXTINF:296,第20回 排他制御・デッドロック・セマフォ
+ep20_os-exclusive-control.mp3
+#EXTINF:342,第21回 システム構成：クラウド・仮想化・コンテナ・性能評価
+ep21_cloud-virtualization.mp3
+#EXTINF:354,第22回 ネットワーク：DNS・DHCP・NAT・メール・IPv6・ルーティング
+ep22_network-protocols.mp3
+#EXTINF:345,第23回 ISMS・リスクマネジメント・CSIRTとインシデント対応
+ep23_isms-incident.mp3
+#EXTINF:306,第24回 オブジェクト指向とUML
+ep24_uml-oop.mp3
+#EXTINF:337,第25回 アジャイル・スクラム・DevOps と見積り（FP法）
+ep25_agile-devops.mp3
+#EXTINF:326,第26回 ハードウェア・組込みシステム（論理回路、センサ、RTOS）
+ep26_hardware-embedded.mp3
+#EXTINF:328,第27回 ユーザーインタフェース・情報メディア・AIの基礎
+ep27_ui-media-ai.mp3
+#EXTINF:339,第28回 科目Bの記述式で点を取る書き方
+ep28_kamoku-b-writing.mp3
+#EXTINF:374,第29回 プロジェクトマネジメント：PMBOK・WBS・リスク対応・調達と契約
+ep29_pm-scope-risk.mp3
+#EXTINF:414,第30回 サービスマネジメント：SLA・可用性・キャパシティ・バックアップ
+ep30_itil-sla-availability.mp3
+#EXTINF:375,第31回 内部統制・ITガバナンス・監査証拠と監査手続
+ep31_internal-control-governance.mp3
+#EXTINF:352,第32回 システム戦略とシステム企画：EA・BPR・DX・RFI/RFP・要件定義
+ep32_system-strategy-planning.mp3
+#EXTINF:339,第33回 マーケティング（4P/4C・STP・PLC・価格戦略）とバランススコアカード
+ep33_marketing.mp3
+#EXTINF:334,第34回 技術戦略とビジネスインダストリ（MOT、イノベーション、IoT、フィンテック、e-ビジネス）
+ep34_tech-strategy-industry.mp3
+#EXTINF:381,第35回 OR・IE：線形計画法・在庫管理（EOQ）・意思決定・需要予測
+ep35_or-ie.mp3
+#EXTINF:339,第36回 品質管理：QC七つ道具・新QC七つ道具・管理図
+ep36_quality-control.mp3
+#EXTINF:397,第37回 会計：財務諸表・減価償却・在庫評価・キャッシュフロー
+ep37_accounting-advanced.mp3
+#EXTINF:381,第38回 知的財産権の深掘り（著作権・特許・職務著作・ライセンス・不正競争防止法）
+ep38_ip-law.mp3
+#EXTINF:386,第39回 労働・取引関連法と標準化（派遣・請負・準委任、取適法、フリーランス法、JIS/ISO）
+ep39_labor-contract-standard.mp3
+#EXTINF:364,第40回 直前総まとめ：ひっかけやすい対の用語と当日の注意（CBT）
+ep40_final-review.mp3
