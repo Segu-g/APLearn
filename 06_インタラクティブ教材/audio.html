@@ -109,13 +109,23 @@
 
     function renderList() {
       listEl.innerHTML = "";
+      let group = "";
       EPISODES.forEach((ep, i) => {
+        const g = ep.id.startsWith("g") ? "用語聞き流し" : "解説講座";
+        if (g !== group) {
+          group = g;
+          const h = document.createElement("li");
+          h.className = "muted";
+          h.style.margin = i ? "14px 0 4px" : "0 0 4px";
+          h.textContent = g;
+          listEl.appendChild(h);
+        }
         const li = document.createElement("li");
         const done = progress[ep.id] && progress[ep.id].done;
         li.innerHTML =
           '<button type="button"' + (i === current ? ' aria-current="true"' : "") + ">" +
-          '<span class="num">' + esc(ep.id.replace("ep", "")) + "</span>" +
-          '<span class="ttl">' + esc(ep.title.replace(/^第\d+回\s*/, "")) +
+          '<span class="num">' + esc(ep.id.replace(/^(ep|g)/, "")) + "</span>" +
+          '<span class="ttl">' + esc(ep.title.replace(/^(第\d+回|用語聞き流し\d+)\s*/, "")) +
           (done ? ' <span class="done">✓ 聴いた</span>' : "") + "</span>" +
           '<span class="dur">' + fmt(ep.duration) + "</span></button>";
         li.querySelector("button").addEventListener("click", () => load(i, true));

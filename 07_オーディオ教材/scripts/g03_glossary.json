@@ -1,0 +1,344 @@
+{
+ "id": "g03",
+ "title": "用語聞き流し3 システム構成要素・ソフトウェア",
+ "summary": "システム構成要素・ソフトウェアの頻出略語21語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、システム構成要素・ソフトウェア編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "OS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Operating System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "基本ソフトウェア。資源管理を行う"
+  },
+  {
+   "speaker": "metan",
+   "text": "RTOS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Real-Time Operating System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "応答時間の保証を重視するOS。組込み機器で使う"
+  },
+  {
+   "speaker": "metan",
+   "text": "RAID。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Redundant Arrays of Inexpensive (Independent) Disks。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "複数ディスクを組み合わせ信頼性・性能を高める技術"
+  },
+  {
+   "speaker": "metan",
+   "text": "MTBF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Mean Time Between Failures。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "平均故障間隔。稼働していた平均時間"
+  },
+  {
+   "speaker": "metan",
+   "text": "MTTR。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Mean Time To Repair。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "平均修復時間。停止していた平均時間"
+  },
+  {
+   "speaker": "metan",
+   "text": "RASIS。",
+   "yomi": "レイシス。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Reliability, Availability, Serviceability, Integrity, Security。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "信頼性評価の5つの指標"
+  },
+  {
+   "speaker": "metan",
+   "text": "SPOF。",
+   "yomi": "スポフ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Single Point Of Failure。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "単一障害点。そこが壊れると全体が停止する箇所"
+  },
+  {
+   "speaker": "metan",
+   "text": "NAS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Network Attached Storage。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "LANに直接接続するファイルサーバ型ストレージ"
+  },
+  {
+   "speaker": "metan",
+   "text": "SAN。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Storage Area Network。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "サーバとストレージを結ぶ専用ネットワーク"
+  },
+  {
+   "speaker": "metan",
+   "text": "IaaS。",
+   "yomi": "イアース。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Infrastructure as a Service。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "サーバ・ネットワーク等の基盤をサービスとして提供"
+  },
+  {
+   "speaker": "metan",
+   "text": "PaaS。",
+   "yomi": "パース。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Platform as a Service。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "OS・ミドルウェア等の実行環境をサービスとして提供"
+  },
+  {
+   "speaker": "metan",
+   "text": "SaaS。",
+   "yomi": "サース。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Software as a Service。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "アプリケーションをサービスとして提供"
+  },
+  {
+   "speaker": "metan",
+   "text": "VM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Virtual Machine。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "仮想マシン。ハイパーバイザ上で動く仮想的なコンピュータ"
+  },
+  {
+   "speaker": "metan",
+   "text": "VDI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Virtual Desktop Infrastructure。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "デスクトップ環境をサーバ上で仮想化して配信する"
+  },
+  {
+   "speaker": "metan",
+   "text": "API。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Application Programming Interface。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ソフトウェア間で機能を呼び出すための窓口"
+  },
+  {
+   "speaker": "metan",
+   "text": "GUI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Graphical User Interface。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "画面のアイコン等で操作するインタフェース"
+  },
+  {
+   "speaker": "metan",
+   "text": "OSS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Open Source Software。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ソースコードが公開され、改変・再配布できるソフトウェア"
+  },
+  {
+   "speaker": "metan",
+   "text": "GPL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "GNU General Public License。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "派生物にも同じライセンスを求めるOSSライセンス（コピーレフト）",
+   "yomi": "派生物にも同じライセンスを求めるOSSライセンス、コピーレフト"
+  },
+  {
+   "speaker": "metan",
+   "text": "LRU。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Least Recently Used。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "最も長く参照されていないページを追い出す置換方式"
+  },
+  {
+   "speaker": "metan",
+   "text": "FIFO。",
+   "yomi": "ファイフォ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "First In First Out。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "先に入ったものから先に出す方式"
+  },
+  {
+   "speaker": "metan",
+   "text": "TPS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Transactions Per Second。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "1秒あたりのトランザクション処理件数"
+  },
+  {
+   "speaker": "metan",
+   "text": "システム構成要素・ソフトウェア編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

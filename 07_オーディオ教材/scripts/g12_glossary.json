@@ -1,0 +1,440 @@
+{
+ "id": "g12",
+ "title": "用語聞き流し12 経営戦略・マーケティング",
+ "summary": "経営戦略・マーケティングの頻出略語27語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、経営戦略・マーケティング編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "SWOT。",
+   "yomi": "スウォット。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Strengths, Weaknesses, Opportunities, Threats。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "強み・弱み・機会・脅威で現状を分析する"
+  },
+  {
+   "speaker": "metan",
+   "text": "PPM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Product Portfolio Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "市場成長率と相対的市場シェアで事業を4分類する"
+  },
+  {
+   "speaker": "metan",
+   "text": "BSC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Balanced Scorecard。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "財務・顧客・業務プロセス・学習と成長の4視点で戦略を管理"
+  },
+  {
+   "speaker": "metan",
+   "text": "KGI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Key Goal Indicator。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "重要目標達成指標。最終目標の達成度"
+  },
+  {
+   "speaker": "metan",
+   "text": "KPI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Key Performance Indicator。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "重要業績評価指標。KGI達成に向けたプロセスの指標"
+  },
+  {
+   "speaker": "metan",
+   "text": "CSF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Critical Success Factor。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "重要成功要因。目標達成のために最も重要な要因"
+  },
+  {
+   "speaker": "metan",
+   "text": "OKR。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Objectives and Key Results。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "目標と主要な成果で組織の目標を管理する手法"
+  },
+  {
+   "speaker": "metan",
+   "text": "M&A。",
+   "yomi": "エムアンドエー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Mergers and Acquisitions。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "企業の合併・買収"
+  },
+  {
+   "speaker": "metan",
+   "text": "TOB。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Take Over Bid。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "株式公開買付け"
+  },
+  {
+   "speaker": "metan",
+   "text": "MBO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Management BuyOut。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "経営陣による自社の買収（※目標管理制度もMBOと略す）",
+   "yomi": "経営陣による自社の買収、※目標管理制度もMBOと略す"
+  },
+  {
+   "speaker": "metan",
+   "text": "OEM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Original Equipment Manufacturing。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "相手先ブランドで製品を製造すること"
+  },
+  {
+   "speaker": "metan",
+   "text": "CSR。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Corporate Social Responsibility。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "企業の社会的責任"
+  },
+  {
+   "speaker": "metan",
+   "text": "ESG。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Environment, Social, Governance。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "環境・社会・ガバナンスを重視する投資・経営の観点"
+  },
+  {
+   "speaker": "metan",
+   "text": "SDGs。",
+   "yomi": "エスディージーズ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Sustainable Development Goals。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "持続可能な開発目標（国連）",
+   "yomi": "持続可能な開発目標、国連"
+  },
+  {
+   "speaker": "metan",
+   "text": "STP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Segmentation, Targeting, Positioning。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "市場細分化・標的市場の選定・自社の位置づけ"
+  },
+  {
+   "speaker": "metan",
+   "text": "4P。",
+   "yomi": "フォーピー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Product, Price, Place, Promotion。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "売り手視点のマーケティングミックス"
+  },
+  {
+   "speaker": "metan",
+   "text": "4C。",
+   "yomi": "フォーシー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Customer value, Cost, Convenience, Communication。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "買い手視点のマーケティングミックス"
+  },
+  {
+   "speaker": "metan",
+   "text": "AIDMA。",
+   "yomi": "アイドマ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Attention, Interest, Desire, Memory, Action。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "消費者の購買行動モデル"
+  },
+  {
+   "speaker": "metan",
+   "text": "AISAS。",
+   "yomi": "アイサス。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Attention, Interest, Search, Action, Share。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ネット時代の購買行動モデル"
+  },
+  {
+   "speaker": "metan",
+   "text": "LTV。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Life Time Value。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "顧客生涯価値。1人の顧客が取引期間全体でもたらす利益"
+  },
+  {
+   "speaker": "metan",
+   "text": "CPA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Cost Per Acquisition。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "顧客1人（成果1件）の獲得単価",
+   "yomi": "顧客1人、成果1件、の獲得単価"
+  },
+  {
+   "speaker": "metan",
+   "text": "SEO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Search Engine Optimization。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "検索結果で上位に表示されるよう最適化する"
+  },
+  {
+   "speaker": "metan",
+   "text": "O2O。",
+   "yomi": "オーツーオー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Online to Offline。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ネットから実店舗へ顧客を誘導する施策"
+  },
+  {
+   "speaker": "metan",
+   "text": "MOT。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Management Of Technology。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "技術経営"
+  },
+  {
+   "speaker": "metan",
+   "text": "RFM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Recency, Frequency, Monetary。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "最終購買日・購買頻度・購買金額で顧客を分析する"
+  },
+  {
+   "speaker": "metan",
+   "text": "EC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Electronic Commerce。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "電子商取引"
+  },
+  {
+   "speaker": "metan",
+   "text": "B2B / B2C。",
+   "yomi": "ビートゥービー、ビートゥーシー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business to Business / Business to Consumer。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "企業間取引／企業と消費者の取引",
+   "yomi": "企業間取引、企業と消費者の取引"
+  },
+  {
+   "speaker": "metan",
+   "text": "経営戦略・マーケティング編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

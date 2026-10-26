@@ -1,0 +1,313 @@
+{
+ "id": "g08",
+ "title": "用語聞き流し8 プロジェクトマネジメント",
+ "summary": "プロジェクトマネジメントの頻出略語19語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、プロジェクトマネジメント編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "PMBOK。",
+   "yomi": "ピンボック。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Project Management Body Of Knowledge。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "PMIが発行するプロジェクトマネジメントの知識体系ガイド"
+  },
+  {
+   "speaker": "metan",
+   "text": "PMO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Project Management Office。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "組織内のプロジェクトを横断的に支援・管理する部門"
+  },
+  {
+   "speaker": "metan",
+   "text": "WBS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Work Breakdown Structure。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "成果物・作業を階層的に分解した構造"
+  },
+  {
+   "speaker": "metan",
+   "text": "EVM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Earned Value Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "出来高で進捗とコストを管理する手法"
+  },
+  {
+   "speaker": "metan",
+   "text": "PV。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Planned Value。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "計画価値。ある時点までに予定していた作業の予算"
+  },
+  {
+   "speaker": "metan",
+   "text": "EV。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Earned Value。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "出来高。実際に完了した作業の予算上の価値"
+  },
+  {
+   "speaker": "metan",
+   "text": "AC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Actual Cost。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "実コスト。実際にかかった費用"
+  },
+  {
+   "speaker": "metan",
+   "text": "BAC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Budget At Completion。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "完成時総予算"
+  },
+  {
+   "speaker": "metan",
+   "text": "EAC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Estimate At Completion。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "完成時総コスト見積り"
+  },
+  {
+   "speaker": "metan",
+   "text": "ETC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Estimate To Complete。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "残作業のコスト見積り"
+  },
+  {
+   "speaker": "metan",
+   "text": "SPI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Schedule Performance Index。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "スケジュール効率指数（EV / PV）",
+   "yomi": "スケジュール効率指数、EV 、 PV"
+  },
+  {
+   "speaker": "metan",
+   "text": "CPI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Cost Performance Index。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "コスト効率指数（EV / AC）（CPUのCPIとは別）",
+   "yomi": "コスト効率指数、EV 、 AC、CPUのCPIとは別"
+  },
+  {
+   "speaker": "metan",
+   "text": "PERT。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Program Evaluation and Review Technique。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "アローダイアグラムで日程を管理する手法"
+  },
+  {
+   "speaker": "metan",
+   "text": "CPM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Critical Path Method。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "クリティカルパス法。最長経路で所要期間を求める"
+  },
+  {
+   "speaker": "metan",
+   "text": "PDM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Precedence Diagramming Method。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "プレシデンスダイアグラム法。FS・SS等の依存関係で表す"
+  },
+  {
+   "speaker": "metan",
+   "text": "FP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Function Point。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "機能の数と複雑さからソフトウェア規模を見積もる単位"
+  },
+  {
+   "speaker": "metan",
+   "text": "COCOMO。",
+   "yomi": "ココモ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "COnstructive COst MOdel。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "プログラム規模（行数）から工数を見積もるモデル",
+   "yomi": "プログラム規模、行数、から工数を見積もるモデル"
+  },
+  {
+   "speaker": "metan",
+   "text": "RACI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Responsible, Accountable, Consulted, Informed。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "作業ごとの役割分担を示す責任分担表"
+  },
+  {
+   "speaker": "metan",
+   "text": "RFC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Request For Change。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "変更要求（SMの変更管理でも使う）",
+   "yomi": "変更要求、SMの変更管理でも使う"
+  },
+  {
+   "speaker": "metan",
+   "text": "プロジェクトマネジメント編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

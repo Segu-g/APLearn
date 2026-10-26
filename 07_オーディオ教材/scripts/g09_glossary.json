@@ -1,0 +1,298 @@
+{
+ "id": "g09",
+ "title": "用語聞き流し9 サービスマネジメント",
+ "summary": "サービスマネジメントの頻出略語18語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、サービスマネジメント編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "ITIL。",
+   "yomi": "アイティル。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Information Technology Infrastructure Library。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ITサービスマネジメントのベストプラクティス集"
+  },
+  {
+   "speaker": "metan",
+   "text": "SMS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Service Management System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "サービスマネジメントシステム（JIS Q 20000-1）",
+   "yomi": "サービスマネジメントシステム、JIS Q 20000-1"
+  },
+  {
+   "speaker": "metan",
+   "text": "SLA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Service Level Agreement。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "サービス提供者と顧客の間のサービスレベル合意書"
+  },
+  {
+   "speaker": "metan",
+   "text": "SLM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Service Level Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "サービスレベル管理"
+  },
+  {
+   "speaker": "metan",
+   "text": "SLO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Service Level Objective。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "サービスレベル目標（SLAの個々の目標値）",
+   "yomi": "サービスレベル目標、SLAの個々の目標値"
+  },
+  {
+   "speaker": "metan",
+   "text": "OLA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Operational Level Agreement。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "組織内部の部門間で結ぶサービスレベル合意"
+  },
+  {
+   "speaker": "metan",
+   "text": "UC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Underpinning Contract。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "外部供給者との契約（サービスを支える契約）",
+   "yomi": "外部供給者との契約、サービスを支える契約"
+  },
+  {
+   "speaker": "metan",
+   "text": "CMDB。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Configuration Management DataBase。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "構成管理データベース。構成品目の情報を管理"
+  },
+  {
+   "speaker": "metan",
+   "text": "CI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Configuration Item。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "構成品目。管理対象のハード・ソフト・文書など（開発のCIとは別）",
+   "yomi": "構成品目。管理対象のハード・ソフト・文書など、開発のCIとは別"
+  },
+  {
+   "speaker": "metan",
+   "text": "CAB。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Change Advisory Board。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "変更諮問委員会。変更の評価・承認を助言する"
+  },
+  {
+   "speaker": "metan",
+   "text": "KEDB。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Known Error DataBase。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "既知の誤り（根本原因と回避策）のデータベース",
+   "yomi": "既知の誤り、根本原因と回避策、のデータベース"
+  },
+  {
+   "speaker": "metan",
+   "text": "BCP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Continuity Plan。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "事業継続計画。災害等で業務を継続・早期復旧する計画"
+  },
+  {
+   "speaker": "metan",
+   "text": "BCM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Continuity Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "事業継続マネジメント"
+  },
+  {
+   "speaker": "metan",
+   "text": "DR。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Disaster Recovery。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "災害復旧"
+  },
+  {
+   "speaker": "metan",
+   "text": "RPO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Recovery Point Objective。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "目標復旧時点。どの時点のデータまで戻すか"
+  },
+  {
+   "speaker": "metan",
+   "text": "RTO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Recovery Time Objective。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "目標復旧時間。何時間以内に復旧するか"
+  },
+  {
+   "speaker": "metan",
+   "text": "FAQ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Frequently Asked Questions。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "よくある質問と回答"
+  },
+  {
+   "speaker": "metan",
+   "text": "UPS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Uninterruptible Power Supply。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "無停電電源装置"
+  },
+  {
+   "speaker": "metan",
+   "text": "サービスマネジメント編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

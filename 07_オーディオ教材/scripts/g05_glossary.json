@@ -1,0 +1,580 @@
+{
+ "id": "g05",
+ "title": "用語聞き流し5 ネットワーク",
+ "summary": "ネットワークの頻出略語36語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、ネットワーク編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "OSI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Open Systems Interconnection。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "通信機能を7階層に分けた参照モデル"
+  },
+  {
+   "speaker": "metan",
+   "text": "TCP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Transmission Control Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "コネクション型で信頼性のあるトランスポート層プロトコル"
+  },
+  {
+   "speaker": "metan",
+   "text": "UDP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "User Datagram Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "コネクションレスで高速なトランスポート層プロトコル"
+  },
+  {
+   "speaker": "metan",
+   "text": "IP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Internet Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ネットワーク層でパケットの経路制御・アドレス付けを行う"
+  },
+  {
+   "speaker": "metan",
+   "text": "IPv6。",
+   "yomi": "アイピーブイシックス。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Internet Protocol version 6。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "128ビットのIPアドレスを使う次世代IP"
+  },
+  {
+   "speaker": "metan",
+   "text": "ARP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Address Resolution Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "IPアドレスからMACアドレスを求める"
+  },
+  {
+   "speaker": "metan",
+   "text": "MAC。",
+   "yomi": "マック。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Media Access Control。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データリンク層の制御。MACアドレスは機器固有の48ビット番号"
+  },
+  {
+   "speaker": "metan",
+   "text": "ICMP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Internet Control Message Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "エラー通知や疎通確認（ping）に使う",
+   "yomi": "エラー通知や疎通確認、ping、に使う"
+  },
+  {
+   "speaker": "metan",
+   "text": "DNS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Domain Name System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ドメイン名とIPアドレスを対応づける"
+  },
+  {
+   "speaker": "metan",
+   "text": "DHCP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Dynamic Host Configuration Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "IPアドレス等を自動で割り当てる"
+  },
+  {
+   "speaker": "metan",
+   "text": "NAT。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Network Address Translation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "プライベートIPとグローバルIPを1対1で変換"
+  },
+  {
+   "speaker": "metan",
+   "text": "NAPT。",
+   "yomi": "ナプト。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Network Address Port Translation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ポート番号も使い、1つのグローバルIPを複数端末で共有"
+  },
+  {
+   "speaker": "metan",
+   "text": "HTTP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "HyperText Transfer Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Webの通信プロトコル（ポート80）",
+   "yomi": "Webの通信プロトコル、ポート80"
+  },
+  {
+   "speaker": "metan",
+   "text": "HTTPS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "HTTP over TLS。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "TLSで暗号化したHTTP（ポート443）",
+   "yomi": "TLSで暗号化したHTTP、ポート443"
+  },
+  {
+   "speaker": "metan",
+   "text": "SMTP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Simple Mail Transfer Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "メールの送信・転送（ポート25、投稿用は587）",
+   "yomi": "メールの送信・転送、ポート25、投稿用は587"
+  },
+  {
+   "speaker": "metan",
+   "text": "POP3。",
+   "yomi": "ポップスリー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Post Office Protocol version 3。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "メールをサーバから受信してダウンロードする"
+  },
+  {
+   "speaker": "metan",
+   "text": "IMAP。",
+   "yomi": "アイマップ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Internet Message Access Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "メールをサーバ上に置いたまま管理する"
+  },
+  {
+   "speaker": "metan",
+   "text": "FTP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "File Transfer Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ファイル転送（データ転送20番、制御21番ポート）",
+   "yomi": "ファイル転送、データ転送20番、制御21番ポート"
+  },
+  {
+   "speaker": "metan",
+   "text": "SSH。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Secure SHell。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "暗号化された遠隔ログイン（ポート22）",
+   "yomi": "暗号化された遠隔ログイン、ポート22"
+  },
+  {
+   "speaker": "metan",
+   "text": "NTP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Network Time Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "時刻同期"
+  },
+  {
+   "speaker": "metan",
+   "text": "SNMP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Simple Network Management Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ネットワーク機器の監視・管理"
+  },
+  {
+   "speaker": "metan",
+   "text": "VLAN。",
+   "yomi": "ブイラン。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Virtual LAN。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "物理構成によらず論理的にLANを分割する"
+  },
+  {
+   "speaker": "metan",
+   "text": "VPN。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Virtual Private Network。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "公衆網上に暗号化した仮想的な専用線をつくる"
+  },
+  {
+   "speaker": "metan",
+   "text": "VRRP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Virtual Router Redundancy Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "複数ルータで仮想ルータをつくり冗長化する"
+  },
+  {
+   "speaker": "metan",
+   "text": "OSPF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Open Shortest Path First。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "コスト（リンク状態）に基づく経路制御プロトコル",
+   "yomi": "コスト、リンク状態、に基づく経路制御プロトコル"
+  },
+  {
+   "speaker": "metan",
+   "text": "BGP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Border Gateway Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "組織（AS）間の経路制御プロトコル",
+   "yomi": "組織、AS、間の経路制御プロトコル"
+  },
+  {
+   "speaker": "metan",
+   "text": "CIDR。",
+   "yomi": "サイダー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Classless Inter-Domain Routing。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "クラスにとらわれず可変長プレフィックスでアドレスを割り当てる"
+  },
+  {
+   "speaker": "metan",
+   "text": "MTU。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Maximum Transmission Unit。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "1回で送れるデータの最大サイズ"
+  },
+  {
+   "speaker": "metan",
+   "text": "QoS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Quality of Service。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "通信の優先度・帯域を制御して品質を保証する"
+  },
+  {
+   "speaker": "metan",
+   "text": "CSMA/CD。",
+   "yomi": "シーエスエムエー、シーディー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Carrier Sense Multiple Access with Collision Detection。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "有線LANの衝突検出方式"
+  },
+  {
+   "speaker": "metan",
+   "text": "CSMA/CA。",
+   "yomi": "シーエスエムエー、シーエー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Carrier Sense Multiple Access with Collision Avoidance。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "無線LANの衝突回避方式"
+  },
+  {
+   "speaker": "metan",
+   "text": "SDN。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Software-Defined Networking。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ソフトウェアでネットワークを集中制御する技術"
+  },
+  {
+   "speaker": "metan",
+   "text": "PoE。",
+   "yomi": "ピーオーイー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Power over Ethernet。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "LANケーブルで電力を供給する"
+  },
+  {
+   "speaker": "metan",
+   "text": "LPWA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Low Power Wide Area。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "低消費電力・広域のIoT向け無線通信"
+  },
+  {
+   "speaker": "metan",
+   "text": "CDN。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Content Delivery Network。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "コンテンツを分散配置して高速に配信する"
+  },
+  {
+   "speaker": "metan",
+   "text": "URL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Uniform Resource Locator。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Web上の資源の場所を示す記述"
+  },
+  {
+   "speaker": "metan",
+   "text": "ネットワーク編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

@@ -1,0 +1,281 @@
+{
+ "id": "g07",
+ "title": "用語聞き流し7 システム開発技術",
+ "summary": "システム開発技術の頻出略語17語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、システム開発技術編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "SLCP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Software Life Cycle Process。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ソフトウェアライフサイクルプロセス。共通フレームの基礎"
+  },
+  {
+   "speaker": "metan",
+   "text": "UML。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Unified Modeling Language。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "オブジェクト指向設計の統一モデリング言語"
+  },
+  {
+   "speaker": "metan",
+   "text": "DFD。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Data Flow Diagram。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データの流れと処理を表す図"
+  },
+  {
+   "speaker": "metan",
+   "text": "XP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "eXtreme Programming。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "アジャイル手法の一つ。テスト駆動・ペアプログラミング等"
+  },
+  {
+   "speaker": "metan",
+   "text": "TDD。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Test-Driven Development。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "テストを先に書いてから実装するテスト駆動開発"
+  },
+  {
+   "speaker": "metan",
+   "text": "CI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Continuous Integration。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "継続的インテグレーション。頻繁に統合・自動テストする"
+  },
+  {
+   "speaker": "metan",
+   "text": "CD。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Continuous Delivery / Deployment。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "継続的デリバリ／デプロイ。常にリリース可能な状態を保つ",
+   "yomi": "継続的デリバリ、デプロイ。常にリリース可能な状態を保つ"
+  },
+  {
+   "speaker": "metan",
+   "text": "DevOps。",
+   "yomi": "デブオプス。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Development and Operations。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "開発と運用が協力して迅速にリリースする考え方"
+  },
+  {
+   "speaker": "metan",
+   "text": "MVP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Minimum Viable Product。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "顧客に価値を提供できる最小限の製品"
+  },
+  {
+   "speaker": "metan",
+   "text": "CMMI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Capability Maturity Model Integration。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "開発組織のプロセス成熟度を5段階で評価するモデル"
+  },
+  {
+   "speaker": "metan",
+   "text": "MVC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Model-View-Controller。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データ・表示・制御に分けるソフトウェア構造"
+  },
+  {
+   "speaker": "metan",
+   "text": "SOA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Service-Oriented Architecture。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "業務機能をサービス単位で組み合わせる設計思想"
+  },
+  {
+   "speaker": "metan",
+   "text": "REST。",
+   "yomi": "レスト。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "REpresentational State Transfer。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "HTTPでリソースを操作するWeb APIの設計スタイル"
+  },
+  {
+   "speaker": "metan",
+   "text": "JSON。",
+   "yomi": "ジェイソン。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "JavaScript Object Notation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "軽量なデータ記述形式"
+  },
+  {
+   "speaker": "metan",
+   "text": "XML。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "eXtensible Markup Language。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "タグで構造を自由に定義できるマークアップ言語"
+  },
+  {
+   "speaker": "metan",
+   "text": "IDE。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Integrated Development Environment。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "統合開発環境"
+  },
+  {
+   "speaker": "metan",
+   "text": "OJT。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "On the Job Training。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "実務を通じた教育訓練"
+  },
+  {
+   "speaker": "metan",
+   "text": "システム開発技術編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

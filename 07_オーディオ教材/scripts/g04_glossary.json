@@ -1,0 +1,304 @@
+{
+ "id": "g04",
+ "title": "用語聞き流し4 データベース",
+ "summary": "データベースの頻出略語18語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、データベース編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "DBMS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "DataBase Management System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データベース管理システム"
+  },
+  {
+   "speaker": "metan",
+   "text": "RDBMS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Relational DBMS。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "表形式（関係モデル）のDBMS",
+   "yomi": "表形式、関係モデル、のDBMS"
+  },
+  {
+   "speaker": "metan",
+   "text": "SQL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Structured Query Language。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "関係データベースを操作する言語"
+  },
+  {
+   "speaker": "metan",
+   "text": "DDL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Data Definition Language。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データ定義言語（CREATE、DROP など）",
+   "yomi": "データ定義言語、CREATE、DROP など"
+  },
+  {
+   "speaker": "metan",
+   "text": "DML。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Data Manipulation Language。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データ操作言語（SELECT、INSERT、UPDATE、DELETE）",
+   "yomi": "データ操作言語、SELECT、INSERT、UPDATE、DELETE"
+  },
+  {
+   "speaker": "metan",
+   "text": "DCL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Data Control Language。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データ制御言語（GRANT、REVOKE など）",
+   "yomi": "データ制御言語、GRANT、REVOKE など"
+  },
+  {
+   "speaker": "metan",
+   "text": "E-R図。",
+   "yomi": "イーアールず。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Entity-Relationship Diagram。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "実体と関連でデータ構造を表す図"
+  },
+  {
+   "speaker": "metan",
+   "text": "ACID。",
+   "yomi": "アシッド。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Atomicity, Consistency, Isolation, Durability。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "トランザクションが満たすべき4つの性質"
+  },
+  {
+   "speaker": "metan",
+   "text": "2PC。",
+   "yomi": "ツーフェーズコミット。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Two-Phase Commit。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "2相コミット。分散DBで全サイトの更新をそろえる手順"
+  },
+  {
+   "speaker": "metan",
+   "text": "NoSQL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Not only SQL。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "関係モデル以外のDB（キーバリュー型、ドキュメント型など）",
+   "yomi": "関係モデル以外のDB、キーバリュー型、ドキュメント型など"
+  },
+  {
+   "speaker": "metan",
+   "text": "KVS。",
+   "yomi": "ケーブイエス。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Key-Value Store。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "キーと値の組でデータを管理するNoSQL"
+  },
+  {
+   "speaker": "metan",
+   "text": "BASE。",
+   "yomi": "ベース。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Basically Available, Soft state, Eventually consistent。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "結果整合性を重視するNoSQLの特性"
+  },
+  {
+   "speaker": "metan",
+   "text": "DWH。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Data WareHouse。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "意思決定のために時系列データを統合・蓄積するDB"
+  },
+  {
+   "speaker": "metan",
+   "text": "OLAP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "OnLine Analytical Processing。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "DWHのデータを多次元で分析する処理"
+  },
+  {
+   "speaker": "metan",
+   "text": "ETL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Extract, Transform, Load。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データを抽出・変換・格納してDWHに取り込む処理"
+  },
+  {
+   "speaker": "metan",
+   "text": "BI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Intelligence。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "蓄積データを分析し経営判断に活かす手法・ツール"
+  },
+  {
+   "speaker": "metan",
+   "text": "CRUD。",
+   "yomi": "クラッド。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Create, Read, Update, Delete。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "データの基本操作。CRUD図で機能とデータの関係を表す"
+  },
+  {
+   "speaker": "metan",
+   "text": "WAL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Write-Ahead Logging。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "更新前にログを先に書き込む方式（障害回復の前提）",
+   "yomi": "更新前にログを先に書き込む方式、障害回復の前提"
+  },
+  {
+   "speaker": "metan",
+   "text": "データベース編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

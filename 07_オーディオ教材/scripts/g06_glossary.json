@@ -1,0 +1,659 @@
+{
+ "id": "g06",
+ "title": "用語聞き流し6 情報セキュリティ",
+ "summary": "情報セキュリティの頻出略語41語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、情報セキュリティ編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "CIA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Confidentiality, Integrity, Availability。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "機密性・完全性・可用性。情報セキュリティの3要素"
+  },
+  {
+   "speaker": "metan",
+   "text": "ISMS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Information Security Management System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "情報セキュリティマネジメントシステム（JIS Q 27001）",
+   "yomi": "情報セキュリティマネジメントシステム、JIS Q 27001"
+  },
+  {
+   "speaker": "metan",
+   "text": "CSIRT。",
+   "yomi": "シーサート。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Computer Security Incident Response Team。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "セキュリティインシデントに対応する組織"
+  },
+  {
+   "speaker": "metan",
+   "text": "SOC。",
+   "yomi": "ソック。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Security Operation Center。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "セキュリティ機器を24時間監視・分析する組織"
+  },
+  {
+   "speaker": "metan",
+   "text": "PKI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Public Key Infrastructure。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "公開鍵基盤。認証局が証明書で公開鍵の正当性を保証"
+  },
+  {
+   "speaker": "metan",
+   "text": "CA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Certificate Authority。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "認証局。デジタル証明書を発行する"
+  },
+  {
+   "speaker": "metan",
+   "text": "CRL。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Certificate Revocation List。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "失効したデジタル証明書の一覧"
+  },
+  {
+   "speaker": "metan",
+   "text": "OCSP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Online Certificate Status Protocol。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "証明書の失効状態をオンラインで確認する"
+  },
+  {
+   "speaker": "metan",
+   "text": "TLS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Transport Layer Security。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "通信の暗号化・サーバ認証を行うプロトコル（SSLの後継）",
+   "yomi": "通信の暗号化・サーバ認証を行うプロトコル、SSLの後継"
+  },
+  {
+   "speaker": "metan",
+   "text": "AES。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Advanced Encryption Standard。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "代表的な共通鍵暗号"
+  },
+  {
+   "speaker": "metan",
+   "text": "RSA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Rivest-Shamir-Adleman。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "素因数分解の困難性を利用した公開鍵暗号"
+  },
+  {
+   "speaker": "metan",
+   "text": "ECC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Elliptic Curve Cryptography。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "楕円曲線暗号。短い鍵長で高い安全性"
+  },
+  {
+   "speaker": "metan",
+   "text": "SHA-256。",
+   "yomi": "シャー、ニーゴーロク。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Secure Hash Algorithm 256。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "256ビットのハッシュ値を出力するハッシュ関数"
+  },
+  {
+   "speaker": "metan",
+   "text": "MAC。",
+   "yomi": "マック。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Message Authentication Code。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "メッセージ認証符号。改ざん検知に使う（ネットワークのMACとは別）",
+   "yomi": "メッセージ認証符号。改ざん検知に使う、ネットワークのMACとは別"
+  },
+  {
+   "speaker": "metan",
+   "text": "HMAC。",
+   "yomi": "エイチマック。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Hash-based MAC。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ハッシュ関数と共通鍵を使うメッセージ認証符号"
+  },
+  {
+   "speaker": "metan",
+   "text": "MFA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Multi-Factor Authentication。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "多要素認証（知識・所持・生体のうち2つ以上）",
+   "yomi": "多要素認証、知識・所持・生体のうち2つ以上"
+  },
+  {
+   "speaker": "metan",
+   "text": "OTP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "One-Time Password。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "一度しか使えないパスワード"
+  },
+  {
+   "speaker": "metan",
+   "text": "SSO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Single Sign-On。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "一度の認証で複数システムを利用できる仕組み"
+  },
+  {
+   "speaker": "metan",
+   "text": "SAML。",
+   "yomi": "サムル。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Security Assertion Markup Language。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "SSOで認証情報をやり取りするXMLベースの標準"
+  },
+  {
+   "speaker": "metan",
+   "text": "IDS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Intrusion Detection System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "侵入検知システム。不正な通信を検知・通知する"
+  },
+  {
+   "speaker": "metan",
+   "text": "IPS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Intrusion Prevention System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "侵入防止システム。不正な通信を検知して遮断する"
+  },
+  {
+   "speaker": "metan",
+   "text": "WAF。",
+   "yomi": "ワフ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Web Application Firewall。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Webアプリへの攻撃（SQLインジェクション等）を防ぐ",
+   "yomi": "Webアプリへの攻撃、SQLインジェクション等、を防ぐ"
+  },
+  {
+   "speaker": "metan",
+   "text": "UTM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Unified Threat Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "FW・IPS・ウイルス対策などを1台に統合した機器"
+  },
+  {
+   "speaker": "metan",
+   "text": "EDR。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Endpoint Detection and Response。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "端末の挙動を監視し、侵害の検知・対応を行う"
+  },
+  {
+   "speaker": "metan",
+   "text": "SIEM。",
+   "yomi": "シーム。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Security Information and Event Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "各種ログを集約・相関分析して脅威を検知する"
+  },
+  {
+   "speaker": "metan",
+   "text": "DMZ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "DeMilitarized Zone。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "外部公開サーバを置く、内部LANと外部の中間セグメント"
+  },
+  {
+   "speaker": "metan",
+   "text": "DoS。",
+   "yomi": "ドス。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Denial of Service。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "大量の要求でサービスを妨害する攻撃"
+  },
+  {
+   "speaker": "metan",
+   "text": "DDoS。",
+   "yomi": "ディードス。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Distributed DoS。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "多数の機器から同時に行うDoS攻撃"
+  },
+  {
+   "speaker": "metan",
+   "text": "XSS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Cross-Site Scripting。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "悪意のあるスクリプトを他の利用者のブラウザで実行させる攻撃"
+  },
+  {
+   "speaker": "metan",
+   "text": "CSRF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Cross-Site Request Forgery。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "利用者に意図しないリクエストを送信させる攻撃"
+  },
+  {
+   "speaker": "metan",
+   "text": "APT。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Advanced Persistent Threat。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "特定組織を長期間狙う高度な標的型攻撃"
+  },
+  {
+   "speaker": "metan",
+   "text": "BEC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Email Compromise。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ビジネスメール詐欺。取引先等を装い送金させる"
+  },
+  {
+   "speaker": "metan",
+   "text": "SPF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Sender Policy Framework。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "送信元メールサーバのIPアドレスをDNSで検証する"
+  },
+  {
+   "speaker": "metan",
+   "text": "DKIM。",
+   "yomi": "ディーキム。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "DomainKeys Identified Mail。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "メールにデジタル署名を付けて送信ドメインを検証する"
+  },
+  {
+   "speaker": "metan",
+   "text": "DMARC。",
+   "yomi": "ディーマーク。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Domain-based Message Authentication, Reporting and Conformance。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "SPF/DKIMの検証結果に基づく処理方針を送信側が宣言する",
+   "yomi": "SPF、DKIMの検証結果に基づく処理方針を送信側が宣言する"
+  },
+  {
+   "speaker": "metan",
+   "text": "S/MIME。",
+   "yomi": "エスマイム。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Secure/Multipurpose Internet Mail Extensions。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "公開鍵暗号によるメールの暗号化・署名"
+  },
+  {
+   "speaker": "metan",
+   "text": "WPA3。",
+   "yomi": "ダブリューピーエースリー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Wi-Fi Protected Access 3。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "無線LANの暗号化・認証規格"
+  },
+  {
+   "speaker": "metan",
+   "text": "CVE。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Common Vulnerabilities and Exposures。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "脆弱性に付けられる共通の識別番号"
+  },
+  {
+   "speaker": "metan",
+   "text": "CVSS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Common Vulnerability Scoring System。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "脆弱性の深刻度を評価する共通の基準"
+  },
+  {
+   "speaker": "metan",
+   "text": "TPM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Trusted Platform Module。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "鍵の生成・保管を行う耐タンパ性のあるチップ"
+  },
+  {
+   "speaker": "metan",
+   "text": "NISC。",
+   "yomi": "ニスク。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "National center of Incident readiness and Strategy for Cybersecurity。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "内閣サイバーセキュリティセンター（2025年7月に国家サイバー統括室へ改組）",
+   "yomi": "内閣サイバーセキュリティセンター、2025年7月に国家サイバー統括室へ改組"
+  },
+  {
+   "speaker": "metan",
+   "text": "情報セキュリティ編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

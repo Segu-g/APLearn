@@ -1,0 +1,128 @@
+{
+ "id": "g10",
+ "title": "用語聞き流し10 システム監査・内部統制",
+ "summary": "システム監査・内部統制の頻出略語7語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、システム監査・内部統制編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "COSO。",
+   "yomi": "コソ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Committee of Sponsoring Organizations of the Treadway Commission。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "内部統制のフレームワーク（3目的・5構成要素）を示した組織",
+   "yomi": "内部統制のフレームワーク、3目的・5構成要素、を示した組織"
+  },
+  {
+   "speaker": "metan",
+   "text": "COBIT。",
+   "yomi": "コビット。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Control OBjectives for Information and related Technology。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ITガバナンス・管理のフレームワーク（ISACA）",
+   "yomi": "ITガバナンス・管理のフレームワーク、ISACA"
+  },
+  {
+   "speaker": "metan",
+   "text": "CSA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Control Self-Assessment。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "統制自己評価。業務担当者自身が内部統制を評価する"
+  },
+  {
+   "speaker": "metan",
+   "text": "CAAT。",
+   "yomi": "キャット。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Computer Assisted Audit Techniques。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "コンピュータ支援監査技法"
+  },
+  {
+   "speaker": "metan",
+   "text": "ITF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Integrated Test Facility。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "本番システムに監査用の架空口座を設けて検証する技法"
+  },
+  {
+   "speaker": "metan",
+   "text": "J-SOX。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "上場企業に財務報告に係る内部統制の評価・監査を求める制度"
+  },
+  {
+   "speaker": "metan",
+   "text": "GRC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Governance, Risk management, Compliance。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ガバナンス・リスク管理・コンプライアンスの統合的な取組み"
+  },
+  {
+   "speaker": "metan",
+   "text": "システム監査・内部統制編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

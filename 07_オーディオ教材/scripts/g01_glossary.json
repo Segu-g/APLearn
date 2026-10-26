@@ -1,0 +1,207 @@
+{
+ "id": "g01",
+ "title": "用語聞き流し1 基礎理論・AI",
+ "summary": "基礎理論・AIの頻出略語12語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、基礎理論・AI編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "AI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Artificial Intelligence。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "人工知能。人間の知的活動をコンピュータで実現する技術"
+  },
+  {
+   "speaker": "metan",
+   "text": "CNN。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Convolutional Neural Network。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "畳み込みニューラルネットワーク。画像認識に強い"
+  },
+  {
+   "speaker": "metan",
+   "text": "RNN。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Recurrent Neural Network。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "再帰型ニューラルネットワーク。時系列データを扱う"
+  },
+  {
+   "speaker": "metan",
+   "text": "GAN。",
+   "yomi": "ギャン。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Generative Adversarial Network。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "敵対的生成ネットワーク。生成器と識別器を競わせて画像等を生成"
+  },
+  {
+   "speaker": "metan",
+   "text": "LLM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Large Language Model。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "大規模言語モデル。大量テキストで学習した生成AIの基盤"
+  },
+  {
+   "speaker": "metan",
+   "text": "RAG。",
+   "yomi": "ラグ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Retrieval-Augmented Generation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "検索拡張生成。外部文書を検索して生成AIの回答に反映する"
+  },
+  {
+   "speaker": "metan",
+   "text": "BNF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Backus-Naur Form。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "バッカス・ナウア記法。プログラム言語の文法を定義する記法"
+  },
+  {
+   "speaker": "metan",
+   "text": "FSM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Finite State Machine。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "有限オートマトン（有限状態機械）。状態と遷移で動作を表す",
+   "yomi": "有限オートマトン、有限状態機械、。状態と遷移で動作を表す"
+  },
+  {
+   "speaker": "metan",
+   "text": "CRC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Cyclic Redundancy Check。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "巡回冗長検査。生成多項式による誤り検出方式"
+  },
+  {
+   "speaker": "metan",
+   "text": "ASCII。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "American Standard Code for Information Interchange。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "7ビットの英数字の文字コード"
+  },
+  {
+   "speaker": "metan",
+   "text": "UTF-8。",
+   "yomi": "ユーティーエフエイト。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "UCS Transformation Format 8。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Unicodeの符号化方式。1〜4バイトの可変長"
+  },
+  {
+   "speaker": "metan",
+   "text": "IoT。",
+   "yomi": "アイオーティー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Internet of Things。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "モノのインターネット。機器をネットワークにつなぐ"
+  },
+  {
+   "speaker": "metan",
+   "text": "基礎理論・AI編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

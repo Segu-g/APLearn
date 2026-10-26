@@ -1,0 +1,241 @@
+{
+ "id": "g14",
+ "title": "用語聞き流し14 法務・標準化",
+ "summary": "法務・標準化の頻出略語14語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、法務・標準化編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "JIS。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Japanese Industrial Standards。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "日本産業規格"
+  },
+  {
+   "speaker": "metan",
+   "text": "ISO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "International Organization for Standardization。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "国際標準化機構"
+  },
+  {
+   "speaker": "metan",
+   "text": "IEC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "International Electrotechnical Commission。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "国際電気標準会議"
+  },
+  {
+   "speaker": "metan",
+   "text": "IEEE。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Institute of Electrical and Electronics Engineers。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "米国電気電子学会。LAN規格（IEEE 802）を定める",
+   "yomi": "米国電気電子学会。LAN規格、IEEE 802、を定める"
+  },
+  {
+   "speaker": "metan",
+   "text": "IETF。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Internet Engineering Task Force。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "インターネット技術の標準（RFC）を策定する組織",
+   "yomi": "インターネット技術の標準、RFC、を策定する組織"
+  },
+  {
+   "speaker": "metan",
+   "text": "W3C。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "World Wide Web Consortium。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Web技術（HTML等）の標準化団体",
+   "yomi": "Web技術、HTML等、の標準化団体"
+  },
+  {
+   "speaker": "metan",
+   "text": "RFC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Request For Comments。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "IETFが発行するインターネット技術の仕様文書"
+  },
+  {
+   "speaker": "metan",
+   "text": "GDPR。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "General Data Protection Regulation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "EU一般データ保護規則"
+  },
+  {
+   "speaker": "metan",
+   "text": "PL法。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Product Liability（製造物責任法）。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "製品の欠陥による損害について製造業者の責任を定める法律"
+  },
+  {
+   "speaker": "metan",
+   "text": "SLA（契約）。",
+   "yomi": "エスエルエー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Service Level Agreement。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "法務でもサービス品質の契約条件として出題される"
+  },
+  {
+   "speaker": "metan",
+   "text": "NDA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Non-Disclosure Agreement。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "秘密保持契約（再掲）",
+   "yomi": "秘密保持契約、再掲"
+  },
+  {
+   "speaker": "metan",
+   "text": "CC。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Creative Commons。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "著作物の利用条件を示すライセンス"
+  },
+  {
+   "speaker": "metan",
+   "text": "CC（評価基準）。",
+   "yomi": "シーシー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Common Criteria。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "ISO/IEC 15408。IT製品のセキュリティ評価基準",
+   "yomi": "ISO、IEC 15408。IT製品のセキュリティ評価基準"
+  },
+  {
+   "speaker": "metan",
+   "text": "PPP / PFI。",
+   "yomi": "ピーピーピー、ピーエフアイ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Public-Private Partnership / Private Finance Initiative。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "官民連携／民間資金を活用した公共事業",
+   "yomi": "官民連携、民間資金を活用した公共事業"
+  },
+  {
+   "speaker": "metan",
+   "text": "法務・標準化編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}

@@ -1,0 +1,327 @@
+{
+ "id": "g11",
+ "title": "用語聞き流し11 システム戦略・調達",
+ "summary": "システム戦略・調達の頻出略語20語を、略語 → 間 → 正式名称と意味の順に読み上げます。",
+ "related": [
+  "../05_まとめ・横断資料/02_頻出略語・用語集.md"
+ ],
+ "lines": [
+  {
+   "speaker": "zundamon",
+   "text": "用語の聞き流し、システム戦略・調達編なのだ。"
+  },
+  {
+   "speaker": "metan",
+   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+  },
+  {
+   "speaker": "metan",
+   "text": "EA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Enterprise Architecture。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "業務とシステムを全体最適の観点で設計する手法"
+  },
+  {
+   "speaker": "metan",
+   "text": "BPR。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Process Reengineering。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "業務プロセスを抜本的に再設計する"
+  },
+  {
+   "speaker": "metan",
+   "text": "BPM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Process Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "業務プロセスを継続的に改善する管理手法"
+  },
+  {
+   "speaker": "metan",
+   "text": "BPMN。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Process Model and Notation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "業務プロセスの標準的な表記法"
+  },
+  {
+   "speaker": "metan",
+   "text": "BPO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Business Process Outsourcing。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "業務プロセスを外部に委託する"
+  },
+  {
+   "speaker": "metan",
+   "text": "DX。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Digital Transformation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "デジタル技術でビジネスモデルや組織を変革する"
+  },
+  {
+   "speaker": "metan",
+   "text": "RPA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Robotic Process Automation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "定型的なPC操作をソフトウェアロボットで自動化する"
+  },
+  {
+   "speaker": "metan",
+   "text": "ERP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Enterprise Resource Planning。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "企業の基幹業務を統合管理するシステム（統合基幹業務）",
+   "yomi": "企業の基幹業務を統合管理するシステム、統合基幹業務"
+  },
+  {
+   "speaker": "metan",
+   "text": "SCM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Supply Chain Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "調達から販売までの供給連鎖を全体最適化する"
+  },
+  {
+   "speaker": "metan",
+   "text": "CRM。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Customer Relationship Management。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "顧客との関係を管理し、満足度と収益を高める"
+  },
+  {
+   "speaker": "metan",
+   "text": "SFA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Sales Force Automation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "営業活動をITで支援する"
+  },
+  {
+   "speaker": "metan",
+   "text": "RFI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Request For Information。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "情報提供依頼。調達前にベンダから情報を集める"
+  },
+  {
+   "speaker": "metan",
+   "text": "RFP。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Request For Proposal。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "提案依頼書。ベンダに提案を依頼する文書"
+  },
+  {
+   "speaker": "metan",
+   "text": "RFQ。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Request For Quotation。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "見積依頼書"
+  },
+  {
+   "speaker": "metan",
+   "text": "NDA。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Non-Disclosure Agreement。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "秘密保持契約"
+  },
+  {
+   "speaker": "metan",
+   "text": "TCO。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Total Cost of Ownership。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "導入から運用・廃棄までの総保有コスト"
+  },
+  {
+   "speaker": "metan",
+   "text": "ROI。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Return On Investment。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "投資利益率。投資に対する利益の割合"
+  },
+  {
+   "speaker": "metan",
+   "text": "SoR。",
+   "yomi": "エスオーアール。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "System of Record。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "記録のためのシステム（基幹系）",
+   "yomi": "記録のためのシステム、基幹系"
+  },
+  {
+   "speaker": "metan",
+   "text": "SoE。",
+   "yomi": "エスオーイー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "System of Engagement。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "顧客とのつながりを重視するシステム"
+  },
+  {
+   "speaker": "metan",
+   "text": "PoC。",
+   "yomi": "ピーオーシー。"
+  },
+  {
+   "pause": 1.5
+  },
+  {
+   "speaker": "zundamon",
+   "text": "Proof of Concept。"
+  },
+  {
+   "speaker": "zundamon",
+   "text": "概念実証。新技術・アイデアが実現可能か検証する"
+  },
+  {
+   "speaker": "metan",
+   "text": "システム戦略・調達編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+  }
+ ]
+}
