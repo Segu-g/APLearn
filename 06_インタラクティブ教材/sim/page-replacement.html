@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ページ置換シミュレータ</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* グラフ系列色（色覚多様性チェック済み）。ライト／ダークで別の段を使う */
+    :root { --s1: #2563eb; --s2: #c2410c; --s3: #0d9488; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --s1: #5b8def; --s2: #d07a12; --s3: #0f9f90; } }
+    :root[data-theme="dark"] { --s1: #5b8def; --s2: #d07a12; --s3: #0f9f90; }
+
+    table.pr { width: auto; font-family: var(--mono); }
+    table.pr th, table.pr td { text-align: center; padding: 4px 7px; min-width: 2.2em; }
+    table.pr th:first-child, table.pr td:first-child { text-align: left; font-family: var(--font); white-space: nowrap; position: sticky; left: 0; background: var(--surface-2); }
+    table.pr td.new { background: var(--ng-weak); color: var(--ng); font-weight: 700; }
+    table.pr td.hit { background: var(--ok-weak); color: var(--ok); font-weight: 700; }
+    table.pr td.f { color: var(--ng); font-weight: 700; }
+    table.pr td.h { color: var(--ok); font-weight: 700; }
+    table.pr td.cur, table.pr th.cur { outline: 2px solid var(--accent); outline-offset: -2px; }
+    table.pr td.future { color: transparent; }
+    .algo-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 18px 0 6px; }
+    .algo-h h3 { margin: 0; }
+    .swatch { display: inline-block; width: 12px; height: 3px; vertical-align: middle; margin-right: 4px; }
+    #chart svg text { font-size: 12px; }
+    .field { max-width: 100%; min-width: 0; }
+  </style>
+</head>
+<body data-root="../" data-title="ページ置換シミュレータ">
+  <main>
+    <h1>ページ置換シミュレータ（FIFO・LRU・OPT）</h1>
+    <p class="lead">参照列とページ枠の数を入れると、各時点の枠の中身とページフォールトを表で確認できます。1ステップずつ進めることも、一括で結果を見ることもできます。</p>
+
+    <section class="card">
+      <div class="row">
+        <div class="field" style="flex:1 1 260px">
+          <label for="refs">参照列（カンマまたは空白区切り）</label>
+          <input type="text" id="refs" value="7,0,1,2,0,3,0,4,2,3,0,3,2" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="frames">ページ枠の数</label>
+          <input type="number" id="frames" value="3" min="1" max="10" style="width:6em">
+        </div>
+        <div class="field">
+          <label for="view">枠の表示順</label>
+          <select id="view">
+            <option value="order">追い出す順（上が次の候補）</option>
+            <option value="slot">枠の位置（枠1・枠2…）</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button type="button" id="reset">最初に戻す</button>
+        <button type="button" id="back">◀ 1つ戻る</button>
+        <button type="button" class="primary" id="step">1ステップ進む ▶</button>
+        <button type="button" class="primary" id="all">一括実行</button>
+        <span class="muted" id="pos"></span>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <span class="muted">例題を読み込む：</span>
+        <button type="button" data-ex="7,0,1,2,0,3,0,4,2,3,0,3,2|3">教科書の例（13個・枠3）</button>
+        <button type="button" data-ex="7,0,1,2,0,3,0,4,2,3|3">資料 5.5 の例（枠3）</button>
+        <button type="button" data-ex="1,2,3,1,4,2,5,1|3">公式集の例（枠3）</button>
+        <button type="button" data-ex="1,2,3,4,1,2,5,1,2,3,4,5|3">Belady の異常（枠3）</button>
+        <button type="button" data-ex="1,2,3,4,1,2,5,1,2,3,4,5|4">Belady の異常（枠4）</button>
+      </div>
+      <div id="err"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">各時点の枠の中身</h2>
+      <p class="muted" style="margin:0">● = ページフォールト（赤：新しく読み込んだページ）　○ = ヒット（緑：参照されたページ）。最初の読込みもページフォールトに数えます。</p>
+      <div id="tables"></div>
+      <div id="note" style="margin-top:12px"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">フォールト数の比較</h2>
+      <div id="compare"></div>
+      <h3>ページ枠の数とフォールト数</h3>
+      <p class="muted" style="margin-top:0">同じ参照列で枠の数を変えたときのフォールト数です。FIFO だけ、枠を増やしたのにフォールトが増える（Belady の異常）ことがあります。</p>
+      <div id="chart"></div>
+      <div id="chartTable" class="table-wrap" style="margin-top:8px"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">3つの方式</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>方式</th><th>追い出すページ</th><th>ヒット時の扱い</th></tr></thead>
+        <tbody>
+          <tr><td><b>FIFO</b>（First In First Out）</td><td>最も古くに読み込まれたページ</td><td>並びを変えない</td></tr>
+          <tr><td><b>LRU</b>（Least Recently Used）</td><td>最後に参照されてから最も時間が経っているページ</td><td>「最近使った」扱いに更新（右端へ移す）</td></tr>
+          <tr><td><b>OPT</b>（最適、Belady の最適アルゴリズム）</td><td>今後最も長く参照されないページ（理論上の最良。未来の参照が必要なので実現不可）</td><td>—</td></tr>
+        </tbody>
+      </table></div>
+      <p class="muted">OPT で「今後一度も参照されないページ」が複数あるときは、先に読み込んだほうを追い出しています（どれを選んでもフォールト数は同じ）。</p>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">関連資料</h2>
+      <ul>
+        <li><a href="../../01_テクノロジ系/05_ソフトウェア.md">01_テクノロジ系/05_ソフトウェア.md</a>（5. 仮想記憶とページ置換）</li>
+        <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（5. OS（ページ置換））</li>
+      </ul>
+    </section>
+  </main>
+  <script src="../assets/common.js"></script>
+  <script>
+// LOGIC-BEGIN
+var PageLogic = (function () {
+  "use strict";
+  function parseRefs(str) {
+    var a = String(str).split(/[\s,、，]+/).filter(function (x) { return x !== ""; });
+    if (!a.length) throw new Error("参照列を入力してください");
+    if (a.length > 60) throw new Error("参照列は 60 個までにしてください");
+    a.forEach(function (x) { if (!/^[0-9A-Za-z]{1,3}$/.test(x)) throw new Error("「" + x + "」はページ番号として使えません（英数字3文字まで）"); });
+    return a;
+  }
+
+  // algo: "FIFO" | "LRU" | "OPT"
+  // 戻り値 steps[i] = { page, hit, evicted, slots(枠の位置順), order(追い出す順。先頭が次の候補), slot(読込み/ヒットした枠番号) }
+  function simulate(refs, frames, algo) {
+    var slots = [], order = [], steps = [], faults = 0;
+    for (var i = 0; i < refs.length; i++) {
+      var p = refs[i], idx = slots.indexOf(p), evicted = null, slotNo;
+      if (idx >= 0) {
+        slotNo = idx;
+        if (algo === "LRU") { order.splice(order.indexOf(p), 1); order.push(p); }
+      } else {
+        faults++;
+        if (slots.length < frames) { slots.push(p); slotNo = slots.length - 1; }
+        else {
+          var victim;
+          if (algo === "OPT") victim = optVictim(refs, i, order);
+          else victim = order[0]; // FIFO: 最も古く読み込んだ／LRU: 最も長く参照されていない
+          slotNo = slots.indexOf(victim);
+          slots[slotNo] = p; evicted = victim;
+          order.splice(order.indexOf(victim), 1);
+        }
+        order.push(p);
+      }
+      var shownOrder = algo === "OPT" ? optOrder(refs, i, order) : order.slice();
+      steps.push({ page: p, hit: idx >= 0, evicted: evicted, slots: slots.slice(), order: shownOrder, slot: slotNo });
+    }
+    return { steps: steps, faults: faults, hits: refs.length - faults };
+  }
+  function nextUse(refs, i, p) { for (var j = i + 1; j < refs.length; j++) if (refs[j] === p) return j; return Infinity; }
+  // OPT: 次に参照されるのが最も遠いページ。同点（今後参照なし）は先に読み込んだもの
+  function optVictim(refs, i, order) {
+    var best = null, bestN = -1;
+    for (var k = 0; k < order.length; k++) {
+      var n = nextUse(refs, i, order[k]);
+      if (n > bestN) { bestN = n; best = order[k]; }
+    }
+    return best;
+  }
+  // OPT の「追い出す順」：次の参照が遠い順（同点は読込み順）
+  function optOrder(refs, i, order) {
+    return order.map(function (p, k) { return { p: p, n: nextUse(refs, i, p), k: k }; })
+      .sort(function (a, b) { return b.n - a.n || a.k - b.k; }).map(function (x) { return x.p; });
+  }
+  function faultsByFrames(refs, algo, maxF) {
+    var r = []; for (var f = 1; f <= maxF; f++) r.push(simulate(refs, f, algo).faults); return r;
+  }
+  // FIFO で Belady の異常が起きる枠数の組を探す
+  function beladyPairs(counts) {
+    var r = []; for (var f = 1; f < counts.length; f++) if (counts[f] > counts[f - 1]) r.push([f, f + 1]); return r;
+  }
+  return { parseRefs: parseRefs, simulate: simulate, faultsByFrames: faultsByFrames, beladyPairs: beladyPairs };
+})();
+// LOGIC-END
+
+(function () {
+  var L = PageLogic, esc = APL.esc;
+  var $ = function (id) { return document.getElementById(id); };
+  var ALGOS = ["FIFO", "LRU", "OPT"], COLORS = { FIFO: "var(--s1)", LRU: "var(--s2)", OPT: "var(--s3)" };
+  var DESC = { FIFO: "最も古く読み込んだページを追い出す", LRU: "最も長く参照されていないページを追い出す", OPT: "今後最も長く参照されないページを追い出す" };
+  var refs = [], frames = 3, results = {}, cur = 0; // cur = 表示済みのステップ数
+
+  function load() {
+    try {
+      refs = L.parseRefs($("refs").value);
+      frames = Number($("frames").value);
+      if (!(frames >= 1 && frames <= 10 && Number.isInteger(frames))) throw new Error("ページ枠の数は 1〜10 の整数にしてください");
+      $("err").innerHTML = "";
+    } catch (e) { $("err").innerHTML = '<div class="result box-ng">' + esc(e.message) + "</div>"; return false; }
+    ALGOS.forEach(function (a) { results[a] = L.simulate(refs, frames, a); });
+    renderCompare();
+    return true;
+  }
+
+  function renderTables() {
+    var view = $("view").value, html = "";
+    ALGOS.forEach(function (a) {
+      var res = results[a], shownF = 0;
+      for (var i = 0; i < cur; i++) if (!res.steps[i].hit) shownF++;
+      html += '<div class="algo-h"><h3><span class="swatch" style="background:' + COLORS[a] + '"></span>' + a + '</h3><span class="muted">' + DESC[a] + "</span>" +
+        '<span class="tag">フォールト ' + shownF + (cur < refs.length ? "（途中）" : " 回") + "</span></div>";
+      html += '<div class="table-wrap"><table class="pr"><thead><tr><th>参照</th>';
+      refs.forEach(function (p, i) { html += '<th class="' + (i === cur - 1 ? "cur" : "") + '">' + esc(p) + "</th>"; });
+      html += "</tr></thead><tbody>";
+      for (var r = 0; r < frames; r++) {
+        html += "<tr><td>" + (view === "slot" ? "枠" + (r + 1) : (r === 0 ? "次に追い出す →" : (r === frames - 1 ? "最後に追い出す" : ""))) + "</td>";
+        res.steps.forEach(function (st, i) {
+          if (i >= cur) { html += '<td class="future"></td>'; return; }
+          var v = view === "slot" ? st.slots[r] : st.order[r], cls = "";
+          if (v !== undefined && v === st.page) cls = st.hit ? "hit" : "new";
+          if (i === cur - 1) cls += " cur";
+          html += '<td class="' + cls + '">' + (v === undefined ? "" : esc(v)) + "</td>";
+        });
+        html += "</tr>";
+      }
+      html += "<tr><td>結果</td>";
+      res.steps.forEach(function (st, i) { html += i >= cur ? "<td></td>" : '<td class="' + (st.hit ? "h" : "f") + '">' + (st.hit ? "○" : "●") + "</td>"; });
+      html += "</tr><tr><td>追い出し</td>";
+      res.steps.forEach(function (st, i) { html += "<td>" + (i < cur && st.evicted !== null ? esc(st.evicted) : "") + "</td>"; });
+      html += "</tr></tbody></table></div>";
+    });
+    $("tables").innerHTML = html;
+    $("pos").textContent = cur + " / " + refs.length + " ステップ";
+    $("step").disabled = $("all").disabled = cur >= refs.length;
+    $("back").disabled = cur <= 0;
+
+    // 現在のステップの説明
+    if (cur === 0) { $("note").innerHTML = '<div class="box-note">「1ステップ進む」で1つずつ、「一括実行」で最後まで表示します。</div>'; return; }
+    var i = cur - 1, lines = ALGOS.map(function (a) {
+      var st = results[a].steps[i];
+      var t = "<b>" + a + "</b>：";
+      if (st.hit) t += "ページ " + esc(st.page) + " は枠にあるので <span class=\"ok\">ヒット</span>" + (a === "LRU" ? "（最近使った扱いに更新）" : "");
+      else if (st.evicted === null) t += "空き枠に " + esc(st.page) + " を読み込む（<span class=\"ng\">フォールト</span>）";
+      else t += "<span class=\"ng\">フォールト</span>。" + (a === "FIFO" ? "最も古く読み込んだ " : a === "LRU" ? "最も長く参照されていない " : "今後最も長く参照されない ") + esc(st.evicted) + " を追い出して " + esc(st.page) + " を読み込む";
+      return t;
+    });
+    $("note").innerHTML = '<div class="result">' + (i + 1) + " 番目の参照（ページ " + esc(refs[i]) + "）<br>" + lines.join("<br>") + "</div>";
+  }
+
+  function renderCompare() {
+    var html = '<div class="table-wrap"><table style="width:auto"><thead><tr><th>方式</th><th>ページフォールト</th><th>ヒット</th><th>ヒット率</th></tr></thead><tbody>';
+    var min = Math.min.apply(null, ALGOS.map(function (a) { return results[a].faults; }));
+    ALGOS.forEach(function (a) {
+      var r = results[a];
+      html += "<tr><td><span class=\"swatch\" style=\"background:" + COLORS[a] + "\"></span>" + a + "</td><td><b>" + r.faults + "</b> 回" + (r.faults === min ? ' <span class="tag">最少</span>' : "") + "</td><td>" + r.hits + " 回</td><td>" + (r.hits / refs.length * 100).toFixed(1) + "%</td></tr>";
+    });
+    html += "</tbody></table></div>";
+    var distinct = {}; refs.forEach(function (p) { distinct[p] = 1; });
+    var maxF = Math.max(2, Math.min(10, Object.keys(distinct).length + 1));
+    var counts = {}; ALGOS.forEach(function (a) { counts[a] = L.faultsByFrames(refs, a, maxF); });
+    var bel = L.beladyPairs(counts.FIFO);
+    if (bel.length) html += '<div class="box-note" style="margin-top:10px"><b>Belady の異常</b>：FIFO では ' + bel.map(function (b) { return "枠" + b[0] + "→枠" + b[1] + "（" + counts.FIFO[b[0] - 1] + "回→" + counts.FIFO[b[1] - 1] + "回）"; }).join("、") + " のように、枠を増やしたのにフォールトが増えています。LRU と OPT ではこの異常は起きません。</div>";
+    $("compare").innerHTML = html;
+    drawChart(counts, maxF);
+    var t = '<table style="width:auto"><thead><tr><th>枠の数</th>';
+    for (var f = 1; f <= maxF; f++) t += "<th" + (f === frames ? ' style="color:var(--accent)"' : "") + ">" + f + "</th>";
+    t += "</tr></thead><tbody>";
+    ALGOS.forEach(function (a) { t += "<tr><td>" + a + "</td>" + counts[a].map(function (c) { return "<td>" + c + "</td>"; }).join("") + "</tr>"; });
+    $("chartTable").innerHTML = t + "</tbody></table>";
+  }
+
+  function drawChart(counts, maxF) {
+    var NS = "http://www.w3.org/2000/svg", W = Math.max(280, Math.min(560, $("chart").clientWidth || 560)), H = 240, m = { l: 40, r: 56, t: 14, b: 36 };
+    var maxY = Math.max.apply(null, ALGOS.map(function (a) { return Math.max.apply(null, counts[a]); }));
+    var stepY = maxY > 20 ? 5 : maxY > 10 ? 2 : 1; maxY = Math.ceil(maxY / stepY) * stepY || 1;
+    var x = function (f) { return m.l + (f - 1) / (maxF - 1) * (W - m.l - m.r); };
+    var y = function (v) { return H - m.b - v / maxY * (H - m.t - m.b); };
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", "100%"); svg.style.maxWidth = W + "px";
+    svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "ページ枠の数ごとのページフォールト数の折れ線グラフ");
+    function add(tag, at, txt, parent) { var e = document.createElementNS(NS, tag); for (var k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; (parent || svg).appendChild(e); return e; }
+    for (var v = 0; v <= maxY; v += stepY) {
+      add("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--border)", "stroke-width": 1 });
+      add("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", fill: "var(--text-sub)" }, v);
+    }
+    for (var f = 1; f <= maxF; f++) add("text", { x: x(f), y: H - m.b + 16, "text-anchor": "middle", fill: f === frames ? "var(--accent)" : "var(--text-sub)", "font-weight": f === frames ? 700 : 400 }, f);
+    add("text", { x: (m.l + W - m.r) / 2, y: H - 4, "text-anchor": "middle", fill: "var(--text-sub)" }, "ページ枠の数");
+    add("text", { x: 4, y: m.t - 2, fill: "var(--text-sub)" }, "回");
+    add("line", { x1: x(frames), x2: x(frames), y1: m.t, y2: H - m.b, stroke: "var(--accent)", "stroke-dasharray": "3 3", opacity: .6 });
+    var lastYs = [];
+    ALGOS.forEach(function (a) {
+      var pts = counts[a].map(function (c, i) { return x(i + 1) + "," + y(c); }).join(" ");
+      add("polyline", { points: pts, fill: "none", stroke: COLORS[a], "stroke-width": 2, "stroke-linejoin": "round" });
+      counts[a].forEach(function (c, i) {
+        var g = add("g", {});
+        add("circle", { cx: x(i + 1), cy: y(c), r: 4.5, fill: COLORS[a], stroke: "var(--surface)", "stroke-width": 2 }, null, g);
+        add("circle", { cx: x(i + 1), cy: y(c), r: 11, fill: "transparent" }, null, g);
+        add("title", {}, a + "・枠" + (i + 1) + "：フォールト " + c + " 回", g);
+      });
+      // 直接ラベル（重ならないようにずらす）
+      var ly = y(counts[a][maxF - 1]);
+      lastYs.forEach(function (py) { if (Math.abs(py - ly) < 13) ly = py + 13; });
+      lastYs.push(ly);
+      add("text", { x: W - m.r + 8, y: ly + 4, fill: "var(--text)" }, a);
+    });
+    $("chart").innerHTML = ""; $("chart").appendChild(svg);
+    var lg = document.createElement("p"); lg.className = "muted"; lg.style.margin = "4px 0 0";
+    lg.innerHTML = ALGOS.map(function (a) { return '<span style="margin-right:14px"><span class="swatch" style="background:' + COLORS[a] + '"></span>' + a + "</span>"; }).join("") + "（点にマウスを重ねると値を表示）";
+    $("chart").appendChild(lg);
+  }
+
+  function restart() { cur = 0; if (load()) renderTables(); }
+  $("reset").addEventListener("click", function () { cur = 0; renderTables(); });
+  $("step").addEventListener("click", function () { if (cur < refs.length) { cur++; renderTables(); } });
+  $("back").addEventListener("click", function () { if (cur > 0) { cur--; renderTables(); } });
+  $("all").addEventListener("click", function () { cur = refs.length; renderTables(); });
+  $("view").addEventListener("change", renderTables);
+  ["refs", "frames"].forEach(function (id) {
+    $(id).addEventListener("change", restart);
+    $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") restart(); });
+  });
+  document.querySelectorAll("[data-ex]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = b.dataset.ex.split("|"); $("refs").value = a[0]; $("frames").value = a[1];
+      cur = 0; if (load()) { cur = refs.length; renderTables(); }
+    });
+  });
+  if (load()) { cur = refs.length; renderTables(); }
+  var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { if (refs.length) renderCompare(); }, 200); });
+})();
+  </script>
+</body>
+</html>

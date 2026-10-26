@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IPv4サブネット計算機</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .binrows { font-family: var(--mono); font-size: 15px; display: grid; grid-template-columns: max-content max-content 1fr; gap: 4px 14px; align-items: baseline; overflow-x: auto; }
+    .binrows .lbl { font-family: var(--font); font-size: 13px; color: var(--text-sub); white-space: nowrap; }
+    .binrows .dec { white-space: nowrap; }
+    .binrows .bin { white-space: nowrap; letter-spacing: .5px; }
+    .binrows .sep { grid-column: 1 / -1; border-top: 2px solid var(--text-sub); height: 0; margin: 2px 0; }
+    .bn { color: var(--accent); font-weight: 700; }
+    .bh { color: var(--warn); }
+    .bf { background: var(--accent-weak); border-radius: 3px; }
+    .legend span { margin-right: 14px; }
+    .quiz-q { font-size: 20px; font-family: var(--mono); font-weight: 700; margin: 4px 0 12px; }
+    .quiz-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .quiz-grid input { width: 100%; font-family: var(--mono); }
+    .mark { font-size: 13px; font-weight: 700; }
+    @media (max-width: 600px) {
+      .binrows { grid-template-columns: minmax(0, 1fr) max-content; font-size: 12px; letter-spacing: 0; gap: 0 10px; }
+      .binrows .lbl { white-space: normal; }
+      .binrows .dec { grid-column: 2; text-align: right; }
+      .binrows .bin { grid-column: 1 / -1; margin-bottom: 6px; }
+    }
+    /* 途中式は桁をそろえて読めるよう、狭い画面では折り返さず枠内で横スクロール */
+    @media (max-width: 600px) { .steps { white-space: pre; font-size: 12.5px; } }
+  </style>
+</head>
+<body data-root="../" data-title="IPv4サブネット計算機">
+  <main>
+    <h1>IPv4サブネット計算機</h1>
+    <p class="lead">IPアドレスとプレフィックス長（またはサブネットマスク）から、ネットワークアドレス・ブロードキャストアドレス・割当て可能なホストの範囲とホスト数を求めます。2進数の AND 演算の様子と速算法も表示します。</p>
+
+    <section class="card">
+      <h2 style="margin-top:0">計算機</h2>
+      <div class="row">
+        <div class="field">
+          <label for="ipIn">IPアドレス</label>
+          <input type="text" id="ipIn" value="192.168.10.130" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:11em">
+        </div>
+        <div class="field">
+          <label for="maskIn">プレフィックス長 または サブネットマスク</label>
+          <input type="text" id="maskIn" value="/26" inputmode="decimal" autocomplete="off" spellcheck="false" style="width:11em">
+        </div>
+        <button class="primary" id="calcBtn" type="button">計算</button>
+      </div>
+      <p class="muted" style="margin:6px 0 0">「192.168.1.10/24」のように IP 欄にまとめて入力しても構いません。マスク欄は「/26」「26」「255.255.255.192」のどれでも可。</p>
+      <div class="row" style="margin-top:10px">
+        <span class="muted">例題を読み込む：</span>
+        <button type="button" data-ex="192.168.10.130|/26">192.168.10.130/26</button>
+        <button type="button" data-ex="172.16.45.200|/20">172.16.45.200/20</button>
+        <button type="button" data-ex="192.168.10.100|255.255.255.224">192.168.10.100 マスク255.255.255.224</button>
+        <button type="button" data-ex="10.1.2.3|/8">10.1.2.3/8</button>
+      </div>
+      <div id="calcOut"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">練習問題モード</h2>
+      <p class="muted" style="margin-top:0">ランダムに出題します。答えを入力して「判定」を押してください（ホスト数は割当て可能な台数 = 2<sup>h</sup> − 2）。</p>
+      <div class="row">
+        <div class="field">
+          <label for="qLevel">難易度</label>
+          <select id="qLevel">
+            <option value="easy">基本（/24〜/30、第4オクテット）</option>
+            <option value="mid" selected>標準（/17〜/30）</option>
+            <option value="hard">応用（/9〜/30、マスク表記あり）</option>
+          </select>
+        </div>
+        <button class="primary" id="qNew" type="button">新しい問題</button>
+        <span class="muted" id="qScore"></span>
+      </div>
+      <div id="quiz" style="margin-top:12px"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">関連資料</h2>
+      <ul>
+        <li><a href="../../01_テクノロジ系/07_ネットワーク.md">01_テクノロジ系/07_ネットワーク.md</a>（4. ネットワーク層：IPアドレスとサブネット）</li>
+        <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（6. ネットワーク）</li>
+      </ul>
+    </section>
+  </main>
+  <script src="../assets/common.js"></script>
+  <script>
+// LOGIC-BEGIN
+var SubnetLogic = (function () {
+  "use strict";
+  var P32 = 4294967296;
+
+  function parseIP(str) {
+    var s = String(str).trim();
+    var m = s.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (!m) throw new Error("IPアドレスは 192.168.1.10 のように「.」で区切った4つの数で入力してください");
+    var v = 0;
+    for (var i = 1; i <= 4; i++) {
+      var o = Number(m[i]);
+      if (o > 255) throw new Error("各オクテットは 0〜255 です（" + o + " は範囲外）");
+      v = v * 256 + o;
+    }
+    return v;
+  }
+  function prefixToMask(p) { return p === 0 ? 0 : P32 - Math.pow(2, 32 - p); }
+  function maskToPrefix(mask) {
+    var bits = toBin(mask);
+    if (!/^1*0*$/.test(bits)) throw new Error("サブネットマスクは、上位から 1 が連続し、その後に 0 が続く形でなければなりません（" + toDotted(mask) + " は不正）");
+    return bits.indexOf("0") < 0 ? 32 : bits.indexOf("0");
+  }
+  // "/26" "26" "255.255.255.192" を受け付けてプレフィックス長を返す
+  function parseMask(str) {
+    var s = String(str).trim().replace(/^\//, "");
+    if (/^\d{1,2}$/.test(s)) {
+      var p = Number(s);
+      if (p > 32) throw new Error("プレフィックス長は 0〜32 です");
+      return p;
+    }
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(s)) return maskToPrefix(parseIP(s));
+    throw new Error("プレフィックス長（/26 など）またはサブネットマスク（255.255.255.192 など）を入力してください");
+  }
+  function octets(v) { return [Math.floor(v / 16777216) % 256, Math.floor(v / 65536) % 256, Math.floor(v / 256) % 256, v % 256]; }
+  function toDotted(v) { return octets(v).join("."); }
+  function toBin(v) { var s = v.toString(2); while (s.length < 32) s = "0" + s; return s; }
+  function and(a, b) { var r = 0; for (var i = 0; i < 32; i++) { var p = Math.pow(2, 31 - i); if (Math.floor(a / p) % 2 && Math.floor(b / p) % 2) r += p; } return r; }
+
+  function calc(ip, prefix) {
+    var mask = prefixToMask(prefix), h = 32 - prefix, size = Math.pow(2, h);
+    var network = and(ip, mask), broadcast = network + size - 1;
+    var hosts = Math.max(0, size - 2);
+    var r = { ip: ip, prefix: prefix, mask: mask, wildcard: P32 - 1 - mask, network: network, broadcast: broadcast,
+              hostBits: h, total: size, hosts: hosts, first: null, last: null };
+    if (hosts > 0) { r.first = network + 1; r.last = broadcast - 1; }
+    // 速算法：注目オクテット（マスクが 255 でも 0 でもないオクテット。/8,/16,/24 のように割り切れる場合は境界のオクテット）
+    var oi = prefix % 8 === 0 ? Math.max(0, prefix / 8 - 1) : Math.floor(prefix / 8);
+    if (prefix === 32) oi = 3;
+    var mo = octets(mask)[oi];
+    r.focus = { index: oi, maskOctet: mo, block: 256 - mo, value: octets(ip)[oi], netOctet: octets(network)[oi] };
+    return r;
+  }
+  function addrInfo(ip) {
+    var o = octets(ip);
+    var cls = o[0] < 128 ? "A" : o[0] < 192 ? "B" : o[0] < 224 ? "C" : o[0] < 240 ? "D（マルチキャスト）" : "E（実験用）";
+    var priv = (o[0] === 10) || (o[0] === 172 && o[1] >= 16 && o[1] <= 31) || (o[0] === 192 && o[1] === 168);
+    var note = priv ? "プライベートIPアドレス" : o[0] === 127 ? "ループバックアドレス" : (o[0] === 169 && o[1] === 254) ? "リンクローカルアドレス" : "グローバルIPアドレス（等）";
+    return { cls: cls, note: note };
+  }
+
+  // 乱数：rnd() は 0〜1 を返す関数（テスト用に差し替え可）
+  function randomProblem(level, rnd) {
+    rnd = rnd || Math.random;
+    var ri = function (a, b) { return a + Math.floor(rnd() * (b - a + 1)); };
+    var lo = level === "easy" ? 24 : level === "mid" ? 17 : 9, prefix;
+    do { prefix = ri(lo, 30); } while (prefix % 8 === 0 && rnd() < 0.7); // 区切りがきれいな /16 /24 は出にくく
+    var first = [10, 172, 192][ri(0, 2)];
+    var o = first === 10 ? [10, ri(0, 255), ri(0, 255), ri(1, 254)] :
+            first === 172 ? [172, ri(16, 31), ri(0, 255), ri(1, 254)] : [192, 168, ri(0, 255), ri(1, 254)];
+    var ip = ((o[0] * 256 + o[1]) * 256 + o[2]) * 256 + o[3];
+    return { ip: ip, prefix: prefix, maskForm: level === "hard" && rnd() < 0.5 };
+  }
+  function norm(s) { return String(s).replace(/[\s　]/g, "").replace(/[０-９．／]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }); }
+  // 解答の判定 ans: {mask, network, broadcast, hosts}
+  function judge(prob, ans) {
+    var r = calc(prob.ip, prob.prefix), res = {};
+    function ipEq(s, v) { try { return parseIP(norm(s)) === v; } catch (e) { return false; } }
+    res.mask = prob.maskForm ? (function () { try { return parseMask(norm(ans.mask)) === prob.prefix && /^\/?\d{1,2}$/.test(norm(ans.mask)); } catch (e) { return false; } })()
+                             : ipEq(ans.mask, r.mask);
+    res.network = ipEq(ans.network, r.network);
+    res.broadcast = ipEq(ans.broadcast, r.broadcast);
+    res.hosts = norm(ans.hosts).replace(/[,台]/g, "") === String(r.hosts);
+    return res;
+  }
+  return { parseIP: parseIP, parseMask: parseMask, prefixToMask: prefixToMask, maskToPrefix: maskToPrefix, octets: octets,
+           toDotted: toDotted, toBin: toBin, and: and, calc: calc, addrInfo: addrInfo, randomProblem: randomProblem, judge: judge };
+})();
+// LOGIC-END
+
+(function () {
+  var L = SubnetLogic, esc = APL.esc;
+  var $ = function (id) { return document.getElementById(id); };
+  var OCT = ["第1", "第2", "第3", "第4"];
+
+  // 32ビットを「ネットワーク部／ホスト部」で色分けして表示
+  function binHTML(v, prefix, focusIdx) {
+    var b = L.toBin(v), out = "";
+    for (var i = 0; i < 32; i++) {
+      if (i && i % 8 === 0) out += ".";
+      var oct = Math.floor(i / 8);
+      var cls = (i < prefix ? "bn" : "bh") + (oct === focusIdx ? " bf" : "");
+      out += '<span class="' + cls + '">' + b[i] + "</span>";
+    }
+    return out;
+  }
+  function row(label, v, prefix, focusIdx) {
+    return '<span class="lbl">' + label + '</span><span class="dec">' + L.toDotted(v) + '</span><span class="bin">' + binHTML(v, prefix, focusIdx) + "</span>";
+  }
+
+  // 計算結果と解説（練習問題の解説にも使う）
+  function explainHTML(ip, prefix) {
+    var r = L.calc(ip, prefix), f = r.focus, info = L.addrInfo(ip);
+    var html = '<div class="table-wrap" style="margin-top:12px"><table><tbody>';
+    html += "<tr><th>ネットワークアドレス</th><td class=\"mono\"><b>" + L.toDotted(r.network) + "/" + prefix + "</b></td></tr>";
+    html += "<tr><th>ブロードキャストアドレス</th><td class=\"mono\"><b>" + L.toDotted(r.broadcast) + "</b></td></tr>";
+    html += "<tr><th>割当て可能な範囲</th><td class=\"mono\">" + (r.first !== null ? L.toDotted(r.first) + " 〜 " + L.toDotted(r.last) : "なし") + "</td></tr>";
+    html += "<tr><th>ホスト数</th><td class=\"mono\"><b>" + r.hosts.toLocaleString() + "</b>（2<sup>" + r.hostBits + "</sup> − 2）</td></tr>";
+    html += "<tr><th>サブネットマスク</th><td class=\"mono\">" + L.toDotted(r.mask) + "（/" + prefix + "）</td></tr>";
+    html += "<tr><th>参考</th><td>クラス" + info.cls + "の範囲／" + info.note + "</td></tr>";
+    html += "</tbody></table></div>";
+    if (prefix >= 31) html += '<p class="box-note">/' + prefix + " はホスト部が " + r.hostBits + " ビットしかなく、公式 2<sup>h</sup> − 2 では割当て可能なホストは 0 台です（/31 は 2 点間リンク用の特例、/32 は単一ホストを表す経路などに使われます）。</p>";
+
+    html += '<h3>2進数で AND 演算</h3><p class="legend muted"><span class="bn">■ ネットワーク部（上位 ' + prefix + ' ビット）</span><span class="bh">■ ホスト部（下位 ' + r.hostBits + " ビット）</span>" + (prefix % 8 ? '<span class="bf">注目オクテット</span>' : "") + "</p>";
+    var fi = prefix % 8 ? f.index : -1;
+    html += '<div class="binrows">' + row("IPアドレス", ip, prefix, fi) + row("サブネットマスク", r.mask, prefix, fi) +
+      '<div class="sep"></div>' + row("AND → ネットワーク", r.network, prefix, fi) + row("ホスト部を全部1 → ブロードキャスト", r.broadcast, prefix, fi) + "</div>";
+
+    // 途中式
+    var s = "";
+    s += "手順1：ホスト数\n  h = 32 − " + prefix + " = " + r.hostBits + "\n  ホスト数 = 2^" + r.hostBits + " − 2 = " + r.total.toLocaleString() + " − 2 = " + r.hosts.toLocaleString() + "\n\n";
+    s += "手順2：サブネットマスク\n  /" + prefix + " → 1 が " + prefix + " 個 → " + L.toBin(r.mask).replace(/(.{8})(?=.)/g, "$1.") + "\n                → " + L.toDotted(r.mask) + "\n\n";
+    if (prefix % 8 !== 0) {
+      var ipo = L.octets(ip)[f.index], mo = f.maskOctet;
+      var b8 = function (n) { var t = n.toString(2); while (t.length < 8) t = "0" + t; return t.slice(0, 4) + " " + t.slice(4); };
+      s += "手順3：ネットワークアドレス（AND 演算）\n  マスクが 255 でも 0 でもないのは" + OCT[f.index] + "オクテットなので、そこだけ計算すればよい\n";
+      s += "  IPアドレス       " + String(ipo).padStart(3) + " = " + b8(ipo) + "\n";
+      s += "  サブネットマスク " + String(mo).padStart(3) + " = " + b8(mo) + "\n";
+      s += "  AND              ─────────────\n";
+      s += "                       " + b8(ipo & mo) + " = " + (ipo & mo) + "\n";
+      s += "  （それより右のオクテットは 0、左のオクテットはそのまま）\n  → " + L.toDotted(r.network) + "\n";
+      s += "  速算法：ブロックサイズ = 256 − " + mo + " = " + f.block + "。" + f.block + " の倍数のうち " + ipo + " 以下で最大は " + f.netOctet + "\n\n";
+      s += "手順4：ブロードキャストアドレス\n  ホスト部（下位 " + r.hostBits + " ビット）をすべて 1 にする\n  速算法：" + OCT[f.index] + "オクテットは " + f.netOctet + " + " + f.block + " − 1 = " + (f.netOctet + f.block - 1) + (f.index < 3 ? "、それより右のオクテットは 255" : "") + "\n  → " + L.toDotted(r.broadcast) + "\n\n";
+    } else {
+      s += "手順3：ネットワークアドレス\n  /" + prefix + " はオクテットの区切りなので、マスクが 255 のオクテットはそのまま、0 のオクテットは 0 にする\n  → " + L.toDotted(r.network) + "\n\n";
+      s += "手順4：ブロードキャストアドレス\n  マスクが 0 のオクテット（ホスト部）をすべて 255 にする\n  → " + L.toDotted(r.broadcast) + "\n\n";
+    }
+    s += "手順5：割当て可能な範囲\n  " + (r.first !== null ? "ネットワークアドレス + 1 〜 ブロードキャストアドレス − 1\n  → " + L.toDotted(r.first) + " 〜 " + L.toDotted(r.last) : "割当て可能なアドレスはありません");
+    html += '<h3>途中式</h3><div class="steps">' + esc(s) + "</div>";
+    return html;
+  }
+
+  function runCalc() {
+    var ipStr = $("ipIn").value.trim(), maskStr = $("maskIn").value;
+    var m = ipStr.match(/^(.*)\/(\d{1,2})$/);
+    if (m) { ipStr = m[1].trim(); maskStr = "/" + m[2]; $("ipIn").value = ipStr; $("maskIn").value = maskStr; }
+    try {
+      var ip = L.parseIP(ipStr), prefix = L.parseMask(maskStr);
+      $("calcOut").innerHTML = '<div class="result">' + explainHTML(ip, prefix) + "</div>";
+    } catch (e) {
+      $("calcOut").innerHTML = '<div class="result box-ng">' + esc(e.message) + "</div>";
+    }
+  }
+  $("calcBtn").addEventListener("click", runCalc);
+  ["ipIn", "maskIn"].forEach(function (id) { $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") runCalc(); }); });
+  document.querySelectorAll("[data-ex]").forEach(function (b) {
+    b.addEventListener("click", function () { var a = b.dataset.ex.split("|"); $("ipIn").value = a[0]; $("maskIn").value = a[1]; runCalc(); });
+  });
+
+  // ---------- 練習問題 ----------
+  var prob = null, score = APL.store.get("subnet:score", { ok: 0, total: 0 });
+  function showScore() { $("qScore").textContent = "これまでの成績：" + score.ok + " / " + score.total + " 問 全問正解"; }
+  var FIELDS = [["mask", "サブネットマスク", "255.255.255.0"], ["network", "ネットワークアドレス", "192.168.1.0"],
+                ["broadcast", "ブロードキャストアドレス", "192.168.1.255"], ["hosts", "割当て可能なホスト数", "254"]];
+  function newProblem(noFocus) {
+    prob = L.randomProblem($("qLevel").value);
+    var q = prob.maskForm ? L.toDotted(prob.ip) + "  マスク " + L.toDotted(L.prefixToMask(prob.prefix)) : L.toDotted(prob.ip) + "/" + prob.prefix;
+    var html = '<div class="quiz-q">' + esc(q) + '</div><div class="quiz-grid">';
+    FIELDS.forEach(function (f) {
+      var label = f[0] === "mask" && prob.maskForm ? "プレフィックス長（/○○）" : f[1];
+      var ph = f[0] === "mask" && prob.maskForm ? "/24" : f[2];
+      html += '<div class="field"><label for="qa-' + f[0] + '">' + label + ' <span class="mark" id="qm-' + f[0] + '"></span></label><input type="text" inputmode="decimal" autocomplete="off" id="qa-' + f[0] + '" placeholder="例 ' + ph + '"></div>';
+    });
+    html += '</div><div class="row" style="margin-top:12px"><button class="primary" type="button" id="qJudge">判定</button><button type="button" id="qShow">解説を見る</button></div><div id="qResult"></div>';
+    $("quiz").innerHTML = html;
+    $("qJudge").addEventListener("click", judge);
+    $("qShow").addEventListener("click", function () { showExplain(null); });
+    $("quiz").querySelectorAll("input").forEach(function (inp) { inp.addEventListener("keydown", function (e) { if (e.key === "Enter") judge(); }); });
+    if (noFocus !== true) $("qa-mask").focus();
+  }
+  function judge() {
+    if (!prob) return;
+    var ans = {}; FIELDS.forEach(function (f) { ans[f[0]] = $("qa-" + f[0]).value; });
+    var res = L.judge(prob, ans), all = true;
+    FIELDS.forEach(function (f) {
+      var m = $("qm-" + f[0]); m.textContent = res[f[0]] ? "○ 正解" : "× 不正解"; m.className = "mark " + (res[f[0]] ? "ok" : "ng");
+      if (!res[f[0]]) all = false;
+    });
+    if (!prob.judged) { prob.judged = true; score.total++; if (all) score.ok++; APL.store.set("subnet:score", score); showScore(); }
+    showExplain(all);
+  }
+  function showExplain(all) {
+    var r = L.calc(prob.ip, prob.prefix);
+    var head = all === null ? "" : all ? '<div class="box-ok">全問正解です！</div>' : '<div class="box-ng">不正解があります。正解：マスク ' +
+      (prob.maskForm ? "/" + prob.prefix : L.toDotted(r.mask)) + "、ネットワーク " + L.toDotted(r.network) + "、ブロードキャスト " + L.toDotted(r.broadcast) + "、ホスト数 " + r.hosts + "</div>";
+    $("qResult").innerHTML = '<div class="result">' + head + explainHTML(prob.ip, prob.prefix) + "</div>";
+  }
+  $("qNew").addEventListener("click", function () { newProblem(false); });
+  showScore();
+  newProblem(true);
+  runCalc();
+})();
+  </script>
+</body>
+</html>

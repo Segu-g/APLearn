@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>キャッシュメモリの計算</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .field { max-width: 100%; min-width: 0; }
+    .field input[type="number"] { width: 7em; }
+    details.mode { margin-top: 10px; }
+    .big { font-size: 22px; font-weight: 700; font-family: var(--mono); }
+    table.dm { width: auto; font-family: var(--mono); }
+    table.dm th, table.dm td { text-align: center; padding: 4px 8px; white-space: nowrap; }
+    table.dm td.hit { background: var(--ok-weak); color: var(--ok); font-weight: 700; }
+    table.dm td.miss { background: var(--ng-weak); color: var(--ng); font-weight: 700; }
+    table.dm td.chg { background: var(--warn-weak); font-weight: 700; }
+    table.dm td.same { color: var(--text-sub); }
+    table.dm th.line { color: var(--text-sub); font-weight: 400; }
+    .addr-split { font-family: var(--mono); }
+    .addr-split .t { color: var(--mgmt); } .addr-split .i { color: var(--accent); } .addr-split .o { color: var(--warn); }
+    /* 途中式は桁をそろえて読めるよう、狭い画面では折り返さず枠内で横スクロール */
+    @media (max-width: 600px) { .steps { white-space: pre; font-size: 12.5px; } }
+  </style>
+</head>
+<body data-root="../" data-title="キャッシュメモリの計算">
+  <main>
+    <h1>キャッシュメモリの計算</h1>
+    <p class="lead">実効アクセス時間、目標の時間から必要なヒット率の逆算、2階層キャッシュの計算を途中式つきで行います。後半では、ダイレクトマッピング方式のキャッシュにアドレス列を与えてヒット／ミスを確かめられます。</p>
+
+    <section class="card">
+      <h2 style="margin-top:0">前提（ミスしたときにかかる時間）</h2>
+      <div class="row">
+        <label style="display:flex;gap:6px;align-items:center;color:var(--text)"><input type="radio" name="mode" value="simple" checked> ミス時は主記憶の時間だけ（教科書の標準）</label>
+        <label style="display:flex;gap:6px;align-items:center;color:var(--text)"><input type="radio" name="mode" value="add"> ミス時はキャッシュを調べた時間＋主記憶の時間</label>
+      </div>
+      <p class="muted" style="margin:6px 0 0">問題文の前提を確認して選んでください。下の3つの計算すべてに適用されます。</p>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">1. 実効アクセス時間</h2>
+      <div class="row">
+        <div class="field"><label for="tc">キャッシュ（ns）</label><input type="number" id="tc" value="10" min="0" step="any"></div>
+        <div class="field"><label for="tm">主記憶（ns）</label><input type="number" id="tm" value="60" min="0" step="any"></div>
+        <div class="field"><label for="h">ヒット率（%）</label><input type="number" id="h" value="90" min="0" max="100" step="any"></div>
+        <button type="button" class="primary" id="eatBtn">計算</button>
+        <button type="button" id="eatEx">例題を読み込む</button>
+      </div>
+      <div id="eatOut"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">2. ヒット率の逆算</h2>
+      <div class="row">
+        <div class="field"><label for="rtc">キャッシュ（ns）</label><input type="number" id="rtc" value="10" min="0" step="any"></div>
+        <div class="field"><label for="rtm">主記憶（ns）</label><input type="number" id="rtm" value="60" min="0" step="any"></div>
+        <div class="field"><label for="rt">目標の実効アクセス時間（ns 以下）</label><input type="number" id="rt" value="12" min="0" step="any"></div>
+        <button type="button" class="primary" id="revBtn">計算</button>
+        <button type="button" id="revEx">例題を読み込む</button>
+      </div>
+      <div id="revOut"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">3. 2階層キャッシュ（L1・L2）</h2>
+      <div class="row">
+        <div class="field"><label for="t1">L1（ns）</label><input type="number" id="t1" value="2" min="0" step="any"></div>
+        <div class="field"><label for="h1">L1 ヒット率（%）</label><input type="number" id="h1" value="90" min="0" max="100" step="any"></div>
+        <div class="field"><label for="t2">L2（ns）</label><input type="number" id="t2" value="10" min="0" step="any"></div>
+        <div class="field"><label for="h2">L2 ヒット率（%）<br><span style="font-size:12px">L1 でミスしたアクセスのうち</span></label><input type="number" id="h2" value="80" min="0" max="100" step="any"></div>
+        <div class="field"><label for="tm2">主記憶（ns）</label><input type="number" id="tm2" value="80" min="0" step="any"></div>
+        <button type="button" class="primary" id="twoBtn">計算</button>
+        <button type="button" id="twoEx">例題を読み込む</button>
+      </div>
+      <div id="twoOut"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">4. ダイレクトマッピング方式のシミュレーション</h2>
+      <p class="muted" style="margin-top:0">主記憶のブロックごとに、置けるキャッシュの位置（ライン）が1か所に決まっている方式です。<br>
+        ブロック番号 = アドレス ÷ ブロックサイズ（切捨て）、ライン番号（インデックス）= ブロック番号 mod ライン数、タグ = ブロック番号 ÷ ライン数（切捨て）</p>
+      <div class="row">
+        <div class="field"><label for="lines">ライン数</label><input type="number" id="lines" value="4" min="1" max="64"></div>
+        <div class="field"><label for="bsize">ブロックサイズ（バイト）</label><input type="number" id="bsize" value="1" min="1" max="4096"></div>
+        <div class="field" style="flex:1 1 260px"><label for="addrs">アドレス列（10進、または 0x で16進。カンマ区切り）</label><input type="text" id="addrs" value="0,1,2,3,4,0,1" autocomplete="off" spellcheck="false"></div>
+        <button type="button" class="primary" id="dmBtn">実行</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="muted">例題を読み込む：</span>
+        <button type="button" data-ex="4|1|0,1,2,3,4,0,1">ブロック番号で（ライン4）</button>
+        <button type="button" data-ex="8|1|22,26,22,26,16,3,16,18">ライン8の例</button>
+        <button type="button" data-ex="4|1|0,4,0,4,0,4">競合ミスが続く例</button>
+        <button type="button" data-ex="4|16|0x00,0x04,0x10,0x44,0x08,0x40,0x14">バイトアドレス（16バイト／ブロック）</button>
+      </div>
+      <div id="dmOut"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">関連資料</h2>
+      <ul>
+        <li><a href="../../01_テクノロジ系/03_コンピュータ構成要素.md">01_テクノロジ系/03_コンピュータ構成要素.md</a>（5. メモリ階層とキャッシュ）</li>
+        <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（2. コンピュータ・性能）</li>
+      </ul>
+    </section>
+  </main>
+  <script src="../assets/common.js"></script>
+  <script>
+// LOGIC-BEGIN
+var CacheLogic = (function () {
+  "use strict";
+  // 表示用の丸め（浮動小数点の誤差 9.000000000000002 などを消す）
+  function r(x) { return Math.round(x * 1e9) / 1e9; }
+  function num(x) { var v = r(x); return String(v); }
+
+  // mode: "simple" = ミス時は主記憶の時間のみ / "add" = キャッシュの時間 + 主記憶の時間
+  function eat(tc, tm, h, mode) {
+    return mode === "add" ? r(h * tc + (1 - h) * (tc + tm)) : r(h * tc + (1 - h) * tm);
+  }
+  // 実効アクセス時間を target 以下にする最小のヒット率（0〜1）。不可能なら null
+  function requiredHitRate(tc, tm, target, mode) {
+    var h = mode === "add" ? 1 - (target - tc) / tm : (tm - target) / (tm - tc);
+    if (!(tm > 0) || (mode !== "add" && tm === tc)) return null;
+    h = r(h);
+    if (h > 1) return null;   // ヒット率100%でも届かない
+    return Math.max(0, h);
+  }
+  function twoLevel(t1, h1, t2, h2, tm, mode) {
+    var pL1 = h1, pL2 = (1 - h1) * h2, pM = (1 - h1) * (1 - h2);
+    var c1 = t1, c2 = mode === "add" ? t1 + t2 : t2, cm = mode === "add" ? t1 + t2 + tm : tm;
+    return { pL1: r(pL1), pL2: r(pL2), pM: r(pM), c1: c1, c2: c2, cm: cm, eat: r(pL1 * c1 + pL2 * c2 + pM * cm) };
+  }
+
+  function parseAddrs(str) {
+    var a = String(str).split(/[\s,、，]+/).filter(Boolean);
+    if (!a.length) throw new Error("アドレスを入力してください");
+    if (a.length > 64) throw new Error("アドレスは 64 個までにしてください");
+    return a.map(function (s) {
+      var v = /^0x[0-9a-f]+$/i.test(s) ? parseInt(s, 16) : /^\d+$/.test(s) ? Number(s) : NaN;
+      if (!Number.isSafeInteger(v)) throw new Error("「" + s + "」はアドレスとして読めません");
+      return v;
+    });
+  }
+  function isPow2(n) { return n >= 1 && (n & (n - 1)) === 0; }
+  function log2(n) { return Math.round(Math.log2(n)); }
+
+  // ダイレクトマッピング方式
+  function directMapped(addrs, lines, blockSize) {
+    var cache = [], seen = {}, steps = [], hits = 0;
+    for (var i = 0; i < lines; i++) cache.push(null);
+    addrs.forEach(function (ad) {
+      var block = Math.floor(ad / blockSize), index = block % lines, tag = Math.floor(block / lines), offset = ad % blockSize;
+      var line = cache[index], hit = line !== null && line.tag === tag, evicted = null, missType = null;
+      if (hit) hits++;
+      else {
+        evicted = line; missType = seen[block] ? "競合" : "初期参照";
+        cache[index] = { tag: tag, block: block };
+      }
+      seen[block] = true;
+      steps.push({ addr: ad, block: block, index: index, tag: tag, offset: offset, hit: hit, evicted: evicted, missType: missType,
+                   cache: cache.map(function (c) { return c ? { tag: c.tag, block: c.block } : null; }) });
+    });
+    return { steps: steps, hits: hits, misses: addrs.length - hits, hitRate: hits / addrs.length };
+  }
+  return { r: r, num: num, eat: eat, requiredHitRate: requiredHitRate, twoLevel: twoLevel, parseAddrs: parseAddrs,
+           directMapped: directMapped, isPow2: isPow2, log2: log2 };
+})();
+// LOGIC-END
+
+(function () {
+  var L = CacheLogic, esc = APL.esc, n = L.num;
+  var $ = function (id) { return document.getElementById(id); };
+  function mode() { return document.querySelector('input[name="mode"]:checked').value; }
+  function val(id) { return Number($(id).value); }
+  function err(id, msg) { $(id).innerHTML = '<div class="result box-ng">' + esc(msg) + "</div>"; }
+  function out(id, big, steps) { $(id).innerHTML = '<div class="result"><div class="big">' + big + '</div><div class="steps" style="margin-top:8px">' + esc(steps) + "</div></div>"; }
+
+  function runEat() {
+    var tc = val("tc"), tm = val("tm"), hp = val("h"), h = hp / 100, m = mode();
+    if (!(tc >= 0 && tm >= 0) || !(hp >= 0 && hp <= 100)) return err("eatOut", "時間は 0 以上、ヒット率は 0〜100% で入力してください");
+    var e = L.eat(tc, tm, h, m), mh = L.r(1 - h), s;
+    if (m === "simple") {
+      s = "実効アクセス時間 = キャッシュのアクセス時間 × ヒット率\n                 + 主記憶のアクセス時間 × (1 − ヒット率)\n" +
+          "                 = " + n(tc) + " × " + n(h) + " + " + n(tm) + " × (1 − " + n(h) + ")\n" +
+          "                 = " + n(tc * h) + " + " + n(tm * mh) + "\n                 = " + n(e) + " ns";
+    } else {
+      s = "ミス時はキャッシュを調べた時間 + 主記憶の時間がかかる\n実効アクセス時間 = " + n(tc) + " × " + n(h) + " + (" + n(tc) + " + " + n(tm) + ") × (1 − " + n(h) + ")\n" +
+          "                 = " + n(tc * h) + " + " + n(tc + tm) + " × " + n(mh) + "\n                 = " + n(tc * h) + " + " + n((tc + tm) * mh) + "\n                 = " + n(e) + " ns\n" +
+          "（= キャッシュの時間 + ミス率 × 主記憶の時間 = " + n(tc) + " + " + n(mh) + " × " + n(tm) + " と同じ）";
+    }
+    out("eatOut", n(e) + " ns", s + "\n\nミス率（NFP）= 1 − ヒット率 = " + n(mh));
+  }
+  function runRev() {
+    var tc = val("rtc"), tm = val("rtm"), T = val("rt"), m = mode();
+    if (!(tc >= 0 && tm > 0 && T >= 0)) return err("revOut", "時間は正の数で入力してください");
+    if (m === "simple" && tc >= tm) return err("revOut", "この計算ではキャッシュのほうが主記憶より速い（小さい）必要があります");
+    var h = L.requiredHitRate(tc, tm, T, m), s;
+    if (m === "simple") {
+      s = "ヒット率を h とおく\n  " + n(tc) + "h + " + n(tm) + "(1 − h) ≦ " + n(T) + "\n  " + n(tc) + "h + " + n(tm) + " − " + n(tm) + "h ≦ " + n(T) + "\n  " +
+          n(tc - tm) + "h ≦ " + n(T - tm) + "\n  h ≧ " + n(T - tm) + " / " + n(tc - tm) + " = " + n((T - tm) / (tc - tm));
+    } else {
+      s = "ヒット率を h とおく（ミス時は " + n(tc) + " + " + n(tm) + " = " + n(tc + tm) + " ns）\n  " + n(tc) + "h + " + n(tc + tm) + "(1 − h) ≦ " + n(T) + "\n  " +
+          n(tc + tm) + " − " + n(tm) + "h ≦ " + n(T) + "\n  h ≧ (" + n(tc + tm) + " − " + n(T) + ") / " + n(tm) + " = " + n((tc + tm - T) / tm);
+    }
+    var big;
+    if (h === null) { big = "達成できません"; s += "\n→ 1（100%）を超えるので、ヒット率をどれだけ上げても " + n(T) + " ns 以下にはなりません"; }
+    else if (h <= 0) { big = "どのヒット率でも達成"; s += "\n→ 0 以下なので、ヒット率に関係なく条件を満たします"; }
+    else { big = "ヒット率 " + n(h * 100) + "% 以上"; s += "\n→ ヒット率 " + n(h * 100) + "% 以上"; }
+    out("revOut", esc(big), s);
+  }
+  function runTwo() {
+    var t1 = val("t1"), h1 = val("h1") / 100, t2 = val("t2"), h2 = val("h2") / 100, tm = val("tm2"), m = mode();
+    if (![t1, t2, tm].every(function (x) { return x >= 0; }) || !(h1 >= 0 && h1 <= 1 && h2 >= 0 && h2 <= 1)) return err("twoOut", "時間は 0 以上、ヒット率は 0〜100% で入力してください");
+    var R = L.twoLevel(t1, h1, t2, h2, tm, m);
+    var s = (m === "simple" ? "各段でミスした場合は次の段のアクセス時間だけがかかるとする\n" : "ミスした場合は、それまでに調べた段の時間も加算する\n") +
+      "L1 でヒット        ：" + n(h1) + "                       × " + n(R.c1) + " = " + n(R.pL1 * R.c1) + "\n" +
+      "L1ミス・L2でヒット ：" + n(1 - h1) + " × " + n(h2) + " = " + n(R.pL2) + "     × " + n(R.c2) + " = " + n(R.pL2 * R.c2) + "\n" +
+      "L1・L2 ともミス    ：" + n(1 - h1) + " × " + n(1 - h2) + " = " + n(R.pM) + "     × " + n(R.cm) + " = " + n(R.pM * R.cm) + "\n" +
+      "実効アクセス時間 = " + n(R.pL1 * R.c1) + " + " + n(R.pL2 * R.c2) + " + " + n(R.pM * R.cm) + " = " + n(R.eat) + " ns";
+    out("twoOut", n(R.eat) + " ns", s);
+  }
+
+  function runDM() {
+    var lines = val("lines"), bs = val("bsize"), addrs;
+    try {
+      if (!(Number.isInteger(lines) && lines >= 1 && lines <= 64)) throw new Error("ライン数は 1〜64 の整数にしてください");
+      if (!(Number.isInteger(bs) && bs >= 1 && bs <= 4096)) throw new Error("ブロックサイズは 1〜4096 の整数にしてください");
+      addrs = L.parseAddrs($("addrs").value);
+    } catch (e) { return err("dmOut", e.message); }
+    var R = L.directMapped(addrs, lines, bs), pow = L.isPow2(lines) && L.isPow2(bs);
+    var html = '<div class="result"><div class="big">ヒット ' + R.hits + " 回／ミス " + R.misses + " 回（ヒット率 " + n(L.r(R.hitRate * 100)).replace(/(\.\d{1})\d+$/, "$1") + "%）</div>";
+    if (pow) {
+      var ob = L.log2(bs), ib = L.log2(lines);
+      html += '<p class="addr-split" style="margin:8px 0 0">アドレスの分け方：<span class="t">タグ</span> | <span class="i">インデックス ' + ib + " ビット</span>" + (ob ? ' | <span class="o">オフセット ' + ob + " ビット</span>" : "") + "（ライン数 " + lines + " = 2<sup>" + ib + "</sup>、ブロックサイズ " + bs + " = 2<sup>" + ob + "</sup>）</p>";
+    }
+    html += '<div class="table-wrap" style="margin-top:10px"><table class="dm"><thead><tr><th>#</th><th>アドレス</th>' + (bs > 1 ? "<th>ブロック</th>" : "") +
+      "<th>インデックス</th><th>タグ</th><th>結果</th>";
+    for (var i = 0; i < lines && lines <= 16; i++) html += '<th class="line">ライン' + i + "</th>";
+    html += "</tr></thead><tbody>";
+    var maxAddr = Math.max.apply(null, addrs), abits = Math.max(4, Math.ceil(Math.log2(maxAddr + 1)));
+    R.steps.forEach(function (st, k) {
+      var addrTxt = String(st.addr);
+      if (pow && bs > 1) {
+        var b = st.addr.toString(2).padStart(abits, "0"), ob = L.log2(bs), ib = L.log2(lines);
+        var tpart = b.slice(0, Math.max(0, b.length - ob - ib)), ipart = b.slice(b.length - ob - ib, b.length - ob), opart = b.slice(b.length - ob);
+        addrTxt = st.addr + ' <span class="addr-split">(<span class="t">' + (tpart || "0") + '</span>|<span class="i">' + ipart + '</span>|<span class="o">' + opart + "</span>)</span>";
+      }
+      html += "<tr><td>" + (k + 1) + "</td><td>" + addrTxt + "</td>" + (bs > 1 ? "<td>" + st.block + "</td>" : "") + "<td>" + st.index + "</td><td>" + st.tag + "</td>" +
+        '<td class="' + (st.hit ? "hit" : "miss") + '">' + (st.hit ? "ヒット" : "ミス<br><small>" + st.missType + (st.evicted ? "・ブロック" + st.evicted.block + "を追出し" : "") + "</small>") + "</td>";
+      if (lines <= 16) st.cache.forEach(function (c, li) {
+        var cls = li === st.index ? (st.hit ? "hit" : "chg") : "same";
+        html += '<td class="' + cls + '">' + (c ? "B" + c.block + "<br><small>タグ" + c.tag + "</small>" : "—") + "</td>";
+      });
+      html += "</tr>";
+    });
+    html += "</tbody></table></div>";
+    if (lines > 16) html += '<p class="muted">ライン数が 16 を超えるため、各ラインの中身の列は省略しています。</p>';
+    var s = "ブロック番号 = アドレス ÷ " + bs + "（切捨て）\nインデックス = ブロック番号 mod " + lines + "\nタグ = ブロック番号 ÷ " + lines + "（切捨て）\n\n" +
+      R.steps.map(function (st, k) {
+        return (k + 1) + ". アドレス " + st.addr + (bs > 1 ? " → ブロック " + st.block : "") + " → ライン " + st.index + "・タグ " + st.tag + "：" +
+          (st.hit ? "同じタグが入っている → ヒット" : (st.evicted ? "タグ " + st.evicted.tag + "（ブロック " + st.evicted.block + "）が入っている" : "空き") + " → ミス（" + st.missType + "ミス）");
+      }).join("\n");
+    html += '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">途中式</summary><div class="steps">' + esc(s) + "</div></details>";
+    var conflicts = R.steps.filter(function (st) { return st.missType === "競合"; }).length;
+    if (conflicts) html += '<p class="box-note" style="margin:10px 0 0">競合ミス ' + conflicts + " 回：別のブロックが同じラインを取り合って追い出し合っています。ダイレクトマッピング方式の弱点で、セットアソシエイティブ方式やフルアソシエイティブ方式にすると減らせます。</p>";
+    $("dmOut").innerHTML = html + "</div>";
+  }
+
+  function setVals(o) { for (var k in o) $(k).value = o[k]; }
+  $("eatBtn").addEventListener("click", runEat);
+  $("revBtn").addEventListener("click", runRev);
+  $("twoBtn").addEventListener("click", runTwo);
+  $("dmBtn").addEventListener("click", runDM);
+  $("eatEx").addEventListener("click", function () { setVals({ tc: 10, tm: 60, h: 90 }); runEat(); });
+  $("revEx").addEventListener("click", function () { setVals({ rtc: 10, rtm: 60, rt: 12 }); runRev(); });
+  $("twoEx").addEventListener("click", function () { setVals({ t1: 2, h1: 90, t2: 10, h2: 80, tm2: 80 }); runTwo(); });
+  document.querySelectorAll("[data-ex]").forEach(function (b) {
+    b.addEventListener("click", function () { var p = b.dataset.ex.split("|"); setVals({ lines: p[0], bsize: p[1], addrs: p[2] }); runDM(); });
+  });
+  document.querySelectorAll('input[name="mode"]').forEach(function (r) { r.addEventListener("change", function () { runEat(); runRev(); runTwo(); }); });
+  [["tc", runEat], ["tm", runEat], ["h", runEat], ["rtc", runRev], ["rtm", runRev], ["rt", runRev], ["t1", runTwo], ["h1", runTwo], ["t2", runTwo], ["h2", runTwo], ["tm2", runTwo]]
+    .forEach(function (p) { $(p[0]).addEventListener("change", p[1]); });
+  $("addrs").addEventListener("keydown", function (e) { if (e.key === "Enter") runDM(); });
+  runEat(); runRev(); runTwo(); runDM();
+})();
+  </script>
+</body>
+</html>

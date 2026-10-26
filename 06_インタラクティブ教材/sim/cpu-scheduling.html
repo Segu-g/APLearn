@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CPUスケジューリング</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ptable input { width: 5em; padding: 4px 6px; }
+    .ptable input.name { width: 4.5em; }
+    .ptable td, .ptable th { padding: 4px 6px; vertical-align: middle; }
+    .ptable button { padding: 2px 10px; font-size: 13px; }
+    .field { max-width: 100%; min-width: 0; }
+    td.num, th.num { text-align: right; font-family: var(--mono); }
+    tr.avg td { font-weight: 700; background: var(--surface-2); }
+    #gantt svg text { font-family: var(--mono); }
+    .best { color: var(--ok); font-weight: 700; }
+    @media (max-width: 600px) { .ptable input { width: 3.6em; } .ptable input.name { width: 3.6em; } }
+  </style>
+</head>
+<body data-root="../" data-title="CPUスケジューリング">
+  <main>
+    <h1>CPUスケジューリング</h1>
+    <p class="lead">到着順（FCFS）・処理時間順（SJF）・残り時間順（SRT）・ラウンドロビン・優先度順で、どのタスクがいつ CPU を使うかをガントチャートで表示し、ターンアラウンドタイムと待ち時間を計算します。</p>
+
+    <section class="card">
+      <h2 style="margin-top:0">プロセス表</h2>
+      <div class="table-wrap">
+        <table class="ptable" style="width:auto">
+          <thead><tr><th>名前</th><th>到着時刻</th><th>処理時間</th><th>優先度</th><th></th></tr></thead>
+          <tbody id="ptbody"></tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button type="button" id="addRow">＋ 行を追加</button>
+        <span class="muted">時刻・処理時間は整数。優先度は<b>数値が小さいほど優先度が高い</b>とします。</span>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <div class="field">
+          <label for="algo">スケジューリング方式</label>
+          <select id="algo">
+            <option value="FCFS">到着順（FCFS）</option>
+            <option value="SJF">処理時間順（SJF・横取りなし）</option>
+            <option value="SRT">残り処理時間順（SRT・横取りあり）</option>
+            <option value="RR">ラウンドロビン（RR）</option>
+            <option value="PRI">優先度順（横取りなし）</option>
+            <option value="PPRI">優先度順（横取りあり）</option>
+          </select>
+        </div>
+        <div class="field" id="qField">
+          <label for="quantum">タイムクウォンタム</label>
+          <input type="number" id="quantum" value="2" min="1" max="50" style="width:6em">
+        </div>
+        <button type="button" class="primary" id="run">実行</button>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <span class="muted">例題を読み込む：</span>
+        <button type="button" data-ex="doc">資料 2.4（FCFS・SJF）</button>
+        <button type="button" data-ex="rr">資料 2.5（ラウンドロビン）</button>
+        <button type="button" data-ex="srt">SRT の例</button>
+        <button type="button" data-ex="pri">優先度順の例</button>
+      </div>
+      <div id="err"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0" id="resTitle">ガントチャート</h2>
+      <div id="gantt"></div>
+      <h3>ターンアラウンドタイムと待ち時間</h3>
+      <div id="result"></div>
+      <h3>途中経過</h3>
+      <div id="log"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">方式の比較（同じプロセス表）</h2>
+      <div id="compare"></div>
+      <p class="muted">横取りなしの方式の中では、処理時間順（SJF）が平均ターンアラウンドタイムを最小にします。横取りありまで含めると SRT が最小です。</p>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">用語</h2>
+      <ul>
+        <li><b>ターンアラウンドタイム</b> = 終了時刻 − 到着時刻</li>
+        <li><b>待ち時間</b> = ターンアラウンドタイム − 処理時間（実行可能状態で CPU を待っていた時間の合計）</li>
+        <li><b>プリエンプティブ</b>（横取りあり）：実行中のタスクから CPU を取り上げて別のタスクに割り当てられる方式（SRT・RR・横取りありの優先度順）。</li>
+        <li>ラウンドロビンでは、タイムクウォンタムを使い切ったタスクは列の末尾に戻ります。<b>同じ時刻に新しく到着したタスクがあれば、そちらを先に列に並べます。</b></li>
+        <li>同じ条件のタスクが並んだときは、先に到着したもの（同時なら表の上の行）を優先しています。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">関連資料</h2>
+      <ul>
+        <li><a href="../../01_テクノロジ系/05_ソフトウェア.md">01_テクノロジ系/05_ソフトウェア.md</a>（2. タスク管理とスケジューリング）</li>
+      </ul>
+    </section>
+  </main>
+  <script src="../assets/common.js"></script>
+  <script>
+// LOGIC-BEGIN
+var SchedLogic = (function () {
+  "use strict";
+  var NAMES = { FCFS: "到着順（FCFS）", SJF: "処理時間順（SJF）", SRT: "残り処理時間順（SRT）", RR: "ラウンドロビン", PRI: "優先度順（横取りなし）", PPRI: "優先度順（横取りあり）" };
+
+  function validate(procs) {
+    if (!procs.length) throw new Error("プロセスを1つ以上入力してください");
+    var seen = {};
+    procs.forEach(function (p, i) {
+      var n = p.name || ("P" + (i + 1));
+      if (seen[n]) throw new Error("名前「" + n + "」が重複しています");
+      seen[n] = 1;
+      if (!Number.isInteger(p.arrival) || p.arrival < 0) throw new Error(n + " の到着時刻は 0 以上の整数にしてください");
+      if (!Number.isInteger(p.burst) || p.burst < 1) throw new Error(n + " の処理時間は 1 以上の整数にしてください");
+      if (!Number.isInteger(p.priority)) throw new Error(n + " の優先度は整数にしてください");
+    });
+  }
+
+  // procs: [{name, arrival, burst, priority}]  algo: FCFS|SJF|SRT|RR|PRI|PPRI  quantum: RR 用
+  // 戻り値: { segments:[{name|null, start, end}], rows:[{..., finish, tat, wait}], avgTat, avgWait, log:[] }
+  function schedule(procs, algo, quantum) {
+    validate(procs);
+    var ps = procs.map(function (p, i) { return { name: p.name || ("P" + (i + 1)), arrival: p.arrival, burst: p.burst, priority: p.priority, idx: i, rem: p.burst, finish: null, start: null }; });
+    var segs = [], log = [], t = 0, done = 0, n = ps.length;
+    function push(name, s, e) {
+      var last = segs[segs.length - 1];
+      if (last && last.name === name && last.end === s) last.end = e; else segs.push({ name: name, start: s, end: e });
+    }
+    function byArrival(a, b) { return a.arrival - b.arrival || a.idx - b.idx; }
+    function ready(time) { return ps.filter(function (p) { return p.rem > 0 && p.arrival <= time; }); }
+    function nextArrival(time) { var c = ps.filter(function (p) { return p.rem > 0 && p.arrival > time; }).map(function (p) { return p.arrival; }); return c.length ? Math.min.apply(null, c) : null; }
+    function desc(list, keyName) {
+      return list.map(function (p) { return p.name + (keyName === "rem" ? "(残り" + p.rem + ")" : keyName === "burst" ? "(" + p.burst + ")" : keyName === "priority" ? "(優先度" + p.priority + ")" : ""); }).join(", ");
+    }
+    function finish(p, time) { p.finish = time; done++; }
+
+    if (algo === "FCFS" || algo === "SJF" || algo === "PRI") {
+      var key = algo === "SJF" ? "burst" : algo === "PRI" ? "priority" : null;
+      while (done < n) {
+        var r = ready(t);
+        if (!r.length) { var na = nextArrival(t); push(null, t, na); log.push("時刻 " + t + "：実行できるタスクがないので時刻 " + na + " まで CPU は空き"); t = na; continue; }
+        r.sort(function (a, b) { return (key ? a[key] - b[key] : 0) || byArrival(a, b); });
+        var p = r[0];
+        log.push("時刻 " + t + "：待ち［" + desc(r.slice().sort(byArrival), key) + "］→ " + (key === "burst" ? "処理時間が最短の " : key === "priority" ? "優先度が最も高い " : "最も早く到着した ") + p.name + " を実行（" + t + "〜" + (t + p.rem) + "）");
+        if (p.start === null) p.start = t;
+        push(p.name, t, t + p.rem); t += p.rem; p.rem = 0; finish(p, t);
+      }
+    } else if (algo === "SRT" || algo === "PPRI") {
+      var k2 = algo === "SRT" ? "rem" : "priority", running = null;
+      while (done < n) {
+        var r2 = ready(t);
+        if (!r2.length) { var na2 = nextArrival(t); push(null, t, na2); log.push("時刻 " + t + "：実行できるタスクがないので時刻 " + na2 + " まで CPU は空き"); t = na2; running = null; continue; }
+        r2.sort(function (a, b) { return a[k2] - b[k2] || (a === running ? -1 : b === running ? 1 : 0) || byArrival(a, b); });
+        var q = r2[0];
+        if (q !== running) {
+          log.push("時刻 " + t + "：待ち［" + desc(r2.slice().sort(byArrival), k2) + "］→ " + q.name + " を実行" + (running && running.rem > 0 ? "（" + running.name + " から横取り）" : ""));
+          running = q;
+        }
+        if (q.start === null) q.start = t;
+        // 次の到着か、このタスクの終了まで進める
+        var na3 = nextArrival(t), end = t + q.rem;
+        if (na3 !== null && na3 < end) end = na3;
+        push(q.name, t, end); q.rem -= end - t; t = end;
+        if (q.rem === 0) { finish(q, t); log.push("時刻 " + t + "：" + q.name + " が終了"); running = null; }
+      }
+    } else if (algo === "RR") {
+      if (!(quantum >= 1)) throw new Error("タイムクウォンタムは 1 以上にしてください");
+      var queue = [], added = {};
+      var enqueueArrived = function (time) {
+        ps.slice().sort(byArrival).forEach(function (p) { if (!added[p.idx] && p.arrival <= time) { queue.push(p); added[p.idx] = true; } });
+      };
+      enqueueArrived(t);
+      while (done < n) {
+        if (!queue.length) { var na4 = nextArrival(t); push(null, t, na4); log.push("時刻 " + t + "：列が空なので時刻 " + na4 + " まで CPU は空き"); t = na4; enqueueArrived(t); continue; }
+        var cur = queue.shift(), run = Math.min(quantum, cur.rem);
+        if (cur.start === null) cur.start = t;
+        push(cur.name, t, t + run); cur.rem -= run; var s0 = t; t += run;
+        enqueueArrived(t); // クウォンタム中・終了時刻ちょうどに到着したタスクを先に並べる
+        var msg = "時刻 " + s0 + "〜" + t + "：" + cur.name + " を実行";
+        if (cur.rem > 0) { queue.push(cur); msg += "（残り " + cur.rem + "）→ 列の末尾へ"; }
+        else { finish(cur, t); msg += " → 終了"; }
+        log.push(msg + "　列：" + (queue.length ? queue.map(function (p) { return p.name; }).join(", ") : "空"));
+      }
+    } else throw new Error("unknown algo");
+
+    var rows = ps.map(function (p) {
+      var tat = p.finish - p.arrival;
+      return { name: p.name, arrival: p.arrival, burst: p.burst, priority: p.priority, start: p.start, finish: p.finish, tat: tat, wait: tat - p.burst, response: p.start - p.arrival };
+    });
+    var sumT = rows.reduce(function (s, r) { return s + r.tat; }, 0), sumW = rows.reduce(function (s, r) { return s + r.wait; }, 0);
+    return { segments: segs, rows: rows, sumTat: sumT, sumWait: sumW, avgTat: sumT / n, avgWait: sumW / n, log: log };
+  }
+  return { NAMES: NAMES, schedule: schedule, validate: validate };
+})();
+// LOGIC-END
+
+(function () {
+  var L = SchedLogic, esc = APL.esc;
+  var $ = function (id) { return document.getElementById(id); };
+  var EX = {
+    doc: { algo: "FCFS", q: 2, procs: [["P1", 0, 7, 1], ["P2", 2, 4, 1], ["P3", 4, 1, 1], ["P4", 5, 4, 1]] },
+    rr:  { algo: "RR", q: 2, procs: [["A", 0, 5, 1], ["B", 0, 3, 1], ["C", 0, 1, 1]] },
+    srt: { algo: "SRT", q: 2, procs: [["P1", 0, 8, 1], ["P2", 1, 4, 1], ["P3", 2, 9, 1], ["P4", 3, 5, 1]] },
+    pri: { algo: "PRI", q: 2, procs: [["P1", 0, 10, 3], ["P2", 0, 1, 1], ["P3", 0, 2, 4], ["P4", 0, 1, 5], ["P5", 0, 5, 2]] },
+  };
+
+  function addRow(v) {
+    var tb = $("ptbody");
+    if (tb.children.length >= 10) return;
+    v = v || ["P" + (tb.children.length + 1), 0, 3, 1];
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td><input class="name" type="text" maxlength="4" aria-label="名前"></td>' +
+      '<td><input type="number" min="0" aria-label="到着時刻"></td><td><input type="number" min="1" aria-label="処理時間"></td>' +
+      '<td><input type="number" aria-label="優先度"></td><td><button type="button" aria-label="この行を削除">削除</button></td>';
+    var ins = tr.querySelectorAll("input");
+    for (var i = 0; i < 4; i++) ins[i].value = v[i];
+    tr.querySelector("button").addEventListener("click", function () { if (tb.children.length > 1) { tr.remove(); run(); } });
+    ins.forEach(function (x) { x.addEventListener("change", run); });
+    tb.appendChild(tr);
+  }
+  function readProcs() {
+    return Array.prototype.map.call($("ptbody").children, function (tr) {
+      var ins = tr.querySelectorAll("input");
+      return { name: ins[0].value.trim(), arrival: Number(ins[1].value), burst: Number(ins[2].value), priority: Number(ins[3].value) };
+    });
+  }
+  function fmt(x) { return Number.isInteger(x) ? String(x) : x.toFixed(2); }
+
+  function run() {
+    var algo = $("algo").value, q = Number($("quantum").value);
+    $("qField").style.display = algo === "RR" ? "" : "none";
+    var procs = readProcs(), res;
+    try { res = L.schedule(procs, algo, q); $("err").innerHTML = ""; }
+    catch (e) { $("err").innerHTML = '<div class="result box-ng">' + esc(e.message) + "</div>"; return; }
+    $("resTitle").textContent = "ガントチャート：" + L.NAMES[algo] + (algo === "RR" ? "（クウォンタム " + q + "）" : "");
+    drawGantt(res, procs);
+    var showPri = algo === "PRI" || algo === "PPRI";
+    var h = '<div class="table-wrap"><table><thead><tr><th>タスク</th><th class="num">到着</th><th class="num">処理時間</th>' + (showPri ? '<th class="num">優先度</th>' : "") +
+      '<th class="num">終了時刻</th><th class="num">ターンアラウンド</th><th class="num">待ち時間</th></tr></thead><tbody>';
+    res.rows.forEach(function (r) {
+      h += "<tr><td>" + esc(r.name) + '</td><td class="num">' + r.arrival + '</td><td class="num">' + r.burst + "</td>" + (showPri ? '<td class="num">' + r.priority + "</td>" : "") +
+        '<td class="num">' + r.finish + '</td><td class="num">' + r.tat + '</td><td class="num">' + r.wait + "</td></tr>";
+    });
+    h += '<tr class="avg"><td colspan="' + (showPri ? 5 : 4) + '">平均</td><td class="num">' + fmt(res.avgTat) + '</td><td class="num">' + fmt(res.avgWait) + "</td></tr></tbody></table></div>";
+    var s = "ターンアラウンドタイム = 終了時刻 − 到着時刻\n  " + res.rows.map(function (r) { return r.name + "：" + r.finish + " − " + r.arrival + " = " + r.tat; }).join("\n  ") +
+      "\n  平均 = (" + res.rows.map(function (r) { return r.tat; }).join(" + ") + ") / " + res.rows.length + " = " + res.sumTat + " / " + res.rows.length + " = " + fmt(res.avgTat) +
+      "\n\n待ち時間 = ターンアラウンドタイム − 処理時間\n  " + res.rows.map(function (r) { return r.name + "：" + r.tat + " − " + r.burst + " = " + r.wait; }).join("\n  ") +
+      "\n  平均 = " + res.sumWait + " / " + res.rows.length + " = " + fmt(res.avgWait);
+    h += '<div class="steps" style="margin-top:10px">' + esc(s) + "</div>";
+    $("result").innerHTML = h;
+    $("log").innerHTML = '<div class="steps">' + esc(res.log.join("\n")) + "</div>";
+
+    // 比較
+    var algos = ["FCFS", "SJF", "SRT", "RR", "PRI", "PPRI"], all = {};
+    algos.forEach(function (a) { all[a] = L.schedule(procs, a, q); });
+    var minT = Math.min.apply(null, algos.map(function (a) { return all[a].avgTat; }));
+    var c = '<div class="table-wrap"><table><thead><tr><th>方式</th><th class="num">平均ターンアラウンド</th><th class="num">平均待ち時間</th></tr></thead><tbody>';
+    algos.forEach(function (a) {
+      var best = Math.abs(all[a].avgTat - minT) < 1e-9;
+      c += "<tr" + (a === algo ? ' style="outline:2px solid var(--accent);outline-offset:-2px"' : "") + "><td>" + L.NAMES[a] + (a === "RR" ? "（q=" + q + "）" : "") +
+        '</td><td class="num' + (best ? " best" : "") + '">' + fmt(all[a].avgTat) + (best ? " ✔最小" : "") + '</td><td class="num">' + fmt(all[a].avgWait) + "</td></tr>";
+    });
+    $("compare").innerHTML = c + "</tbody></table></div>";
+  }
+
+  function drawGantt(res, procs) {
+    var NS = "http://www.w3.org/2000/svg", box = $("gantt");
+    var W = Math.max(280, Math.min(900, box.clientWidth || 800));
+    var names = res.rows.map(function (r) { return r.name; });
+    var end = res.segments[res.segments.length - 1].end;
+    var lane = 26, m = { l: 44, r: 12, t: 8 }, H = m.t + lane * (names.length + 1) + 12 + 30;
+    var x = function (t) { return m.l + t / end * (W - m.l - m.r); };
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", "100%");
+    svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "ガントチャート");
+    function add(tag, at, txt, parent) { var e = document.createElementNS(NS, tag); for (var k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; (parent || svg).appendChild(e); return e; }
+    // 時刻の目盛り（区切りの時刻すべて。混む場合は間引く）
+    var ticks = {}; res.segments.forEach(function (s) { ticks[s.start] = 1; ticks[s.end] = 1; });
+    res.rows.forEach(function (r) { ticks[r.arrival] = 1; });
+    var tlist = Object.keys(ticks).map(Number).sort(function (a, b) { return a - b; }), lastX = -99;
+    var yAxis = m.t + lane * (names.length + 1) + 6;
+    tlist.forEach(function (t) {
+      add("line", { x1: x(t), x2: x(t), y1: m.t, y2: yAxis, stroke: "var(--border)", "stroke-width": 1 });
+      if (x(t) - lastX >= 18) { add("text", { x: x(t), y: yAxis + 14, "text-anchor": "middle", "font-size": 11, fill: "var(--text-sub)" }, t); lastX = x(t); }
+    });
+    add("text", { x: W - m.r, y: yAxis + 28, "text-anchor": "end", "font-size": 11, fill: "var(--text-sub)" }, "時刻");
+    // CPU レーン
+    add("text", { x: 4, y: m.t + lane / 2 + 4, "font-size": 12, fill: "var(--text)", "font-weight": 700 }, "CPU");
+    res.segments.forEach(function (s) {
+      var g = add("g", {}), w = x(s.end) - x(s.start);
+      add("rect", { x: x(s.start) + 1, y: m.t + 2, width: Math.max(1, w - 2), height: lane - 6, rx: 3,
+        fill: s.name ? "var(--accent-weak)" : "transparent", stroke: s.name ? "var(--accent)" : "var(--text-sub)", "stroke-dasharray": s.name ? "" : "3 3" }, null, g);
+      if (w >= 18) add("text", { x: x(s.start) + w / 2, y: m.t + lane / 2 + 3, "text-anchor": "middle", "font-size": 12, fill: "var(--text)" }, s.name || "空き", g);
+      add("title", {}, (s.name || "空き") + "：" + s.start + "〜" + s.end, g);
+    });
+    // 各タスクのレーン（細線＝待ち、太い帯＝実行）
+    names.forEach(function (nm, i) {
+      var r = res.rows[i], y0 = m.t + lane * (i + 1);
+      add("text", { x: 4, y: y0 + lane / 2 + 4, "font-size": 12, fill: "var(--text-sub)" }, nm.length > 5 ? nm.slice(0, 5) : nm);
+      add("line", { x1: x(r.arrival), x2: x(r.finish), y1: y0 + lane / 2, y2: y0 + lane / 2, stroke: "var(--text-sub)", "stroke-width": 1, "stroke-dasharray": "2 3" });
+      add("path", { d: "M" + x(r.arrival) + " " + (y0 + 5) + " l-4 -5 h8 z", fill: "var(--text-sub)" }); // 到着マーク
+      res.segments.forEach(function (s) {
+        if (s.name !== nm) return;
+        var g = add("g", {});
+        add("rect", { x: x(s.start) + 1, y: y0 + 6, width: Math.max(1, x(s.end) - x(s.start) - 2), height: lane - 12, rx: 3, fill: "var(--accent)" }, null, g);
+        add("title", {}, nm + " 実行：" + s.start + "〜" + s.end, g);
+      });
+    });
+    box.innerHTML = ""; box.appendChild(svg);
+    var lg = document.createElement("p"); lg.className = "muted"; lg.style.margin = "4px 0 0";
+    lg.textContent = "上段：CPU を使っているタスク　下段：各タスクの様子（▼到着、点線＝待ち、帯＝実行中）";
+    box.appendChild(lg);
+  }
+
+  function loadEx(key) {
+    var ex = EX[key];
+    $("ptbody").innerHTML = ""; ex.procs.forEach(addRow);
+    $("algo").value = ex.algo; $("quantum").value = ex.q; run();
+  }
+  document.querySelectorAll("[data-ex]").forEach(function (b) { b.addEventListener("click", function () { loadEx(b.dataset.ex); }); });
+  $("addRow").addEventListener("click", function () { addRow(); run(); });
+  $("run").addEventListener("click", run);
+  $("algo").addEventListener("change", run);
+  $("quantum").addEventListener("change", run);
+  var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(run, 200); });
+  loadEx("doc");
+})();
+  </script>
+</body>
+</html>

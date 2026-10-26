@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>基数変換・2の補数・シフト演算</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .conv-table td:first-child { white-space: nowrap; width: 6em; }
+    .conv-table td.mono { word-break: break-all; }
+    details.step-block { margin-top: 10px; }
+    details.step-block summary { cursor: pointer; font-weight: 700; }
+    .bits { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .nibble { display: flex; gap: 2px; }
+    .bitbtn {
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 30px; padding: 2px 2px 3px; border-radius: 6px;
+      font-family: var(--mono); line-height: 1.2;
+    }
+    .bitbtn .v { font-size: 18px; font-weight: 700; }
+    .bitbtn .w { font-size: 10px; color: var(--text-sub); }
+    .bitbtn.on { background: var(--accent-weak); border-color: var(--accent); }
+    .bitbtn.sign .w { color: var(--ng); }
+    .kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; }
+    .kv dt { color: var(--text-sub); font-size: 14px; }
+    .kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
+    svg text { font-family: var(--mono); }
+    @media (max-width: 600px) { .bitbtn { min-width: 22px; } .bitbtn .v { font-size: 15px; } .bitbtn .w { font-size: 8px; } }
+    /* 途中式は桁をそろえて読めるよう、狭い画面では折り返さず枠内で横スクロール */
+    @media (max-width: 600px) { .steps { white-space: pre; font-size: 12.5px; } }
+  </style>
+</head>
+<body data-root="../" data-title="基数変換・2の補数・シフト">
+  <main>
+    <h1>基数変換・2の補数・シフト演算</h1>
+    <p class="lead">2／8／10／16進数の相互変換（小数を含む）を、割り算・掛け算の途中式つきで確認できます。2の補数のビットはクリックで反転でき、シフト演算の動きも図で確かめられます。</p>
+
+    <!-- 1. 基数変換 -->
+    <section class="card">
+      <h2 style="margin-top:0">1. 基数変換</h2>
+      <div class="row">
+        <div class="field">
+          <label for="rxIn">数値（小数点・先頭の − 可）</label>
+          <input type="text" id="rxIn" value="45.625" autocomplete="off" spellcheck="false" style="width:12em">
+        </div>
+        <div class="field">
+          <label for="rxBase">入力の基数</label>
+          <select id="rxBase">
+            <option value="2">2進数</option>
+            <option value="8">8進数</option>
+            <option value="10" selected>10進数</option>
+            <option value="16">16進数</option>
+          </select>
+        </div>
+        <button class="primary" id="rxRun" type="button">変換</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="muted">例題を読み込む：</span>
+        <button type="button" data-rx="45.625,10">45.625₁₀</button>
+        <button type="button" data-rx="0.1,10">0.1₁₀（循環小数）</button>
+        <button type="button" data-rx="2F,16">2F₁₆</button>
+        <button type="button" data-rx="1011,2">1011₂</button>
+        <button type="button" data-rx="57.4,8">57.4₈</button>
+      </div>
+      <div id="rxOut"></div>
+    </section>
+
+    <!-- 2. 2の補数 -->
+    <section class="card">
+      <h2 style="margin-top:0">2. 2の補数とビット表示</h2>
+      <div class="row">
+        <div class="field">
+          <label for="tcWidth">ビット数</label>
+          <select id="tcWidth">
+            <option value="8" selected>8ビット</option>
+            <option value="16">16ビット</option>
+            <option value="32">32ビット</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tcIn">10進数（符号付き）</label>
+          <input type="number" id="tcIn" value="-45" style="width:10em">
+        </div>
+        <button class="primary" id="tcRun" type="button">ビット列にする</button>
+        <button type="button" id="tcEx">例題を読み込む（−45）</button>
+      </div>
+      <p class="muted" style="margin:8px 0 0">各ビットをクリックすると 0/1 が反転します。下の数字はそのビットの重み（最上位ビットは 2の補数では負の重み）。</p>
+      <div class="bits" id="tcBits"></div>
+      <div id="tcOut"></div>
+    </section>
+
+    <!-- 3. シフト演算 -->
+    <section class="card">
+      <h2 style="margin-top:0">3. シフト演算</h2>
+      <p class="muted" style="margin-top:0">上の「2の補数」欄のビット列をシフトします。</p>
+      <div class="row">
+        <div class="field">
+          <label for="shKind">種類</label>
+          <select id="shKind">
+            <option value="lsl">論理左シフト</option>
+            <option value="lsr">論理右シフト</option>
+            <option value="asl">算術左シフト</option>
+            <option value="asr" selected>算術右シフト</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="shK">シフト量（ビット）</label>
+          <input type="number" id="shK" value="2" min="0" max="31" style="width:6em">
+        </div>
+        <button class="primary" id="shRun" type="button">シフト</button>
+        <button type="button" id="shApply">結果を上のビット列に反映</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="muted">例題を読み込む：</span>
+        <button type="button" data-sh="22,lsl,2">22 を論理左へ2ビット</button>
+        <button type="button" data-sh="-24,asr,2">−24 を算術右へ2ビット</button>
+        <button type="button" data-sh="100,asl,1">100 を算術左へ1ビット（あふれ）</button>
+      </div>
+      <div id="shFig" style="margin-top:12px"></div>
+      <div id="shOut"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">関連資料</h2>
+      <ul>
+        <li><a href="../../01_テクノロジ系/01_基礎理論.md">01_テクノロジ系/01_基礎理論.md</a>（1. 基数変換と数値の表現／2.3 シフト演算）</li>
+        <li><a href="../../05_まとめ・横断資料/01_計算問題公式集.md">05_まとめ・横断資料/01_計算問題公式集.md</a>（1. 基礎理論）</li>
+      </ul>
+    </section>
+  </main>
+  <script src="../assets/common.js"></script>
+  <script>
+// LOGIC-BEGIN
+var RadixLogic = (function () {
+  "use strict";
+  var DIGITS = "0123456789ABCDEF";
+
+  // 文字列 → 有理数 {neg, num, den}（BigInt で厳密に扱う）
+  function parseNumber(str, base) {
+    var s = String(str).trim().replace(/[\s_,]/g, "").toUpperCase();
+    var neg = false;
+    if (s[0] === "-" || s[0] === "−") { neg = true; s = s.slice(1); }
+    if (s === "" || s === ".") throw new Error("数値を入力してください");
+    var parts = s.split(".");
+    if (parts.length > 2) throw new Error("小数点が2つ以上あります");
+    var ip = parts[0] || "0", fp = parts[1] || "";
+    var b = BigInt(base), num = 0n, den = 1n;
+    var all = ip + fp;
+    for (var i = 0; i < all.length; i++) {
+      var d = DIGITS.indexOf(all[i]);
+      if (d < 0 || d >= base) throw new Error("「" + all[i] + "」は " + base + " 進数の数字ではありません");
+      num = num * b + BigInt(d);
+    }
+    for (var j = 0; j < fp.length; j++) den *= b;
+    return { neg: neg && num !== 0n, num: num, den: den, intStr: ip.replace(/^0+(?=.)/, ""), fracStr: fp };
+  }
+
+  // 有理数を 10進の文字列に（分母が 2,5 の積なら有限小数になる）
+  function ratToDecimal(num, den, maxFrac) {
+    maxFrac = maxFrac || 30;
+    var ip = num / den, r = num % den, s = ip.toString();
+    if (r === 0n) return s;
+    s += ".";
+    for (var i = 0; i < maxFrac && r !== 0n; i++) { r *= 10n; s += (r / den).toString(); r %= den; }
+    if (r !== 0n) s += "…";
+    return s;
+  }
+
+  // 有理数 num/den（0以上）を base 進数に。整数部は割り算、小数部は掛け算の過程を記録
+  function convert(num, den, base, maxFrac) {
+    maxFrac = maxFrac || 20;
+    var b = BigInt(base);
+    var ip = num / den, r = num % den;
+    var intSteps = [], intDigits = "";
+    if (ip === 0n) intDigits = "0";
+    var q = ip;
+    while (q > 0n) {
+      var nq = q / b, rem = q % b;
+      intSteps.push({ n: q.toString(), q: nq.toString(), r: Number(rem) });
+      intDigits = DIGITS[Number(rem)] + intDigits;
+      q = nq;
+    }
+    var fracSteps = [], fracDigits = "", seen = new Map(), recurStart = -1, truncated = false;
+    while (r !== 0n) {
+      if (seen.has(r.toString())) { recurStart = seen.get(r.toString()); break; }
+      if (fracDigits.length >= maxFrac) { truncated = true; break; }
+      seen.set(r.toString(), fracDigits.length);
+      var prod = r * b, d = prod / den;
+      fracSteps.push({ x: ratToDecimal(r, den), prod: ratToDecimal(prod, den), d: Number(d) });
+      fracDigits += DIGITS[Number(d)];
+      r = prod % den;
+    }
+    return { intDigits: intDigits, fracDigits: fracDigits, recurStart: recurStart, truncated: truncated,
+             intSteps: intSteps, fracSteps: fracSteps };
+  }
+
+  // 変換結果を文字列に（循環部分は (…) で表記）
+  function formatConv(c, neg) {
+    var s = (neg ? "-" : "") + c.intDigits;
+    if (c.fracDigits) {
+      if (c.recurStart >= 0) s += "." + c.fracDigits.slice(0, c.recurStart) + "(" + c.fracDigits.slice(c.recurStart) + ")";
+      else s += "." + c.fracDigits + (c.truncated ? "…" : "");
+    }
+    return s;
+  }
+
+  // n進 → 10進 の重み展開
+  function expansion(p, base) {
+    var terms = [], vals = [], k = p.intStr.length - 1;
+    var all = p.intStr + p.fracStr;
+    for (var i = 0; i < all.length; i++, k--) {
+      var d = DIGITS.indexOf(all[i]);
+      terms.push((base === 16 && d >= 10 ? all[i] + "(" + d + ")" : String(d)) + "×" + base + supPow(k));
+      if (d !== 0) {
+        var pn = 1n, pd = 1n;
+        if (k >= 0) pn = BigInt(base) ** BigInt(k); else pd = BigInt(base) ** BigInt(-k);
+        vals.push(ratToDecimal(BigInt(d) * pn, pd));
+      }
+    }
+    return { terms: terms, vals: vals };
+  }
+  function supPow(k) {
+    var m = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "-": "⁻" };
+    return String(k).split("").map(function (c) { return m[c]; }).join("");
+  }
+
+  // 2進数文字列を k ビットずつ区切る（整数部は下位から、小数部は上位から）
+  function groupBits(intBits, fracBits, k) {
+    var ip = intBits, fp = fracBits;
+    while (ip.length % k) ip = "0" + ip;
+    while (fp.length % k) fp = fp + "0";
+    var ig = [], fg = [];
+    for (var i = 0; i < ip.length; i += k) ig.push(ip.slice(i, i + k));
+    for (var j = 0; j < fp.length; j += k) fg.push(fp.slice(j, j + k));
+    var toD = function (g) { return DIGITS[parseInt(g, 2)]; };
+    return { ig: ig, fg: fg, intDigits: ig.map(toD).join("").replace(/^0+(?=.)/, ""), fracDigits: fg.map(toD).join("") };
+  }
+
+  // ---- 2の補数 ----
+  function range(n) { return { min: -Math.pow(2, n - 1), max: Math.pow(2, n - 1) - 1, umax: Math.pow(2, n) - 1 }; }
+  function fromSigned(v, n) {
+    var r = range(n);
+    if (!Number.isInteger(v) || v < r.min || v > r.max) throw new Error(n + "ビットの2の補数で表せる範囲は " + r.min + " 〜 " + r.max + " です");
+    return v < 0 ? v + Math.pow(2, n) : v;
+  }
+  function toSigned(u, n) { return u >= Math.pow(2, n - 1) ? u - Math.pow(2, n) : u; }
+  function toBits(u, n) { var s = u.toString(2); while (s.length < n) s = "0" + s; return s; }
+  function fromBits(s) { return parseInt(s, 2); }
+  function invertBits(s) { return s.replace(/[01]/g, function (c) { return c === "0" ? "1" : "0"; }); }
+  function spaced(s) { return s.replace(/(.{4})(?=.)/g, "$1 "); }
+
+  // 2の補数を作る手順
+  function complementSteps(v, n) {
+    if (v >= 0) return null;
+    var abs = toBits(-v, n), inv = invertBits(abs);
+    var res = toBits((fromBits(inv) + 1) % Math.pow(2, n), n);
+    return { abs: abs, inv: inv, res: res };
+  }
+
+  // シフト演算（ビット列 s を kind で k ビット）
+  // 論理: 空いたビットに 0。算術: 符号ビットは固定し、残りをシフト（右は符号ビットで埋める）
+  function shift(s, kind, k) {
+    var n = s.length; k = Math.max(0, Math.min(k, n));
+    var out, lost, overflow = false, fill;
+    if (kind === "lsl") { out = s.slice(k) + "0".repeat(k); lost = s.slice(0, k); fill = "0"; }
+    else if (kind === "lsr") { out = "0".repeat(k) + s.slice(0, n - k); lost = s.slice(n - k); fill = "0"; }
+    else if (kind === "asr") { var sg = s[0]; var body = s.slice(1); var kk = Math.min(k, n - 1);
+      out = sg + sg.repeat(kk) + body.slice(0, body.length - kk); lost = body.slice(body.length - kk); fill = sg; }
+    else if (kind === "asl") { var sg2 = s[0], body2 = s.slice(1), k2 = Math.min(k, n - 1);
+      out = sg2 + body2.slice(k2) + "0".repeat(k2); lost = body2.slice(0, k2); fill = "0";
+      // 結果が元の値 × 2^k にならなければオーバフロー（符号と異なるビットがはみ出す／符号ビットの直後が変わる）
+      overflow = toSignedBits(out) !== toSignedBits(s) * Math.pow(2, k2);
+    }
+    else throw new Error("unknown kind");
+    if (kind === "lsl") overflow = lost.indexOf("1") >= 0;
+    return { out: out, lost: lost, fill: fill, overflow: overflow };
+  }
+  function toSignedBits(s) { return toSigned(fromBits(s), s.length); }
+
+  return { DIGITS: DIGITS, parseNumber: parseNumber, ratToDecimal: ratToDecimal, convert: convert, formatConv: formatConv,
+           expansion: expansion, groupBits: groupBits, range: range, fromSigned: fromSigned, toSigned: toSigned,
+           toBits: toBits, fromBits: fromBits, invertBits: invertBits, spaced: spaced, complementSteps: complementSteps,
+           shift: shift, toSignedBits: toSignedBits };
+})();
+// LOGIC-END
+
+(function () {
+  var L = RadixLogic, esc = APL.esc;
+  var $ = function (id) { return document.getElementById(id); };
+  var NAMES = { 2: "2進数", 8: "8進数", 10: "10進数", 16: "16進数" };
+
+  // ---------- 1. 基数変換 ----------
+  function runRadix() {
+    var out = $("rxOut"), base = Number($("rxBase").value);
+    var p;
+    try { p = L.parseNumber($("rxIn").value, base); }
+    catch (e) { out.innerHTML = '<div class="result box-ng">' + esc(e.message) + "</div>"; return; }
+    var sign = p.neg ? "-" : "";
+    var conv = {}; [2, 8, 10, 16].forEach(function (b) { conv[b] = L.convert(p.num, p.den, b, b === 2 ? 24 : 16); });
+    var html = '<div class="result"><div class="table-wrap"><table class="conv-table"><tbody>';
+    [2, 8, 10, 16].forEach(function (b) {
+      var txt = b === 10 ? sign + L.ratToDecimal(p.num, p.den) : L.formatConv(conv[b], p.neg);
+      if (b === 2) txt = sign + spacedRight(conv[2].intDigits) + txt.slice(sign.length + conv[2].intDigits.length);
+      html += "<tr><td>" + NAMES[b] + (b === base ? ' <span class="tag">入力</span>' : "") + '</td><td class="mono">' + esc(txt) + "</td></tr>";
+    });
+    html += "</tbody></table></div>";
+    if (conv[2].recurStart >= 0 || conv[2].truncated)
+      html += '<p class="box-note" style="margin:10px 0 0">2進数では小数部が<b>有限桁で表せません</b>（( ) 内が循環部分）。コンピュータでは途中で打ち切るため<b>丸め誤差</b>が生じます。分母が 2ⁿ の小数（0.5, 0.25, 0.625 など）だけが2進数で正確に表せます。</p>';
+    html += "</div>";
+
+    var blocks = [];
+    // n進 → 10進
+    if (base !== 10) {
+      var ex = L.expansion(p, base);
+      var s = "【" + NAMES[base] + " → 10進数】各桁 × 重み（" + base + " のべき乗）の和\n";
+      s += sign + "(" + esc(p.intStr + (p.fracStr ? "." + p.fracStr : "")) + ")" + toSub(base) + "\n= " + ex.terms.join(" + ") + "\n";
+      if (ex.vals.length) s += "= " + ex.vals.join(" + ") + "\n";
+      s += "= " + sign + L.ratToDecimal(p.num, p.den);
+      blocks.push(["n進数 → 10進数（重みの和）", s, true]);
+    }
+    // 10進 → 2, 8, 16（割り算・掛け算）
+    [2, 8, 16].forEach(function (b) {
+      if (b === base) return;
+      blocks.push(["10進数 → " + NAMES[b] + "（整数部は ÷" + b + "、小数部は ×" + b + "）", divMulSteps(p, conv[b], b, sign), b === 2]);
+    });
+    // 2進 ⇔ 8進・16進（ビットの区切り）
+    var c2 = conv[2];
+    if (c2.recurStart < 0 && !c2.truncated) {
+      [[16, 4], [8, 3]].forEach(function (bk) {
+        var g = L.groupBits(c2.intDigits, c2.fracDigits, bk[1]);
+        var s2 = "2進数を小数点を基準に " + bk[1] + " ビットずつ区切る（整数部は下位から、小数部は上位から。足りない桁は 0 で埋める）\n";
+        s2 += g.ig.join(" ") + (g.fg.length ? " . " + g.fg.join(" ") : "") + "\n";
+        s2 += g.ig.map(function (x) { return pad(L.DIGITS[parseInt(x, 2)], bk[1]); }).join(" ") + (g.fg.length ? " . " + g.fg.map(function (x) { return pad(L.DIGITS[parseInt(x, 2)], bk[1]); }).join(" ") : "") + "\n";
+        s2 += "→ " + sign + g.intDigits + (g.fracDigits ? "." + g.fracDigits : "") + toSub(bk[0]);
+        blocks.push(["2進数 → " + NAMES[bk[0]] + "（" + bk[1] + "ビットずつ区切る）", s2, false]);
+      });
+    }
+    html += blocks.map(function (bl) {
+      return '<details class="step-block"' + (bl[2] ? " open" : "") + "><summary>途中式：" + esc(bl[0]) + '</summary><div class="steps">' + bl[1] + "</div></details>";
+    }).join("");
+    out.innerHTML = html;
+  }
+  function pad(c, k) { return String(c).padStart(k); }
+  function toSub(n) { return "(" + n + ")"; }
+  function spacedRight(s) { var o = ""; for (var i = 0; i < s.length; i++) { if (i && (s.length - i) % 4 === 0) o += " "; o += s[i]; } return o; }
+
+  function divMulSteps(p, c, b, sign) {
+    var dec = L.ratToDecimal(p.num, p.den);
+    var ip = dec.split(".")[0], fp = dec.indexOf(".") >= 0 ? "0." + dec.split(".")[1] : "";
+    var s = "【整数部 " + ip + "】" + b + " で割り続け、余りを下から読む\n";
+    if (!c.intSteps.length) s += "  整数部は 0\n";
+    var w = c.intSteps.length ? c.intSteps[0].n.length : 1;
+    c.intSteps.forEach(function (st, i) {
+      var rr = st.r >= 10 ? st.r + "(" + L.DIGITS[st.r] + ")" : String(st.r);
+      s += "  " + st.n.padStart(w) + " ÷ " + b + " = " + st.q.padStart(w) + " 余り " + rr + (i === 0 ? "   ↑" : i === c.intSteps.length - 1 ? "   │（下から読む）" : "   │") + "\n";
+    });
+    s += "  → " + c.intDigits + "\n";
+    if (fp) {
+      s += "\n【小数部 " + fp + "】" + b + " を掛け続け、整数部に出た数字を上から読む\n";
+      c.fracSteps.forEach(function (st, i) {
+        var dd = st.d >= 10 ? st.d + "(" + L.DIGITS[st.d] + ")" : String(st.d);
+        s += "  " + st.x + " × " + b + " = " + st.prod + "  → " + dd + (i === 0 ? "  ↓" : "") + "\n";
+      });
+      if (c.recurStart >= 0) s += "  （小数部が " + c.fracSteps[c.recurStart].x + " に戻った → ここから先は第 " + (c.recurStart + 1) + " 桁以降の繰り返し）\n";
+      else if (c.truncated) s += "  （" + c.fracSteps.length + " 桁で打ち切り）\n";
+      else s += "  （小数部が 0 になったので終了）\n";
+      s += "  → ." + c.fracDigits + (c.recurStart >= 0 ? "…" : "") + "\n";
+    }
+    s += "\n答え：" + sign + L.formatConv(c, false);
+    return esc(s);
+  }
+
+  document.querySelectorAll("[data-rx]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var a = btn.dataset.rx.split(",");
+      $("rxIn").value = a[0]; $("rxBase").value = a[1]; runRadix();
+    });
+  });
+  $("rxRun").addEventListener("click", runRadix);
+  $("rxIn").addEventListener("keydown", function (e) { if (e.key === "Enter") runRadix(); });
+
+  // ---------- 2. 2の補数 ----------
+  var state = { n: 8, u: L.fromSigned(-45, 8) };
+
+  function setFromInput() {
+    var n = Number($("tcWidth").value), v = Number($("tcIn").value);
+    try { state = { n: n, u: L.fromSigned(v, n) }; renderBits(true); }
+    catch (e) { $("tcOut").innerHTML = '<div class="result box-ng">' + esc(e.message) + "</div>"; }
+  }
+  function renderBits(fromInput) {
+    var n = state.n, bits = L.toBits(state.u, n), box = $("tcBits");
+    box.innerHTML = "";
+    for (var g = 0; g < n; g += 4) {
+      var nib = document.createElement("div"); nib.className = "nibble";
+      for (var i = g; i < g + 4; i++) {
+        var pos = n - 1 - i, b = document.createElement("button");
+        b.type = "button"; b.className = "bitbtn" + (bits[i] === "1" ? " on" : "") + (i === 0 ? " sign" : "");
+        b.innerHTML = '<span class="v">' + bits[i] + '</span><span class="w">' + (i === 0 ? "−" : "") + "2" + supNum(pos) + "</span>";
+        b.title = "第" + pos + "ビット（重み " + (i === 0 ? "−" : "") + Math.pow(2, pos) + "）をクリックで反転";
+        b.setAttribute("aria-label", "第" + pos + "ビット 現在 " + bits[i]);
+        (function (p) { b.addEventListener("click", function () { toggle(p); }); })(pos);
+        nib.appendChild(b);
+      }
+      box.appendChild(nib);
+    }
+    var sv = L.toSigned(state.u, n), r = L.range(n);
+    if (!fromInput) $("tcIn").value = sv;
+    var html = '<div class="result"><dl class="kv">';
+    html += "<dt>2進数</dt><dd>" + L.spaced(bits) + "</dd>";
+    html += "<dt>16進数</dt><dd>" + state.u.toString(16).toUpperCase().padStart(n / 4, "0") + "</dd>";
+    html += "<dt>符号なし整数</dt><dd>" + state.u + "</dd>";
+    html += "<dt>2の補数（符号付き）</dt><dd><b>" + sv + "</b></dd>";
+    html += "<dt>表現範囲</dt><dd>符号なし 0〜" + r.umax + " ／ 2の補数 " + r.min + "〜" + r.max + "</dd>";
+    html += "</dl>";
+    // 途中式
+    var s = "";
+    var ones = []; for (var k = 0; k < n; k++) if (bits[k] === "1") ones.push((k === 0 ? "(−" : "") + Math.pow(2, n - 1 - k) + (k === 0 ? ")" : ""));
+    s += "【2の補数 → 10進数】最上位ビットの重みを −" + Math.pow(2, n - 1) + " とみなして、1 の桁の重みを足す\n";
+    s += "  " + L.spaced(bits) + " = " + (ones.length ? ones.join(" + ") : "0") + " = " + sv + "\n";
+    var cs = L.complementSteps(sv, n);
+    if (cs) {
+      s += "\n【" + sv + " を2の補数で表す手順】\n";
+      s += "  ① +" + (-sv) + " を2進数にする      : " + L.spaced(cs.abs) + "\n";
+      s += "  ② 全ビットを反転（1の補数）: " + L.spaced(cs.inv) + "\n";
+      s += "  ③ +1 する（2の補数）       : " + L.spaced(cs.res) + "  ← " + sv + "\n";
+      if (sv !== r.min) s += "  検算：" + L.spaced(cs.abs) + " + " + L.spaced(cs.res) + " = 1 " + L.spaced("0".repeat(n)) + "（桁あふれを捨てると 0）\n";
+      else s += "  ※ " + r.min + " は +" + (-r.min) + " が " + n + " ビットの範囲外ですが、同じ手順で " + L.spaced(cs.res) + " になります\n";
+    } else {
+      s += "\n0 以上の数は、2の補数でもそのまま2進数で表します（最上位ビットは 0）。\n";
+      if (sv !== 0) {
+        var neg = L.complementSteps(-sv, n);
+        s += "参考：−" + sv + " は 反転 " + L.spaced(neg.inv) + " → +1 → " + L.spaced(neg.res) + "\n";
+      }
+    }
+    html += '<div class="steps" style="margin-top:10px">' + esc(s) + "</div></div>";
+    $("tcOut").innerHTML = html;
+    runShift();
+  }
+  function supNum(k) { return String(k).split("").map(function (c) { return "⁰¹²³⁴⁵⁶⁷⁸⁹"[Number(c)]; }).join(""); }
+  function toggle(pos) {
+    var p = Math.pow(2, pos), bit = Math.floor(state.u / p) % 2;
+    state.u += bit ? -p : p; renderBits(false);
+  }
+  $("tcRun").addEventListener("click", setFromInput);
+  $("tcIn").addEventListener("keydown", function (e) { if (e.key === "Enter") setFromInput(); });
+  $("tcWidth").addEventListener("change", function () {
+    var n = Number($("tcWidth").value), v = L.toSigned(state.u, state.n), r = L.range(n);
+    if (v < r.min || v > r.max) v = 0;
+    state = { n: n, u: L.fromSigned(v, n) }; renderBits(false);
+  });
+  $("tcEx").addEventListener("click", function () { $("tcWidth").value = "8"; $("tcIn").value = "-45"; setFromInput(); });
+
+  // ---------- 3. シフト ----------
+  var lastShift = null;
+  var KIND = { lsl: "論理左シフト", lsr: "論理右シフト", asl: "算術左シフト", asr: "算術右シフト" };
+  function runShift() {
+    var kind = $("shKind").value, k = Math.max(0, Math.min(Number($("shK").value) || 0, state.n));
+    var s = L.toBits(state.u, state.n), r = L.shift(s, kind, k);
+    lastShift = r;
+    $("shFig").innerHTML = ""; $("shFig").appendChild(drawShift(s, r, kind, k));
+    var arith = kind[0] === "a";
+    var vin = arith ? L.toSignedBits(s) : L.fromBits(s), vout = arith ? L.toSignedBits(r.out) : L.fromBits(r.out);
+    var left = kind[2] === "l";
+    var txt = KIND[kind] + "（" + k + " ビット）" + (arith ? "：符号ビットは固定し、残りのビットをシフト" : "：空いたビットに 0 を入れる") + "\n";
+    txt += "  前：" + L.spaced(s) + " = " + vin + (arith ? "" : "（符号なし）") + "\n";
+    txt += "  後：" + L.spaced(r.out) + " = " + vout + "\n";
+    txt += "  はみ出したビット：" + (r.lost || "なし") + "\n";
+    var p = Math.pow(2, k), expect = left ? vin * p : Math.floor(vin / p);
+    txt += "  " + (left ? "左に " + k + " ビット → ×2" + supNum(k) + "（×" + p + "）： " + vin + " × " + p + " = " + expect
+                        : "右に " + k + " ビット → ÷2" + supNum(k) + "（÷" + p + "、小さい側へ切捨て）： " + vin + " ÷ " + p + " → " + expect) + "\n";
+    var box;
+    if (expect === vout) box = '<div class="box-ok" style="margin-top:8px">結果 ' + vout + " は " + (left ? "×" : "÷") + p + " と一致しています。</div>";
+    else if (left && r.overflow) box = '<div class="box-ng" style="margin-top:8px"><b>オーバフロー</b>：' + (arith ? "符号ビットと異なるビットがはみ出した（または符号が変わる）ため" : "1 のビットがはみ出したため") + "、" + state.n + " ビットでは ×" + p + " を表せません。</div>";
+    else box = '<div class="box-note" style="margin-top:8px">' + (kind === "lsr" ? "論理右シフトは符号を考えないので、負の数を ÷2ⁿ するには算術右シフトを使います。" : "はみ出したビットがあるため、値は単純な ×2ⁿ／÷2ⁿ になりません。") + "</div>";
+    $("shOut").innerHTML = '<div class="steps">' + esc(txt) + "</div>" + box;
+  }
+  function drawShift(s, r, kind, k) {
+    var NS = "http://www.w3.org/2000/svg", n = s.length;
+    var cw = 26, ch = 28, gap = n > 16 ? 2 : 4, padL = 30, W = padL + n * (cw + gap) + (n / 4 - 1) * 6 + 4, H = 120;
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", "100%");
+    svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "シフト前後のビット列");
+    svg.style.maxWidth = (W * 1.3) + "px"; svg.style.display = "block";
+    function x(i) { return padL + i * (cw + gap) + Math.floor(i / 4) * 6; }
+    function add(tag, attrs, text) { var e = document.createElementNS(NS, tag); for (var a in attrs) e.setAttribute(a, attrs[a]); if (text != null) e.textContent = text; svg.appendChild(e); return e; }
+    var left = kind[2] === "l", arith = kind[0] === "a", y1 = 14, y2 = 88;
+    add("text", { x: 2, y: y1 + 19, "font-size": 13, fill: "var(--text-sub)" }, "前");
+    add("text", { x: 2, y: y2 + 19, "font-size": 13, fill: "var(--text-sub)" }, "後");
+    for (var i = 0; i < n; i++) {
+      var lost = left ? (arith ? i >= 1 && i < 1 + k : i < k) : (arith ? i >= n - k && i >= 1 : i >= n - k);
+      add("rect", { x: x(i), y: y1, width: cw, height: ch, rx: 4, fill: lost ? "var(--ng-weak)" : (arith && i === 0 ? "var(--accent-weak)" : "var(--surface-2)"), stroke: lost ? "var(--ng)" : "var(--border)" });
+      add("text", { x: x(i) + cw / 2, y: y1 + 20, "font-size": 16, "text-anchor": "middle", fill: "var(--text)" }, s[i]);
+      var filled = left ? (arith ? i >= n - Math.min(k, n - 1) : i >= n - k) : (arith ? i >= 1 && i < 1 + Math.min(k, n - 1) : i < k);
+      add("rect", { x: x(i), y: y2, width: cw, height: ch, rx: 4, fill: filled ? "var(--warn-weak)" : (arith && i === 0 ? "var(--accent-weak)" : "var(--surface-2)"), stroke: filled ? "var(--warn)" : "var(--border)" });
+      add("text", { x: x(i) + cw / 2, y: y2 + 20, "font-size": 16, "text-anchor": "middle", fill: "var(--text)" }, r.out[i]);
+    }
+    // 移動の矢印（残るビットのみ、間引き）
+    for (var j = 0; j < n; j++) {
+      if (arith && j === 0) { add("line", { x1: x(0) + cw / 2, y1: y1 + ch + 2, x2: x(0) + cw / 2, y2: y2 - 4, stroke: "var(--accent)", "stroke-width": 1.5 }); continue; }
+      var to = left ? j - k : j + k;
+      if (to < (arith ? 1 : 0) || to >= n) continue;
+      if (n > 16 && j % 2) continue;
+      add("line", { x1: x(j) + cw / 2, y1: y1 + ch + 2, x2: x(to) + cw / 2, y2: y2 - 4, stroke: "var(--text-sub)", "stroke-width": 1, opacity: .7 });
+    }
+    var wrap = document.createElement("div");
+    wrap.appendChild(svg);
+    var cap = document.createElement("p"); cap.className = "muted"; cap.style.margin = "4px 0 8px";
+    cap.textContent = "赤：はみ出すビット　黄：補充されたビット" + (arith ? "　青：符号ビット（固定）" : "");
+    wrap.appendChild(cap);
+    return wrap;
+  }
+  $("shRun").addEventListener("click", runShift);
+  $("shKind").addEventListener("change", runShift);
+  $("shK").addEventListener("input", runShift);
+  $("shApply").addEventListener("click", function () { if (lastShift) { state.u = L.fromBits(lastShift.out); renderBits(false); } });
+  document.querySelectorAll("[data-sh]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var a = btn.dataset.sh.split(",");
+      $("tcWidth").value = "8"; $("tcIn").value = a[0]; $("shKind").value = a[1]; $("shK").value = a[2];
+      setFromInput();
+    });
+  });
+
+  runRadix();
+  renderBits(false);
+})();
+  </script>
+</body>
+</html>

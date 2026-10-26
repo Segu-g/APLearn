@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>整列アルゴリズム可視化</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .field { max-width: 100%; min-width: 0; }
+    .counters { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 10px 0 4px; font-size: 14px; }
+    .counters b { font-family: var(--mono); font-size: 18px; }
+    #bars { margin-top: 8px; }
+    #msg { min-height: 3.4em; font-family: var(--mono); font-size: 14px; }
+    .legend span { display: inline-flex; align-items: center; gap: 4px; margin-right: 14px; font-size: 13px; color: var(--text-sub); }
+    .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+    input[type="range"] { width: 140px; accent-color: var(--accent); }
+    td.num, th.num { text-align: right; font-family: var(--mono); }
+  </style>
+</head>
+<body data-root="../" data-title="整列アルゴリズム可視化">
+  <main>
+    <h1>整列アルゴリズム可視化</h1>
+    <p class="lead">バブル・選択・挿入・クイック・マージ・ヒープソートの動きを棒グラフで再生します。1手ずつのステップ実行や速度調整ができ、比較回数と交換回数を数えます。</p>
+
+    <section class="card">
+      <div class="row">
+        <div class="field">
+          <label for="algo">アルゴリズム</label>
+          <select id="algo">
+            <option value="bubble">バブルソート（基本交換法）</option>
+            <option value="selection">選択ソート（基本選択法）</option>
+            <option value="insertion">挿入ソート（基本挿入法）</option>
+            <option value="quick">クイックソート</option>
+            <option value="merge">マージソート</option>
+            <option value="heap">ヒープソート</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="kind">データ</label>
+          <select id="kind">
+            <option value="random">ランダム</option>
+            <option value="nearly">ほぼ整列済み</option>
+            <option value="reversed">逆順</option>
+            <option value="sorted">整列済み</option>
+            <option value="dups">重複が多い</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="n">個数 <span id="nVal">16</span></label>
+          <input type="range" id="n" min="5" max="60" value="16">
+        </div>
+        <button type="button" id="gen">データを作り直す</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field" style="flex:1 1 240px">
+          <label for="custom">データを直接入力（カンマ区切り、2〜60個の整数）</label>
+          <input type="text" id="custom" placeholder="例 5,3,8,1,4" autocomplete="off">
+        </div>
+        <button type="button" id="useCustom">このデータを使う</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="muted">例題を読み込む：</span>
+        <button type="button" data-ex="bubble|5,3,8,1,4">バブルソートのトレース [5,3,8,1,4]</button>
+        <button type="button" data-ex="quick|5,3,8,1,4,7,2">クイックソート [5,3,8,1,4,7,2]</button>
+        <button type="button" data-ex="merge|6,2,5,1">マージソート [6,2,5,1]</button>
+        <button type="button" data-ex="quick|1,2,3,4,5,6,7,8,9,10,11,12">整列済みでクイック（最悪）</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <button type="button" id="reset">⏮ 最初から</button>
+        <button type="button" id="step">1手進む ▶</button>
+        <button type="button" class="primary" id="play">▶ 再生</button>
+        <button type="button" id="finish">⏭ 最後まで</button>
+        <div class="field">
+          <label for="speed">速度</label>
+          <input type="range" id="speed" min="1" max="10" value="5">
+        </div>
+      </div>
+      <div class="counters">
+        <span>比較 <b id="cCmp">0</b> 回</span>
+        <span>交換 <b id="cSwap">0</b> 回</span>
+        <span id="wWrap">書込み（マージ） <b id="cWrite">0</b> 回</span>
+        <span class="muted" id="cPos"></span>
+      </div>
+      <div id="bars"></div>
+      <p class="legend"><span><i style="background:var(--warn)"></i>比較中</span><span><i style="background:var(--ng)"></i>交換・書込み</span><span><i style="background:var(--mgmt)"></i>ピボット</span><span><i style="background:var(--ok)"></i>位置が確定</span></p>
+      <div id="msg" class="result"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">同じデータで比較</h2>
+      <div id="compare"></div>
+      <p class="muted">「交換」は2つの要素の入替え、「書込み」はマージソートで作業領域から配列に値を書き戻した回数です。</p>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">計算量と安定性</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>方式</th><th>考え方</th><th>平均</th><th>最悪</th><th>安定</th></tr></thead>
+        <tbody>
+          <tr><td><b>バブルソート</b>（基本交換法）</td><td>隣同士を比較して交換</td><td>O(n²)</td><td>O(n²)</td><td>○</td></tr>
+          <tr><td><b>選択ソート</b>（基本選択法）</td><td>未整列部分の最小値を選んで先頭と交換</td><td>O(n²)</td><td>O(n²)</td><td>×</td></tr>
+          <tr><td><b>挿入ソート</b>（基本挿入法）</td><td>整列済み部分の適切な位置に挿入。ほぼ整列済みなら O(n) に近い</td><td>O(n²)</td><td>O(n²)</td><td>○</td></tr>
+          <tr><td><b>クイックソート</b></td><td>ピボットより小さい群・大きい群に分割を繰り返す</td><td><b>O(n log n)</b></td><td>O(n²)</td><td>×</td></tr>
+          <tr><td><b>マージソート</b></td><td>半分に分割して整列し、併合（マージ）する。作業領域が必要</td><td><b>O(n log n)</b></td><td><b>O(n log n)</b></td><td>○</td></tr>
+          <tr><td><b>ヒープソート</b></td><td>ヒープを作り、根（最大値）を取り出すことを繰り返す</td><td><b>O(n log n)</b></td><td><b>O(n log n)</b></td><td>×</td></tr>
+        </tbody>
+      </table></div>
+      <p class="muted">安定なソート：同じキーの要素の元の並び順が保たれるソート。このページのクイックソートは先頭の要素をピボットにしているので、整列済みのデータでは分割が偏って O(n²) になります。</p>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">関連資料</h2>
+      <ul>
+        <li><a href="../../01_テクノロジ系/02_アルゴリズムとプログラミング.md">01_テクノロジ系/02_アルゴリズムとプログラミング.md</a>（3. 整列（ソート）アルゴリズム／4. 計算量）</li>
+      </ul>
+    </section>
+  </main>
+  <script src="../assets/common.js"></script>
+  <script>
+// LOGIC-BEGIN
+var SortLogic = (function () {
+  "use strict";
+  // 要素は {v: 値, id: 元の位置}。比較は v だけで行う（安定性を確かめられるように）
+  // 戻り値: { events, result, comparisons, swaps, writes }
+  // events: {t:"cmp",i,j} {t:"swap",i,j} {t:"set",i,v} {t:"pivot",i} {t:"done",i} {t:"range",lo,hi}
+  function trace(algo, values) {
+    var a = values.map(function (x, i) { return typeof x === "object" ? { v: x.v, id: x.id } : { v: x, id: i }; });
+    var ev = [], cmpN = 0, swapN = 0, writeN = 0, n = a.length;
+    function gt(i, j) { cmpN++; ev.push({ t: "cmp", i: i, j: j }); return a[i].v > a[j].v; }
+    function swap(i, j) { if (i === j) return; swapN++; var t = a[i]; a[i] = a[j]; a[j] = t; ev.push({ t: "swap", i: i, j: j }); }
+    function done(i) { ev.push({ t: "done", i: i }); }
+
+    if (algo === "bubble") {
+      var p;
+      for (p = 0; p < n - 1; p++) {
+        var swapped = false;
+        for (var j = 0; j < n - 1 - p; j++) if (gt(j, j + 1)) { swap(j, j + 1); swapped = true; }
+        done(n - 1 - p);
+        if (!swapped) break;
+      }
+      for (var k = 0; k < n; k++) done(k);
+    } else if (algo === "selection") {
+      for (var i = 0; i < n - 1; i++) {
+        var m = i;
+        for (var j2 = i + 1; j2 < n; j2++) if (gt(m, j2)) m = j2;
+        swap(i, m); done(i);
+      }
+      done(n - 1);
+    } else if (algo === "insertion") {
+      for (var i3 = 1; i3 < n; i3++) {
+        for (var j3 = i3; j3 > 0; j3--) { if (gt(j3 - 1, j3)) swap(j3 - 1, j3); else break; }
+      }
+      for (var k3 = 0; k3 < n; k3++) done(k3);
+    } else if (algo === "quick") {
+      // 先頭要素をピボットにする。ピボットより小さい要素を前に集め、最後にピボットを境目へ
+      var qs = function (lo, hi) {
+        if (lo > hi) return;
+        if (lo === hi) { done(lo); return; }
+        ev.push({ t: "range", lo: lo, hi: hi }); ev.push({ t: "pivot", i: lo });
+        var s = lo;
+        for (var j4 = lo + 1; j4 <= hi; j4++) if (gt(lo, j4)) { s++; swap(s, j4); }
+        swap(lo, s); done(s);
+        qs(lo, s - 1); qs(s + 1, hi);
+      };
+      qs(0, n - 1);
+    } else if (algo === "merge") {
+      var ms = function (lo, hi) {
+        if (lo >= hi) return;
+        var mid = Math.floor((lo + hi) / 2);
+        ms(lo, mid); ms(mid + 1, hi);
+        ev.push({ t: "range", lo: lo, hi: hi });
+        var L = a.slice(lo, mid + 1), R = a.slice(mid + 1, hi + 1), x = 0, y = 0, k5 = lo;
+        while (x < L.length && y < R.length) {
+          cmpN++; ev.push({ t: "cmp", i: lo + x, j: mid + 1 + y, a: L[x].v, b: R[y].v });
+          var take = L[x].v <= R[y].v ? L[x++] : R[y++]; // 等しいときは左を先に取る → 安定
+          a[k5] = take; writeN++; ev.push({ t: "set", i: k5, v: take.v }); k5++;
+        }
+        while (x < L.length) { a[k5] = L[x++]; writeN++; ev.push({ t: "set", i: k5, v: a[k5].v }); k5++; }
+        while (y < R.length) { a[k5] = R[y++]; writeN++; ev.push({ t: "set", i: k5, v: a[k5].v }); k5++; }
+      };
+      ms(0, n - 1);
+      for (var k6 = 0; k6 < n; k6++) done(k6);
+    } else if (algo === "heap") {
+      var sift = function (i, size) {
+        while (true) {
+          var l = 2 * i + 1, r = l + 1, big = i;
+          if (l < size && gt(l, big)) big = l;
+          if (r < size && gt(r, big)) big = r;
+          if (big === i) return;
+          swap(i, big); i = big;
+        }
+      };
+      for (var i7 = Math.floor(n / 2) - 1; i7 >= 0; i7--) sift(i7, n);
+      for (var e = n - 1; e > 0; e--) { swap(0, e); done(e); sift(0, e); }
+      done(0);
+    } else throw new Error("unknown algo");
+    return { events: ev, result: a, comparisons: cmpN, swaps: swapN, writes: writeN };
+  }
+
+  // 表示用：events を先頭から k 個適用した状態
+  function applyEvents(values, events, k) {
+    var a = values.slice(), doneSet = {};
+    for (var x = 0; x < k; x++) {
+      var e = events[x];
+      if (e.t === "swap") { var t = a[e.i]; a[e.i] = a[e.j]; a[e.j] = t; }
+      else if (e.t === "set") a[e.i] = e.v;
+      else if (e.t === "done") doneSet[e.i] = true;
+    }
+    return { arr: a, done: doneSet };
+  }
+
+  function makeData(kind, n, rnd) {
+    rnd = rnd || Math.random;
+    var a = [], i;
+    for (i = 0; i < n; i++) a.push(1 + Math.floor(rnd() * 99));
+    if (kind === "sorted" || kind === "nearly" || kind === "reversed") a.sort(function (x, y) { return x - y; });
+    if (kind === "reversed") a.reverse();
+    if (kind === "nearly") for (i = 0; i < Math.max(1, Math.floor(n / 10)); i++) { var p = Math.floor(rnd() * (n - 1)); var t = a[p]; a[p] = a[p + 1]; a[p + 1] = t; }
+    if (kind === "dups") a = a.map(function () { return 10 * (1 + Math.floor(rnd() * 5)); });
+    return a;
+  }
+  return { trace: trace, applyEvents: applyEvents, makeData: makeData };
+})();
+// LOGIC-END
+
+(function () {
+  var L = SortLogic, esc = APL.esc;
+  var $ = function (id) { return document.getElementById(id); };
+  var NAMES = { bubble: "バブルソート", selection: "選択ソート", insertion: "挿入ソート", quick: "クイックソート", merge: "マージソート", heap: "ヒープソート" };
+  var data = [], tr = null, pos = 0, timer = null, state = null;
+  var NS = "http://www.w3.org/2000/svg", svg, rects = [], labels = [], W = 600, H = 220;
+
+  function build() {
+    tr = L.trace($("algo").value, data);
+    pos = 0; stop();
+    $("wWrap").style.display = $("algo").value === "merge" ? "" : "none";
+    buildSvg(); render();
+    renderCompare();
+  }
+  function buildSvg() {
+    var box = $("bars");
+    W = Math.max(280, Math.min(900, box.clientWidth || 600)); H = W < 500 ? 180 : 230;
+    svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", "100%");
+    svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "配列の値を表す棒グラフ");
+    rects = []; labels = [];
+    for (var i = 0; i < data.length; i++) {
+      var r = document.createElementNS(NS, "rect"); r.setAttribute("rx", 2); svg.appendChild(r); rects.push(r);
+      var t = document.createElementNS(NS, "text"); t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", 11); t.setAttribute("fill", "var(--text-sub)"); svg.appendChild(t); labels.push(t);
+    }
+    box.innerHTML = ""; box.appendChild(svg);
+  }
+  function render() {
+    var st = L.applyEvents(data, tr.events, pos), arr = st.arr, n = arr.length;
+    var maxV = Math.max.apply(null, data), gap = n > 40 ? 1 : 2, bw = Math.min(56, (W - gap * (n - 1)) / n), x0 = (W - (bw * n + gap * (n - 1))) / 2;
+    var cur = tr.events[pos - 1], hl = {}, range = null, pivot = null;
+    // 直前のピボット・範囲を探す（クイック・マージの区間表示）
+    for (var x = pos - 1; x >= 0; x--) { var e = tr.events[x]; if (e.t === "range") { range = e; break; } }
+    // ピボットは分割が終わる（次の done が来る）まで表示
+    for (var y = pos - 1; y >= 0; y--) { var e2 = tr.events[y]; if (e2.t === "done") break; if (e2.t === "pivot") { pivot = e2.i; break; } }
+    if (cur) {
+      if (cur.t === "cmp") { hl[cur.i] = "var(--warn)"; hl[cur.j] = "var(--warn)"; }
+      if (cur.t === "swap") { hl[cur.i] = "var(--ng)"; hl[cur.j] = "var(--ng)"; }
+      if (cur.t === "set") hl[cur.i] = "var(--ng)";
+    }
+    var showLabels = n <= 24 && bw >= 12;
+    for (var i = 0; i < n; i++) {
+      var h = Math.max(2, arr[i] / maxV * (H - (showLabels ? 18 : 4))), xx = x0 + i * (bw + gap);
+      var fill = hl[i] || (st.done[i] ? "var(--ok)" : i === pivot && !st.done[i] ? "var(--mgmt)" : "var(--accent)");
+      var dim = range && (i < range.lo || i > range.hi) && !hl[i] && !st.done[i];
+      rects[i].setAttribute("x", xx); rects[i].setAttribute("width", Math.max(1, bw));
+      rects[i].setAttribute("y", H - h); rects[i].setAttribute("height", h);
+      rects[i].setAttribute("fill", fill); rects[i].setAttribute("opacity", dim ? 0.3 : (hl[i] || st.done[i] || i === pivot ? 1 : 0.55));
+      labels[i].setAttribute("x", xx + bw / 2); labels[i].setAttribute("y", H - h - 4);
+      labels[i].textContent = showLabels ? arr[i] : "";
+    }
+    // カウンタ
+    var c = 0, s = 0, w = 0;
+    for (var k = 0; k < pos; k++) { var t = tr.events[k].t; if (t === "cmp") c++; else if (t === "swap") s++; else if (t === "set") w++; }
+    $("cCmp").textContent = c; $("cSwap").textContent = s; $("cWrite").textContent = w;
+    $("cPos").textContent = pos + " / " + tr.events.length + " 手";
+    $("msg").textContent = describe(cur, arr, st);
+    $("step").disabled = $("finish").disabled = pos >= tr.events.length;
+    if (pos >= tr.events.length) { stop(); $("play").disabled = true; } else $("play").disabled = false;
+  }
+  function describe(e, arr, st) {
+    if (!e) return "[" + data.join(", ") + "] を" + NAMES[$("algo").value] + "で昇順に整列します。「1手進む」か「再生」を押してください。";
+    if (pos >= tr.events.length) return "完了：[" + arr.join(", ") + "]　比較 " + tr.comparisons + " 回、交換 " + tr.swaps + " 回" + (tr.writes ? "、書込み " + tr.writes + " 回" : "");
+    var prev = L.applyEvents(data, tr.events, pos - 1).arr;
+    switch (e.t) {
+      case "cmp":
+        var a = e.a !== undefined ? e.a : prev[e.i], b = e.b !== undefined ? e.b : prev[e.j];
+        if ($("algo").value === "merge") return "併合：左の先頭 " + a + " と右の先頭 " + b + " を比較 → 小さいほう（同じなら左）を取り出す";
+        return "a[" + e.i + "]=" + a + " と a[" + e.j + "]=" + b + " を比較" + (a > b ? "（" + a + " > " + b + "）" : "（" + a + " ≦ " + b + "）");
+      case "swap": return "a[" + e.i + "]=" + prev[e.i] + " と a[" + e.j + "]=" + prev[e.j] + " を交換 → [" + arr.join(", ") + "]";
+      case "set": return "a[" + e.i + "] に " + e.v + " を書き込む";
+      case "done": return "a[" + e.i + "]=" + arr[e.i] + " の位置が確定";
+      case "pivot": return "区間 a[" + tr.events[pos - 2].lo + "..." + tr.events[pos - 2].hi + "] の先頭 " + arr[e.i] + " をピボットにする";
+      case "range": return $("algo").value === "merge" ? "区間 a[" + e.lo + "..." + e.hi + "] の左半分と右半分を併合する" : "区間 a[" + e.lo + "..." + e.hi + "] を分割する";
+    }
+    return "";
+  }
+  function delay() { var s = Number($("speed").value); return Math.round(900 / Math.pow(1.75, s - 1)); }
+  function play() {
+    if (timer) { stop(); return; }
+    if (pos >= tr.events.length) return;
+    $("play").textContent = "⏸ 一時停止";
+    var tick = function () {
+      // 速度が速いときは1回の描画で複数手進める
+      var s = Number($("speed").value), k = s >= 9 ? (s === 10 ? 8 : 3) : 1;
+      pos = Math.min(tr.events.length, pos + k); render();
+      if (pos < tr.events.length && timer) timer = setTimeout(tick, delay()); else stop();
+    };
+    timer = setTimeout(tick, 0);
+  }
+  function stop() { if (timer) clearTimeout(timer); timer = null; $("play").textContent = "▶ 再生"; }
+
+  function renderCompare() {
+    var algos = ["bubble", "selection", "insertion", "quick", "merge", "heap"];
+    var h = '<p class="muted" style="margin-top:0">データ（' + data.length + ' 個）：' + esc(data.length <= 30 ? data.join(", ") : data.slice(0, 30).join(", ") + " …") + "</p>";
+    h += '<div class="table-wrap"><table><thead><tr><th>方式</th><th class="num">比較</th><th class="num">交換</th><th class="num">書込み</th></tr></thead><tbody>';
+    algos.forEach(function (a) {
+      var t = L.trace(a, data);
+      h += "<tr" + (a === $("algo").value ? ' style="outline:2px solid var(--accent);outline-offset:-2px"' : "") + "><td>" + NAMES[a] + '</td><td class="num">' + t.comparisons + '</td><td class="num">' + t.swaps + '</td><td class="num">' + (a === "merge" ? t.writes : "—") + "</td></tr>";
+    });
+    var n = data.length;
+    h += "</tbody></table></div><p class=\"muted\">参考：n(n−1)/2 = " + (n * (n - 1) / 2) + "、n log₂ n ≒ " + Math.round(n * Math.log2(n)) + "</p>";
+    $("compare").innerHTML = h;
+  }
+
+  function newData() { data = L.makeData($("kind").value, Number($("n").value)); build(); }
+  $("n").addEventListener("input", function () { $("nVal").textContent = $("n").value; });
+  $("n").addEventListener("change", newData);
+  $("kind").addEventListener("change", newData);
+  $("gen").addEventListener("click", newData);
+  $("algo").addEventListener("change", build);
+  $("reset").addEventListener("click", function () { stop(); pos = 0; render(); });
+  $("step").addEventListener("click", function () { stop(); if (pos < tr.events.length) { pos++; render(); } });
+  $("finish").addEventListener("click", function () { stop(); pos = tr.events.length; render(); });
+  $("play").addEventListener("click", play);
+  function useCustom(str) {
+    var a = String(str).split(/[\s,、，]+/).filter(Boolean).map(Number);
+    if (a.length < 2 || a.length > 60 || a.some(function (x) { return !Number.isInteger(x) || x < 1 || x > 999; })) { $("msg").textContent = "データは 1〜999 の整数を 2〜60 個、カンマ区切りで入力してください。"; return false; }
+    data = a; build(); return true;
+  }
+  $("useCustom").addEventListener("click", function () { useCustom($("custom").value); });
+  document.querySelectorAll("[data-ex]").forEach(function (b) {
+    b.addEventListener("click", function () { var p = b.dataset.ex.split("|"); $("algo").value = p[0]; $("custom").value = p[1]; useCustom(p[1]); });
+  });
+  var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { buildSvg(); render(); }, 200); });
+  $("custom").value = "5,3,8,1,4"; useCustom("5,3,8,1,4");
+})();
+  </script>
+</body>
+</html>
