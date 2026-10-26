@@ -16,7 +16,7 @@
     .timer { font-family: var(--mono); font-weight: 700; font-size: 18px; }
     .timer.low { color: var(--ng); }
     .q-text { white-space: pre-wrap; font-size: 17px; margin: 8px 0 14px; overflow-wrap: anywhere; }
-    .choices { display: grid; gap: 10px; }
+    .choices { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
     .choice {
       display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;
       background: var(--surface); padding: 10px 12px; line-height: 1.6; overflow-wrap: anywhere;
@@ -25,6 +25,7 @@
       flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
       background: var(--surface-2); border: 1px solid var(--border); font-size: 13px; font-family: var(--mono);
     }
+    .choice .body { flex: 1; min-width: 0; }
     .choice:hover:not(:disabled) { border-color: var(--accent); }
     .choice.selected { border-color: var(--accent); background: var(--accent-weak); }
     .choice.correct { border-color: var(--ok); background: var(--ok-weak); }
@@ -44,16 +45,71 @@
     .wrong-list summary { cursor: pointer; overflow-wrap: anywhere; }
     .wrong-list .q-text { font-size: 15px; }
     .kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface-2); }
-    @media (max-width: 600px) { .q-text { font-size: 16px; } .score-big { font-size: 28px; } }
+
+    /* タブ（オリジナル問題／IPA過去問） */
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .tabs button { border-radius: 8px 8px 0 0; border-bottom: none; background: transparent; color: var(--text-sub); margin-bottom: -1px; }
+    .tabs button[aria-selected="true"] { background: var(--surface); color: var(--accent); font-weight: 700; border-bottom: 1px solid var(--surface); }
+    .seg { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+    /* Markdown 表示（過去問の問題文・選択肢・解説） */
+    .md { white-space: normal; overflow-wrap: anywhere; }
+    .md p { margin: 0 0 .6em; }
+    .md > :last-child, .md li > :last-child { margin-bottom: 0; }
+    .md ul, .md ol { margin: .2em 0 .6em; padding-left: 1.4em; }
+    .md li { margin: .15em 0; }
+    .md code { font-size: .9em; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+    .md pre { margin: .4em 0 .8em; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+      overflow-x: auto; font-size: 14px; line-height: 1.5; white-space: pre; overflow-wrap: normal; }
+    .md pre code { background: none; border: none; padding: 0; font-size: inherit; }
+    .md .table-wrap { margin: .4em 0 .8em; }
+    .md table { width: auto; font-size: 14px; }
+    .md th, .md td { overflow-wrap: normal; word-break: keep-all; }
+    .md blockquote { margin: .4em 0 .8em; padding: 2px 12px; border-left: 4px solid var(--border); color: var(--text-sub); }
+    .md hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+    .md img { max-width: 100%; height: auto; }
+    .md .md-h { font-size: 1.02em; }
+    .choice .md p { margin: 0; }
+    .feedback .md p, .wrong-list .md p { margin: 0 0 .6em; }
+    .expl { margin-top: 8px; }
+    .past-fig { margin: 10px 0 12px; }
+    .past-fig img, .md img.zoomable { display: block; max-width: 100%; height: auto; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: zoom-in; }
+    .past-fig figcaption { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+    .fig-missing { display: inline-block; font-size: 13px; color: var(--warn); background: var(--warn-weak); border-radius: 6px; padding: 4px 8px; overflow-wrap: anywhere; }
+    .source { margin: 14px 0 0; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 13px; color: var(--text-sub); overflow-wrap: anywhere; }
+    .past-choice-list { display: grid; gap: 6px; margin: 6px 0 10px; }
+    .past-choice-list > div { display: flex; gap: 8px; align-items: flex-start; }
+    .past-choice-list .num { flex: none; font-weight: 700; width: 1.4em; }
+    .past-choice-list .body { flex: 1; min-width: 0; }
+    .pass-line { font-weight: 700; color: var(--warn); }
+    .mini { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .mini-bar { position: relative; display: inline-block; width: 64px; height: 10px; border-radius: 3px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+    .mini-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); }
+    .mini-bar::after { content: ""; position: absolute; left: 60%; top: 0; bottom: 0; border-left: 1px dashed var(--warn); }
+
+    /* 図の拡大表示 */
+    .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, .85); overflow: auto; display: flex; padding: 52px 8px 16px; }
+    .lightbox img { margin: auto; width: 100%; height: calc(100vh - 80px); object-fit: contain; cursor: zoom-in; }
+    .lightbox img.actual { width: auto; height: auto; max-width: none; background: #fff; cursor: zoom-out; }
+    .lightbox .lb-close { position: fixed; top: 10px; right: 10px; z-index: 101; }
+    .lightbox .lb-hint { position: fixed; top: 16px; left: 12px; color: #ddd; font-size: 13px; }
+    @media (max-width: 480px) { .mini-bar { display: none; } .past-stats td:first-child { min-width: 9.5em; } }
+    @media (max-width: 600px) { .q-text { font-size: 16px; } .score-big { font-size: 28px; } .lightbox .lb-hint { display: none; } }
   </style>
 </head>
 <body data-root="./" data-title="科目A 四択クイズ">
   <main>
     <h1>科目A 四択クイズ</h1>
-    <p class="lead">オリジナルの四択問題で科目A（旧午前）を練習します。分野別の練習、ランダム出題、80問150分の本番モード、間違えた問題の復習ができます。</p>
+    <p class="lead">オリジナルの四択問題と IPA の過去問題（科目A・旧午前）で練習します。分野別の練習、ランダム出題、80問150分の本番モード、間違えた問題の復習ができます。</p>
 
     <!-- ホーム -->
     <section id="view-home">
+      <div class="tabs" role="tablist" aria-label="問題の種類">
+        <button type="button" role="tab" id="tab-orig" data-tab="orig" aria-selected="true" aria-controls="home-orig">オリジナル問題</button>
+        <button type="button" role="tab" id="tab-past" data-tab="past" aria-selected="false" aria-controls="home-past">IPA過去問（科目A）</button>
+      </div>
+
+      <div id="home-orig" role="tabpanel" aria-labelledby="tab-orig">
       <div class="mode-grid">
         <div class="card">
           <h2>分野・中分類を選んで練習</h2>
@@ -103,16 +159,96 @@
 
         <div class="card">
           <h2>苦手問題の復習</h2>
-          <p class="muted">間違えた問題を記録しています。正解するまでくり返し出題し、正解した問題はリストから外れます。</p>
+          <p class="muted">間違えた問題を記録しています（IPA過去問も含みます）。正解するまでくり返し出題し、正解した問題はリストから外れます。</p>
           <p id="weak-info"></p>
           <div class="row"><button class="primary" type="button" id="btn-weak">苦手問題を復習する</button></div>
+        </div>
+      </div>
+      </div>
+
+      <div id="home-past" role="tabpanel" aria-labelledby="tab-past" hidden>
+        <p class="box-note">IPA が公表した応用情報技術者試験の午前問題（現在の科目A）を、出典を明記して収録しています（解説はオリジナル）。選択肢は本番と同じ <strong>ア〜エ の順</strong>で表示し、シャッフルしません。<span class="pass-line">合格ライン：60%</span>（100点満点中60点＝80問中48問）。</p>
+        <div class="box-ng" id="past-empty" hidden>過去問データ（data/past_questions.js）が見つかりません。<code>08_過去問解説/tools/build_past.py</code> を実行すると生成されます。</div>
+        <p class="muted" id="past-total"></p>
+        <div class="mode-grid" id="past-grid">
+          <div class="card">
+            <h2>回別演習</h2>
+            <p class="muted">回を選んで、本番と同じ問1から順に解きます。</p>
+            <div class="row">
+              <div class="field"><label for="past-exam">回</label><select id="past-exam"></select></div>
+            </div>
+            <div class="row seg" role="radiogroup" aria-label="解き方">
+              <label><input type="radio" name="past-exam-mode" value="exam" checked> 本番形式（タイマー・見直し・最後に採点）</label>
+              <label><input type="radio" name="past-exam-mode" value="step"> 1問ずつ（すぐに解説）</label>
+            </div>
+            <p class="muted" id="past-exam-info"></p>
+            <p class="muted" id="past-resume-info" hidden></p>
+            <div class="row">
+              <button class="primary" type="button" id="btn-past-exam">この回を解く</button>
+              <button type="button" id="btn-past-exam-resume" hidden>続きから再開</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>分野別演習</h2>
+            <p class="muted">中分類・分野・回の範囲で絞り込んで出題します。解答するとすぐに解説が表示されます。</p>
+            <div class="row">
+              <div class="field"><label for="past-field">分野</label>
+                <select id="past-field">
+                  <option value="">すべての分野</option>
+                  <option value="tech">テクノロジ系</option>
+                  <option value="mgmt">マネジメント系</option>
+                  <option value="strat">ストラテジ系</option>
+                </select></div>
+              <div class="field"><label for="past-topic">中分類</label>
+                <select id="past-topic"><option value="">すべて</option></select></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="past-from">回の範囲（から）</label><select id="past-from"></select></div>
+              <div class="field"><label for="past-to">（まで）</label><select id="past-to"></select></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="past-count">出題数</label>
+                <select id="past-count">
+                  <option value="10">10問</option>
+                  <option value="20">20問</option>
+                  <option value="40">40問</option>
+                  <option value="0">該当する全問</option>
+                </select></div>
+              <div class="field"><label for="past-order">出題順</label>
+                <select id="past-order">
+                  <option value="random">ランダム</option>
+                  <option value="seq">回・問番号順</option>
+                </select></div>
+              <label><input type="checkbox" id="past-calc"> 計算問題のみ</label>
+            </div>
+            <p class="muted" id="past-pool-info"></p>
+            <div class="row"><button class="primary" type="button" id="btn-past-topic">演習を始める</button></div>
+          </div>
+
+          <div class="card">
+            <h2>ランダム演習</h2>
+            <p class="muted">収録したすべての過去問からランダムに出題します。</p>
+            <div class="row">
+              <button class="primary" type="button" data-past-random="10">10問</button>
+              <button class="primary" type="button" data-past-random="20">20問</button>
+              <button class="primary" type="button" data-past-random="40">40問</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>苦手問題の復習（過去問）</h2>
+            <p class="muted">間違えた過去問だけを、正解するまでくり返し出題します。オリジナル問題タブの「苦手問題の復習」では両方をまとめて復習できます。</p>
+            <p id="past-weak-info"></p>
+            <div class="row"><button class="primary" type="button" id="btn-past-weak">過去問の苦手を復習する</button></div>
+          </div>
         </div>
       </div>
 
       <div class="actions">
         <button type="button" id="btn-stats">成績を見る</button>
       </div>
-      <p class="muted">キーボード：<span class="kbd">1</span>〜<span class="kbd">4</span> で選択、<span class="kbd">Enter</span> で次へ。本番モードでは <span class="kbd">←</span> <span class="kbd">→</span> で前後の問題に移動できます。</p>
+      <p class="muted">キーボード：<span class="kbd">1</span>〜<span class="kbd">4</span> で選択（過去問は ア〜エ の順）、<span class="kbd">Enter</span> で次へ。本番モードでは <span class="kbd">←</span> <span class="kbd">→</span> で前後の問題に移動できます。</p>
     </section>
 
     <!-- 出題 -->
@@ -128,6 +264,7 @@
         <div id="q-text" class="q-text"></div>
         <div id="q-choices" class="choices" role="group" aria-label="選択肢"></div>
         <div id="q-feedback" class="feedback" aria-live="polite"></div>
+        <p id="q-source" class="source" hidden></p>
         <div class="actions" id="practice-actions">
           <button class="primary" type="button" id="btn-next" disabled>次へ（Enter）</button>
           <button type="button" id="btn-quit">中断して結果を見る</button>
@@ -154,6 +291,10 @@
         <div id="r-judge"></div>
         <h3>分野別</h3>
         <div id="r-fields"></div>
+        <div id="r-topics-wrap" hidden>
+          <h3>中分類別</h3>
+          <div id="r-topics"></div>
+        </div>
         <div class="actions">
           <button class="primary" type="button" id="btn-retry-wrong">間違えた問題をもう一度</button>
           <button type="button" id="btn-home">ホームに戻る</button>
@@ -171,10 +312,18 @@
       <div class="card">
         <h2 style="margin-top:0">これまでの成績</h2>
         <p id="s-summary"></p>
+        <h3>オリジナル問題</h3>
         <div class="bars" id="s-bars"></div>
-        <h3>中分類別</h3>
+        <h3>中分類別（オリジナル問題）</h3>
         <div class="table-wrap"><table id="s-topics"></table></div>
-        <h3>本番モードの記録</h3>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0">IPA過去問（科目A）</h2>
+        <p class="box-note"><span class="pass-line">合格ライン：60%</span>（100点満点中60点＝80問中48問）。表の正答率は 60% 以上を緑、未満を赤で示し、バーの点線が 60% の位置です。</p>
+        <div id="s-past" class="past-stats"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">本番モードの記録</h3>
         <div id="s-exams"></div>
         <div class="actions">
           <button type="button" id="btn-stats-home">ホームに戻る</button>
@@ -188,24 +337,46 @@
       <li><a href="../00_はじめに/01_試験概要.md">試験概要（科目Aの出題数・合格基準）</a></li>
       <li><a href="../05_まとめ・横断資料/01_計算問題公式集.md">計算問題公式集</a></li>
       <li><a href="../05_まとめ・横断資料/03_直前チェックリスト.md">直前チェックリスト</a></li>
+      <li><a href="../08_過去問解説/科目A/分野別索引.md">科目A 過去問 分野別索引</a></li>
     </ul>
-    <p class="footer-note">問題はすべてこのリポジトリのオリジナルです（過去問の転載ではありません）。解答履歴・苦手問題はこのブラウザ内にだけ保存されます。</p>
+    <p class="footer-note">「オリジナル問題」はこのリポジトリのオリジナルです。「IPA過去問」は IPA（独立行政法人 情報処理推進機構）が公表した応用情報技術者試験の問題で、問題の著作権は IPA にあります（各問に出典を表示。解説はオリジナル）。解答履歴・苦手問題はこのブラウザ内にだけ保存されます。</p>
   </main>
+
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="図の拡大表示" hidden>
+    <span class="lb-hint">図をタップすると原寸表示／全体表示を切り替えます</span>
+    <button type="button" class="lb-close" id="lb-close">閉じる ×</button>
+    <img id="lb-img" alt="">
+  </div>
+
   <script src="assets/common.js"></script>
   <script src="data/questions.js"></script>
+  <!-- IPA 過去問データ（08_過去問解説/tools/build_past.py が生成。無くても動く） -->
+  <script src="data/past_questions.js"></script>
   <script>
   /* CORE-BEGIN：DOM に依存しないロジック（Node の vm で検証できるようにまとめている） */
   var QuizCore = (function () {
     var FIELDS = { tech: "テクノロジ系", mgmt: "マネジメント系", strat: "ストラテジ系" };
     var EXAM_QUOTA = { tech: 50, mgmt: 10, strat: 20 };   // 試験概要の目安（約50・約10・約20）
     var EXAM_MINUTES = 150;
-    var HISTORY_MAX = 2000;
+    var HISTORY_MAX = 5000;   // 過去問（最大1,040問）も記録するので多めに保持
+    var PASS_PCT = 60;
+    // シラバス Ver.7.2 の中分類（過去問データの topic）
+    var TOPIC_ORDER = [
+      "基礎理論", "アルゴリズムとプログラミング", "コンピュータ構成要素", "システム構成要素", "ソフトウェア",
+      "ハードウェア", "ユーザーインタフェース", "情報メディア", "データベース", "ネットワーク", "セキュリティ",
+      "システム開発技術", "ソフトウェア開発管理技術", "プロジェクトマネジメント", "サービスマネジメント", "システム監査",
+      "システム戦略", "システム企画", "経営戦略マネジメント", "技術戦略マネジメント", "ビジネスインダストリ", "企業活動", "法務",
+    ];
+    var TOPIC_FIELD = {};
+    TOPIC_ORDER.forEach(function (t, i) { TOPIC_FIELD[t] = i < 13 ? "tech" : i < 16 ? "mgmt" : "strat"; });
+    var KANA = ["ア", "イ", "ウ", "エ"];
 
     function defaultShuffle(arr) {
       var a = arr.slice();
       for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
       return a;
     }
+    function isPast(q) { return !!(q && q.exam); }
     function topicsOf(questions, field) {
       var seen = [];
       questions.forEach(function (q) { if ((!field || q.field === field) && seen.indexOf(q.topic) < 0) seen.push(q.topic); });
@@ -214,7 +385,8 @@
     function buildPool(questions, opt) {
       opt = opt || {};
       return questions.filter(function (q) {
-        return (!opt.field || q.field === opt.field) && (!opt.topic || q.topic === opt.topic) && (!opt.calcOnly || q.calc === true);
+        return (!opt.field || q.field === opt.field) && (!opt.topic || q.topic === opt.topic) && (!opt.calcOnly || q.calc === true) &&
+          (!opt.exams || opt.exams.indexOf(q.exam) >= 0);
       });
     }
     function pickRandom(pool, n, shuffle) {
@@ -230,17 +402,22 @@
     }
     // 表示順 → 元の選択肢番号 の対応表
     function makeOrder(shuffle) { return (shuffle || defaultShuffle)([0, 1, 2, 3]); }
+    // 過去問は選択肢の順に意味がある（解説が ア〜エ で参照する）のでシャッフルしない
+    function orderFor(q, shuffle) { return isPast(q) ? [0, 1, 2, 3] : makeOrder(shuffle); }
+    function choiceLabel(q, displayIndex) { return isPast(q) ? KANA[displayIndex] : String(displayIndex + 1); }
     function isCorrect(q, originalIndex) { return originalIndex === q.answer; }
     function emptyFieldStats() { var o = {}; Object.keys(FIELDS).forEach(function (f) { o[f] = { correct: 0, total: 0 }; }); return o; }
     // answers[i] は元の選択肢番号（未解答は null）
     function grade(qmap, ids, answers) {
-      var res = { correct: 0, total: ids.length, answered: 0, byField: emptyFieldStats(), wrongIds: [] };
+      var res = { correct: 0, total: ids.length, answered: 0, byField: emptyFieldStats(), byTopic: {}, wrongIds: [], ids: ids.slice() };
       ids.forEach(function (id, i) {
         var q = qmap[id], a = answers[i];
         var ok = a !== null && a !== undefined && isCorrect(q, a);
         if (a !== null && a !== undefined) res.answered++;
         res.byField[q.field].total++;
-        if (ok) { res.correct++; res.byField[q.field].correct++; } else res.wrongIds.push(id);
+        var t = res.byTopic[q.topic] || (res.byTopic[q.topic] = { field: q.field, correct: 0, total: 0 });
+        t.total++;
+        if (ok) { res.correct++; res.byField[q.field].correct++; t.correct++; } else res.wrongIds.push(id);
       });
       return res;
     }
@@ -256,15 +433,20 @@
       return h.length > max ? h.slice(h.length - max) : h;
     }
     function statsFromHistory(history, qmap) {
-      var byField = emptyFieldStats(), byTopic = {}, total = 0, correct = 0;
+      var byField = emptyFieldStats(), byTopic = {}, byExam = {}, total = 0, correct = 0;
       (history || []).forEach(function (h) {
-        var q = qmap[h.id]; if (!q) return;          // 削除された問題の履歴は無視
+        var q = h && qmap[h.id]; if (!q) return;          // 削除された問題の履歴は無視
         total++; if (h.correct) correct++;
         byField[q.field].total++; if (h.correct) byField[q.field].correct++;
         var t = byTopic[q.topic] || (byTopic[q.topic] = { field: q.field, correct: 0, total: 0 });
         t.total++; if (h.correct) t.correct++;
+        if (q.exam) {
+          var e = byExam[q.exam] || (byExam[q.exam] = { label: q.examLabel, correct: 0, total: 0, seen: {}, solved: 0 });
+          e.total++; if (h.correct) e.correct++;
+          if (!e.seen[q.id]) { e.seen[q.id] = true; e.solved++; }
+        }
       });
-      return { total: total, correct: correct, byField: byField, byTopic: byTopic };
+      return { total: total, correct: correct, byField: byField, byTopic: byTopic, byExam: byExam };
     }
     // 復習モード：間違えた問題をキューの末尾に戻す（正解するまで出題）
     function requeue(queue, pos, id, correct, mode) {
@@ -278,39 +460,253 @@
       return h + ":" + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec;
     }
     function pct(c, t) { return t ? Math.round((c / t) * 1000) / 10 : 0; }
+
+    // ---- 過去問の回 ----
+    // id は「西暦＋元号年＋期」（例 2025r07a）。同じ年は 春 h ＜ 10月 o ＜ 秋 a の順
+    function examSortKey(id) { var s = String(id); return s.slice(0, 4) + ({ h: 0, o: 1, a: 2 }[s.slice(-1)] || 0) + s; }
+    function examList(past) {
+      var map = {}, list = [];
+      past.forEach(function (q) {
+        var e = map[q.exam];
+        if (!e) { e = map[q.exam] = { id: q.exam, label: q.examLabel || q.exam, count: 0 }; list.push(e); }
+        e.count++;
+      });
+      return list.sort(function (a, b) { return examSortKey(b.id) < examSortKey(a.id) ? -1 : examSortKey(b.id) > examSortKey(a.id) ? 1 : 0; });  // 新しい回から
+    }
+    function sortByExamNo(qs) {
+      return qs.slice().sort(function (a, b) {
+        var ka = examSortKey(a.exam), kb = examSortKey(b.exam);
+        return ka < kb ? -1 : ka > kb ? 1 : a.no - b.no;
+      });
+    }
+    function pastExamIds(past, examId) {
+      return past.filter(function (q) { return q.exam === examId; }).sort(function (a, b) { return a.no - b.no; }).map(function (q) { return q.id; });
+    }
+    // 80問なら150分。データが一部だけの回は問題数に比例させる
+    function examMinutes(n) { return n >= 80 ? EXAM_MINUTES : Math.max(5, Math.round(EXAM_MINUTES * n / 80)); }
+
+    // ---- 小さな Markdown レンダラ ----
+    // 必ず先に HTML をエスケープし、その上で記法だけをタグに置き換える（XSS 対策）
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+    }
+    // エスケープ済みの URL を検査。javascript: などのスキームは拒否（相対パス・http(s)・mailto のみ）
+    function safeUrl(u, forImage) {
+      var plain = String(u).replace(/&amp;/g, "&").replace(/[\u0000- \u007f]/g, "");
+      if (!plain) return null;
+      var m = plain.match(/^([a-z][a-z0-9+.\-]*):/i);
+      if (m) {
+        var sc = m[1].toLowerCase();
+        if (!(sc === "http" || sc === "https" || (!forImage && sc === "mailto"))) return null;
+      }
+      return String(u).replace(/[\u0000-\u001f\u007f]/g, "").replace(/ /g, "%20");
+    }
+    function emph(t) { return t.replace(/\*\*(?=\S)(.+?)\*\*/g, "<strong>$1</strong>"); }
+    function inline(s, opt) {
+      opt = opt || {};
+      var slots = [];
+      function put(html) { slots.push(html); return "\u0000" + (slots.length - 1) + "\u0000"; }
+      var t = escHtml(String(s).replace(/\u0000/g, ""));
+      t = t.replace(/`([^`]+)`/g, function (_, code) { return put("<code>" + code + "</code>"); });
+      t = t.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, function (_, alt, url) {
+        alt = alt.replace(/\u0000\d+\u0000/g, "");
+        var u = safeUrl(url, true);
+        return u ? put('<img class="zoomable" src="' + u + '" alt="' + alt + '" loading="lazy">') : alt;
+      });
+      t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (_, text, url) {
+        var u = safeUrl(url), inner = emph(text);
+        if (!u || opt.noLinks) return put('<span class="md-link">' + inner + "</span>");
+        var ext = /^https?:/i.test(u);
+        return put('<a href="' + u + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : "") + ">" + inner + "</a>");
+      });
+      t = emph(t);
+      for (var g = 0; g < 5 && t.indexOf("\u0000") >= 0; g++) t = t.replace(/\u0000(\d+)\u0000/g, function (_, n) { return slots[+n] || ""; });
+      return t;
+    }
+    var LIST_RE = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/;
+    var SEP_RE = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
+    function splitRow(line) {
+      var s = line.trim().replace(/\\\|/g, "\u0001");
+      if (s.charAt(0) === "|") s = s.slice(1);
+      if (s.slice(-1) === "|") s = s.slice(0, -1);
+      return s.split("|").map(function (c) { return c.replace(/\u0001/g, "|").trim(); });
+    }
+    function isTableAt(lines, i) {
+      return lines[i].indexOf("|") >= 0 && i + 1 < lines.length && lines[i + 1].indexOf("|") >= 0 &&
+        lines[i + 1].indexOf("-") >= 0 && SEP_RE.test(lines[i + 1]);
+    }
+    function md(src, opt) {
+      opt = opt || {};
+      var lines = String(src === null || src === undefined ? "" : src).replace(/\r\n?/g, "\n").replace(/\u0000/g, "").split("\n");
+      var out = [], para = [], i = 0, n = lines.length, m;
+      function flush() {
+        if (para.length) out.push("<p>" + para.map(function (l) { return inline(l.trim(), opt); }).join("<br>") + "</p>");
+        para = [];
+      }
+      while (i < n) {
+        var line = lines[i];
+        if ((m = line.match(/^\s*(`{3,}|~{3,})\s*([^`\s]*)\s*$/))) {          // コードブロック
+          flush();
+          var fence = m[1], buf = [];
+          i++;
+          while (i < n && !(lines[i].trim().indexOf(fence) === 0 && /^\s*(`{3,}|~{3,})\s*$/.test(lines[i]))) { buf.push(lines[i]); i++; }
+          i++;
+          out.push("<pre><code>" + escHtml(buf.join("\n")) + "</code></pre>");
+          continue;
+        }
+        if (!line.trim()) { flush(); i++; continue; }
+        if (isTableAt(lines, i)) {                                              // 表（GFM）
+          flush();
+          var head = splitRow(lines[i]), aligns = splitRow(lines[i + 1]).map(function (c) {
+            return /^:-+:$/.test(c) ? "center" : /-+:$/.test(c) ? "right" : "";
+          });
+          i += 2;
+          var rows = [];
+          while (i < n && lines[i].trim() && lines[i].indexOf("|") >= 0) { rows.push(splitRow(lines[i])); i++; }
+          var cell = function (tag, c, k) {
+            return "<" + tag + (aligns[k] ? ' style="text-align:' + aligns[k] + '"' : "") + ">" + inline(c, opt) + "</" + tag + ">";
+          };
+          out.push('<div class="table-wrap"><table><thead><tr>' + head.map(function (c, k) { return cell("th", c, k); }).join("") + "</tr></thead><tbody>" +
+            rows.map(function (r) {
+              var cells = [];
+              for (var k = 0; k < head.length; k++) cells.push(cell("td", r[k] === undefined ? "" : r[k], k));
+              return "<tr>" + cells.join("") + "</tr>";
+            }).join("") + "</tbody></table></div>");
+          continue;
+        }
+        if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) { flush(); out.push("<hr>"); i++; continue; }
+        if ((m = line.match(/^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/))) { flush(); out.push('<p class="md-h"><strong>' + inline(m[2], opt) + "</strong></p>"); i++; continue; }
+        if (/^\s*>/.test(line)) {                                               // 引用
+          flush();
+          var q = [];
+          while (i < n && /^\s*>/.test(lines[i])) { q.push(lines[i].replace(/^\s*>\s?/, "")); i++; }
+          out.push("<blockquote>" + md(q.join("\n"), opt) + "</blockquote>");
+          continue;
+        }
+        if ((m = line.match(LIST_RE))) {                                        // 箇条書き
+          flush();
+          var base = m[1].length, ordered = /\d/.test(m[2]), start = ordered ? parseInt(m[2], 10) : 1, items = [], cur = null;
+          while (i < n) {
+            var l = lines[i], lm = l.match(LIST_RE);
+            if (!l.trim()) break;
+            var indent = l.match(/^\s*/)[0].length;
+            if (lm && indent <= base + 1) { cur = { text: [lm[3]], sub: [] }; items.push(cur); }
+            else if (indent > base + 1) cur.sub.push(l.slice(Math.min(indent, base + 2)));
+            else if (isTableAt(lines, i) || /^\s*(`{3,}|~{3,})/.test(l) || /^\s*>/.test(l) || /^\s{0,3}#{1,6}\s/.test(l)) break;
+            else cur.text.push(l);
+            i++;
+          }
+          out.push((ordered ? "<ol" + (start !== 1 ? ' start="' + start + '"' : "") + ">" : "<ul>") + items.map(function (it) {
+            return "<li>" + it.text.map(function (x) { return inline(x.trim(), opt); }).join("<br>") + (it.sub.length ? md(it.sub.join("\n"), opt) : "") + "</li>";
+          }).join("") + (ordered ? "</ol>" : "</ul>"));
+          continue;
+        }
+        para.push(line); i++;
+      }
+      flush();
+      return out.join("");
+    }
+    // 選択肢用：リンクは無効化し、1段落だけなら <p> を外す
+    function mdChoice(s) {
+      var h = md(s, { noLinks: true });
+      var m = h.match(/^<p>([\s\S]*)<\/p>$/);
+      return m && m[1].indexOf("<p>") < 0 ? m[1] : h;
+    }
+    // 一覧の見出し用に、Markdown の1行目をプレーンテキストにする
+    function mdPlain(s, max) {
+      max = max || 60;
+      var lines = String(s || "").split("\n"), t = "";
+      for (var i = 0; i < lines.length; i++) {
+        var l = lines[i].trim();
+        if (!l || /^(\||`{3}|~{3}|!\[)/.test(l)) continue;
+        t = l; break;
+      }
+      t = t.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/\*\*|`/g, "").replace(/^[-*+]\s+|^#+\s+/, "");
+      return t.length > max ? t.slice(0, max) + "…" : t;
+    }
+
     return {
-      FIELDS: FIELDS, EXAM_QUOTA: EXAM_QUOTA, EXAM_MINUTES: EXAM_MINUTES, HISTORY_MAX: HISTORY_MAX,
-      topicsOf: topicsOf, buildPool: buildPool, pickRandom: pickRandom, buildExam: buildExam, makeOrder: makeOrder,
+      FIELDS: FIELDS, EXAM_QUOTA: EXAM_QUOTA, EXAM_MINUTES: EXAM_MINUTES, HISTORY_MAX: HISTORY_MAX, PASS_PCT: PASS_PCT,
+      TOPIC_ORDER: TOPIC_ORDER, TOPIC_FIELD: TOPIC_FIELD, KANA: KANA,
+      isPast: isPast, topicsOf: topicsOf, buildPool: buildPool, pickRandom: pickRandom, buildExam: buildExam, makeOrder: makeOrder,
+      orderFor: orderFor, choiceLabel: choiceLabel,
       isCorrect: isCorrect, grade: grade, updateWeak: updateWeak, appendHistory: appendHistory,
       statsFromHistory: statsFromHistory, requeue: requeue, remainingMs: remainingMs, formatTime: formatTime, pct: pct,
+      examSortKey: examSortKey, examList: examList, sortByExamNo: sortByExamNo, pastExamIds: pastExamIds, examMinutes: examMinutes,
+      escHtml: escHtml, safeUrl: safeUrl, inline: inline, md: md, mdChoice: mdChoice, mdPlain: mdPlain,
     };
   })();
   /* CORE-END */
 
   (function () {
+    var C = QuizCore;
     var QUESTIONS = window.APL_DATA_QUESTIONS || [];
-    var store = APL.store, esc = APL.esc, C = QuizCore;
-    var QMAP = {};
-    QUESTIONS.forEach(function (q) { QMAP[q.id] = q; });
-    var K = { history: "quiz-history", weak: "quiz-weak", exam: "quiz-exam", exams: "quiz-exams" };
+    // 過去問データは生成途中のこともあるので、形式を満たすものだけ使う
+    var PAST = (Array.isArray(window.APL_DATA_PAST) ? window.APL_DATA_PAST : []).filter(function (q) {
+      return q && typeof q.id === "string" && q.exam && C.FIELDS[q.field] && Array.isArray(q.choices) && q.choices.length === 4 &&
+        typeof q.answer === "number" && q.answer >= 0 && q.answer <= 3;
+    });
+    var store = APL.store, esc = APL.esc;
+    var QMAP = {}, OMAP = {}, PMAP = {};
+    QUESTIONS.forEach(function (q) { QMAP[q.id] = q; OMAP[q.id] = q; });
+    PAST.forEach(function (q) { if (!Array.isArray(q.figures)) q.figures = []; QMAP[q.id] = q; PMAP[q.id] = q; });
+    var EXAMS = C.examList(PAST);               // 新しい回から
+    var EXAMS_ASC = EXAMS.slice().reverse();    // 範囲指定用（古い回から）
+    var K = { history: "quiz-history", weak: "quiz-weak", exam: "quiz-exam", pastExam: "quiz-exam-past", exams: "quiz-exams" };
     var $ = function (id) { return document.getElementById(id); };
 
     // ---- 状態 ----
-    // session: { mode: "practice"|"weak"|"exam", title, ids[], orders[][], answers[], pos, flags[], exam? }
+    // session: { mode: "practice"|"weak"|"exam", title, ids[], orders[][], answers[], pos, flags[], exam?, examKey?, meta }
     var session = null, timerId = null, lastResult = null;
 
     function weakList() { return (store.get(K.weak, []) || []).filter(function (id) { return QMAP[id]; }); }
+    function pastWeakList() { return weakList().filter(function (id) { return PMAP[id]; }); }
     function show(view) {
       ["home", "quiz", "result", "stats"].forEach(function (v) { $("view-" + v).hidden = v !== view; });
       window.scrollTo(0, 0);
     }
-    function fieldTag(q) { return '<span class="tag ' + q.field + '">' + esc(C.FIELDS[q.field]) + '</span> <span class="tag">' + esc(q.topic) + "</span>"; }
+    function fieldTag(q) {
+      var h = '<span class="tag ' + q.field + '">' + esc(C.FIELDS[q.field]) + '</span> <span class="tag">' + esc(q.topic) + "</span>";
+      if (C.isPast(q)) h = '<span class="tag">' + esc((q.examLabel || q.exam) + " 問" + q.no) + "</span> " + h + (q.calc ? ' <span class="tag">計算</span>' : "");
+      return h;
+    }
     function refLink(q) {
+      if (!q.ref) return "";
       var name = q.ref.split("/").pop().replace(/\.md$/, "").replace(/^\d+_/, "");
       return '<a href="' + esc(q.ref) + '">関連資料：' + esc(name) + "</a>";
     }
+    function examById(id) { for (var i = 0; i < EXAMS.length; i++) if (EXAMS[i].id === id) return EXAMS[i]; return null; }
+    function figuresHtml(q) {
+      return (q.figures || []).map(function (src, i) {
+        var u = C.safeUrl(esc(src), true);
+        if (!u) return "";
+        var alt = "問" + q.no + "の図" + (q.figures.length > 1 ? (i + 1) : "");
+        return '<figure class="past-fig"><img class="zoomable" src="' + u + '" alt="' + esc(alt) + '"><figcaption>図をクリック（タップ）すると拡大します</figcaption></figure>';
+      }).join("");
+    }
+    function questionHtml(q) { return C.isPast(q) ? C.md(q.q) + figuresHtml(q) : esc(q.q); }
+    function choiceHtml(q, orig) { return C.isPast(q) ? C.mdChoice(q.choices[orig]) : esc(q.choices[orig]); }
+    function explanationHtml(q) {
+      return C.isPast(q) ? '<div class="md expl">' + C.md(q.explanation) + "</div>"
+        : "<p>" + esc(q.explanation) + "</p><p>" + refLink(q) + "</p>";
+    }
+    function sourceHtml(q) { return C.isPast(q) ? '<p class="source">' + esc(q.source || "出典：IPA 応用情報技術者試験") + "</p>" : ""; }
+    function pctCell(c, t) {
+      if (!t) return "—";
+      var p = C.pct(c, t);
+      return '<span class="mini"><span class="mini-bar" aria-hidden="true"><i style="width:' + Math.min(100, p) + '%"></i></span><span class="' + (p >= C.PASS_PCT ? "ok" : "ng") + '">' + p + "%</span></span>";
+    }
 
-    // ---- ホーム ----
+    // ---- タブ ----
+    function selectTab(tab) {
+      ["orig", "past"].forEach(function (t) {
+        $("tab-" + t).setAttribute("aria-selected", String(t === tab));
+        $("home-" + t).hidden = t !== tab;
+      });
+    }
+    function setHash(h) { try { history.replaceState(null, "", h); } catch (e) { /* file:// などで使えなくても無視 */ } }
+
+    // ---- ホーム（オリジナル問題） ----
     function refreshTopics() {
       var f = $("sel-field").value, sel = $("sel-topic"), cur = sel.value;
       sel.innerHTML = '<option value="">すべて</option>' + C.topicsOf(QUESTIONS, f).map(function (t) {
@@ -327,44 +723,128 @@
       $("pool-info").textContent = "該当する問題：" + n + "問";
       $("btn-start-topic").disabled = n === 0;
     }
+    function resumeText(ex) {
+      var done = ex.answers.filter(function (a) { return a !== null; }).length;
+      return "（解答済み " + done + " / " + ex.ids.length + "、残り " + C.formatTime(C.remainingMs(ex, Date.now())) + "）";
+    }
+    function resumable(key) {
+      var ex = store.get(key, null);
+      return ex && ex.ids && C.remainingMs(ex, Date.now()) > 0 ? ex : null;
+    }
     function refreshHome() {
-      var w = weakList();
-      $("weak-info").textContent = w.length ? "苦手問題：" + w.length + "問" : "苦手問題はありません。間違えた問題がここにたまります。";
+      refreshPastHome();
+      if (!QUESTIONS.length) return;
+      var w = weakList(), pw = pastWeakList().length;
+      $("weak-info").textContent = w.length ? "苦手問題：" + w.length + "問" + (pw ? "（うち過去問 " + pw + "問）" : "") : "苦手問題はありません。間違えた問題がここにたまります。";
       $("btn-weak").disabled = w.length === 0;
-      var ex = store.get(K.exam, null);
-      var resumable = !!(ex && ex.ids && C.remainingMs(ex, Date.now()) > 0);
-      $("btn-exam-resume").hidden = !resumable;
-      $("exam-resume-info").hidden = !resumable;
-      if (resumable) {
-        var done = ex.answers.filter(function (a) { return a !== null; }).length;
-        $("exam-resume-info").textContent = "途中の本番モードがあります（解答済み " + done + " / " + ex.ids.length + "、残り " + C.formatTime(C.remainingMs(ex, Date.now())) + "）。";
-      }
+      var ex = resumable(K.exam);
+      $("btn-exam-resume").hidden = !ex;
+      $("exam-resume-info").hidden = !ex;
+      if (ex) $("exam-resume-info").textContent = "途中の本番モードがあります" + resumeText(ex) + "。";
       refreshPoolInfo();
     }
 
+    // ---- ホーム（IPA過去問） ----
+    function initPast() {
+      if (!PAST.length) { $("past-empty").hidden = false; $("past-grid").hidden = true; return; }
+      $("past-total").textContent = "収録：" + EXAMS.length + "回分・" + PAST.length + "問";
+      $("past-exam").innerHTML = EXAMS.map(function (e) {
+        return '<option value="' + esc(e.id) + '">' + esc(e.label) + "（" + e.count + "問）</option>";
+      }).join("");
+      var opts = EXAMS_ASC.map(function (e) { return '<option value="' + esc(e.id) + '">' + esc(e.label) + "</option>"; }).join("");
+      $("past-from").innerHTML = opts;
+      $("past-to").innerHTML = opts;
+      $("past-from").value = EXAMS_ASC[0].id;
+      $("past-to").value = EXAMS_ASC[EXAMS_ASC.length - 1].id;
+      refreshPastExamInfo();
+      refreshPastTopics();
+    }
+    function pastExamMode() { var r = document.querySelector('input[name="past-exam-mode"]:checked'); return r ? r.value : "exam"; }
+    function refreshPastExamInfo() {
+      if (!PAST.length) return;
+      var e = examById($("past-exam").value); if (!e) return;
+      $("past-exam-info").textContent = pastExamMode() === "exam"
+        ? "全" + e.count + "問を " + C.examMinutes(e.count) + " 分で解き、最後にまとめて採点します" + (e.count < 80 ? "（収録が" + e.count + "問のため時間を短縮）" : "") + "。見直しマークを付けて後から戻れます。"
+        : "全" + e.count + "問を1問ずつ解き、解答するたびに正誤と解説を表示します。";
+    }
+    function pastRangeExams() {
+      var ids = EXAMS_ASC.map(function (e) { return e.id; });
+      var a = ids.indexOf($("past-from").value), b = ids.indexOf($("past-to").value);
+      if (a < 0) a = 0; if (b < 0) b = ids.length - 1;
+      if (a > b) { var t = a; a = b; b = t; }
+      return ids.slice(a, b + 1);
+    }
+    function pastFilter(withTopic) {
+      return { field: $("past-field").value, topic: withTopic ? $("past-topic").value : "", calcOnly: $("past-calc").checked, exams: pastRangeExams() };
+    }
+    function refreshPastTopics() {
+      if (!PAST.length) return;
+      var f = $("past-field").value, sel = $("past-topic"), cur = sel.value;
+      var base = C.buildPool(PAST, pastFilter(false));
+      var topics = C.TOPIC_ORDER.filter(function (t) { return !f || C.TOPIC_FIELD[t] === f; });
+      // シラバスに無い名前の中分類が来ても選べるように末尾に足す
+      C.topicsOf(PAST, f).forEach(function (t) { if (topics.indexOf(t) < 0) topics.push(t); });
+      sel.innerHTML = '<option value="">すべて</option>' + topics.map(function (t) {
+        var n = base.filter(function (q) { return q.topic === t; }).length;
+        return '<option value="' + esc(t) + '">' + esc(t) + "（" + n + "）</option>";
+      }).join("");
+      if (topics.indexOf(cur) >= 0) sel.value = cur;
+      refreshPastPool();
+    }
+    function currentPastPool() { return C.buildPool(PAST, pastFilter(true)); }
+    function refreshPastPool() {
+      var n = currentPastPool().length;
+      $("past-pool-info").textContent = "該当する問題：" + n + "問";
+      $("btn-past-topic").disabled = n === 0;
+    }
+    function refreshPastHome() {
+      if (!PAST.length) return;
+      var pw = pastWeakList().length;
+      $("past-weak-info").textContent = pw ? "過去問の苦手：" + pw + "問" : "過去問の苦手はありません。間違えた過去問がここにたまります。";
+      $("btn-past-weak").disabled = pw === 0;
+      var ex = resumable(K.pastExam);
+      $("btn-past-exam-resume").hidden = !ex;
+      $("past-resume-info").hidden = !ex;
+      if (ex) $("past-resume-info").textContent = "途中の「" + (ex.title || "過去問") + "」があります" + resumeText(ex) + "。";
+    }
+
     // ---- セッション開始 ----
-    function startPractice(questions, title, mode) {
+    function startPractice(questions, title, mode, meta) {
       if (!questions.length) return;
       var ids = questions.map(function (q) { return q.id; });
-      session = { mode: mode || "practice", title: title, ids: ids, orders: ids.map(function () { return C.makeOrder(); }),
-        answers: ids.map(function () { return null; }), pos: 0, results: [] };
+      session = { mode: mode || "practice", title: title, ids: ids, orders: questions.map(function (q) { return C.orderFor(q); }),
+        answers: ids.map(function () { return null; }), pos: 0, results: [], meta: meta || {} };
       renderQuestion();
       show("quiz");
     }
-    function startExam(resume) {
-      var ex = resume ? store.get(K.exam, null) : null;
+    // kind: "orig"（オリジナル問題の本番モード）| "past"（過去問の回別・本番形式）
+    function startExam(kind, resume, opt) {
+      var key = kind === "past" ? K.pastExam : K.exam;
+      var ex = resume ? store.get(key, null) : null;
       // 問題データが更新されて存在しない問題を含む途中データは使わない
-      if (ex && (!ex.ids || ex.ids.some(function (id) { return !QMAP[id]; }))) ex = null;
-      if (resume && !ex) { store.set(K.exam, null); refreshHome(); return; }
+      if (ex && (!ex.ids || !ex.ids.length || ex.ids.some(function (id) { return !QMAP[id]; }))) ex = null;
+      if (resume && !ex) { store.set(key, null); refreshHome(); return; }
       if (!ex) {
-        var ids = C.buildExam(QUESTIONS);
-        ex = { ids: ids, orders: ids.map(function () { return C.makeOrder(); }), answers: ids.map(function () { return null; }),
-          flags: ids.map(function () { return false; }), pos: 0, startedAt: Date.now(), minutes: C.EXAM_MINUTES };
-        store.set(K.exam, ex);
+        var ids, title, minutes;
+        if (kind === "past") {
+          var e = examById(opt.examId); if (!e) return;
+          ids = C.pastExamIds(PAST, e.id);
+          title = e.label + " 過去問（本番形式・" + ids.length + "問）";
+          minutes = C.examMinutes(ids.length);
+        } else {
+          ids = C.buildExam(QUESTIONS);
+          title = "本番モード（" + ids.length + "問）";
+          minutes = C.EXAM_MINUTES;
+        }
+        if (!ids.length) return;
+        ex = { kind: kind, examId: kind === "past" ? opt.examId : null, title: title,
+          ids: ids, orders: ids.map(function (id) { return C.orderFor(QMAP[id]); }), answers: ids.map(function () { return null; }),
+          flags: ids.map(function () { return false; }), pos: 0, startedAt: Date.now(), minutes: minutes };
+        store.set(key, ex);
       }
       if (!ex.flags) ex.flags = ex.ids.map(function () { return false; });
-      session = { mode: "exam", title: "本番モード（" + ex.ids.length + "問）", ids: ex.ids, orders: ex.orders, answers: ex.answers,
-        flags: ex.flags, pos: ex.pos || 0, exam: ex };
+      session = { mode: "exam", title: ex.title || "本番モード（" + ex.ids.length + "問）", ids: ex.ids, orders: ex.orders, answers: ex.answers,
+        flags: ex.flags, pos: ex.pos || 0, exam: ex, examKey: key, meta: {} };
       renderQuestion();
       show("quiz");
       startTimer();
@@ -372,7 +852,7 @@
     function saveExam() {
       if (!session || session.mode !== "exam") return;
       session.exam.pos = session.pos;
-      store.set(K.exam, session.exam);
+      store.set(session.examKey, session.exam);
     }
 
     // ---- タイマー ----
@@ -394,15 +874,19 @@
 
     // ---- 出題画面 ----
     function renderQuestion() {
-      var s = session, q = QMAP[s.ids[s.pos]], order = s.orders[s.pos], exam = s.mode === "exam";
+      var s = session, q = QMAP[s.ids[s.pos]], order = s.orders[s.pos], exam = s.mode === "exam", past = C.isPast(q);
       $("q-progress").textContent = (s.pos + 1) + " / " + s.ids.length;
       $("q-tags").innerHTML = fieldTag(q);
-      $("q-text").textContent = q.q;
+      var qt = $("q-text");
+      qt.className = past ? "q-text md" : "q-text";
+      qt.innerHTML = questionHtml(q);
       var answered = s.answers[s.pos];
       $("q-choices").innerHTML = order.map(function (orig, i) {
-        return '<button type="button" class="choice" data-i="' + i + '"><span class="num">' + (i + 1) + "</span><span>" + esc(q.choices[orig]) + "</span></button>";
+        return '<button type="button" class="choice" data-i="' + i + '"><span class="num">' + C.choiceLabel(q, i) + '</span><span class="body' + (past ? " md" : "") + '">' + choiceHtml(q, orig) + "</span></button>";
       }).join("");
       $("q-feedback").innerHTML = "";
+      $("q-source").hidden = !past;
+      $("q-source").textContent = past ? (q.source || "出典：IPA 応用情報技術者試験") : "";
       $("practice-actions").hidden = exam;
       $("exam-actions").hidden = !exam;
       $("exam-palette-card").hidden = !exam;
@@ -454,21 +938,20 @@
         if (order[i] === q.answer) b.classList.add("correct");
         else if (order[i] === orig) b.classList.add("wrong");
       });
-      var correctNo = order.indexOf(q.answer) + 1;
+      var correctLabel = C.choiceLabel(q, order.indexOf(q.answer));
       var again = !ok && s.mode === "weak";
-      $("q-feedback").innerHTML = '<div class="' + (ok ? "box-ok" : "box-ng") + '"><strong>' + (ok ? "正解！" : "不正解… 正解は " + correctNo + " です") + "</strong>" +
-        (again ? '<p class="muted">この問題は復習の最後にもう一度出題されます。</p>' : "") +
-        "<p>" + esc(q.explanation) + "</p><p>" + refLink(q) + "</p></div>";
+      $("q-feedback").innerHTML = '<div class="' + (ok ? "box-ok" : "box-ng") + '"><strong>' + (ok ? "正解！" : "不正解… 正解は " + correctLabel + " です") + "</strong>" +
+        (again ? '<p class="muted">この問題は復習の最後にもう一度出題されます。</p>' : "") + explanationHtml(q) + "</div>";
       if (again) {
         s.ids = C.requeue(s.ids, s.pos, q.id, ok, s.mode);
-        s.orders.push(C.makeOrder()); s.answers.push(null);
+        s.orders.push(C.orderFor(q)); s.answers.push(null);
       }
       $("q-progress").textContent = (s.pos + 1) + " / " + s.ids.length;
       var done = s.results.length, okN = s.results.filter(function (r) { return r; }).length;
       $("q-score").textContent = "正解 " + okN + " / " + done;
       $("btn-next").disabled = false;
       $("btn-next").textContent = s.pos === s.ids.length - 1 ? "結果を見る（Enter）" : "次へ（Enter）";
-      $("btn-next").focus();
+      $("btn-next").focus({ preventScroll: true });
     }
     function next() {
       var s = session; if (!s) return;
@@ -481,6 +964,7 @@
       var s = session;
       if (i < 0 || i >= s.ids.length) return;
       s.pos = i; renderQuestion(); saveExam();
+      window.scrollTo(0, 0);
     }
 
     // ---- 結果 ----
@@ -493,7 +977,8 @@
         seen[s.ids[i]] = true; ids.unshift(s.ids[i]); ans.unshift(s.answers[i]);
       }
       var firstTry = s.results.length ? s.results.filter(function (r) { return r; }).length : 0;
-      lastResult = { mode: s.mode, title: s.title, res: C.grade(QMAP, ids, ans), firstTry: firstTry, tries: s.results.length };
+      lastResult = { mode: s.mode, title: s.title, res: C.grade(QMAP, ids, ans), firstTry: firstTry, tries: s.results.length, meta: s.meta,
+        planned: s.mode === "practice" ? s.ids.length : null };
       session = null;
       renderResult();
     }
@@ -512,10 +997,10 @@
       store.set(K.weak, weak);
       var exams = store.get(K.exams, []) || [];
       exams.push({ at: now, correct: res.correct, total: res.total, minutes: Math.round((now - s.exam.startedAt) / 60000),
-        byField: res.byField });
+        byField: res.byField, kind: s.exam.kind || "orig", examId: s.exam.examId || null, title: s.title });
       store.set(K.exams, exams.slice(-50));
-      store.set(K.exam, null);
-      lastResult = { mode: "exam", title: s.title, res: res, answers: s.answers, ids: s.ids };
+      store.set(s.examKey, null);
+      lastResult = { mode: "exam", title: s.title, res: res, answers: s.answers, ids: s.ids, meta: {} };
       session = null;
       renderResult();
     }
@@ -540,8 +1025,45 @@
           return "<tr><td>" + esc(C.FIELDS[f]) + "</td><td>" + st.correct + "</td><td>" + st.total + "</td><td>" + (st.total ? C.pct(st.correct, st.total) + "%" : "—") + "</td></tr>";
         }).join("") + "</table></div>";
     }
+    // 中分類をシラバス順に並べる（シラバスに無いものは末尾）
+    function orderedTopics(names) {
+      return C.TOPIC_ORDER.filter(function (t) { return names.indexOf(t) >= 0; })
+        .concat(names.filter(function (t) { return C.TOPIC_ORDER.indexOf(t) < 0; }));
+    }
+    function topicResultTable(byTopic) {
+      return '<div class="table-wrap"><table><tr><th>中分類</th><th>正解 / 出題</th><th>正答率</th></tr>' +
+        orderedTopics(Object.keys(byTopic)).map(function (t) {
+          var x = byTopic[t];
+          return "<tr><td>" + esc(t) + "</td><td>" + x.correct + " / " + x.total + "</td><td>" + pctCell(x.correct, x.total) + "</td></tr>";
+        }).join("") + "</table></div>";
+    }
+    function passJudge(res, extra) {
+      var p = C.pct(res.correct, res.total), pass = p >= C.PASS_PCT;
+      return '<div class="' + (pass ? "box-ok" : "box-ng") + '">' + (pass ? "合格ライン（60%）に達しています。" :
+        "合格ライン（60%）まであと " + Math.max(0, Math.ceil(res.total * C.PASS_PCT / 100) - res.correct) + " 問です。") + (extra || "") + "</div>";
+    }
+    function wrongItemHtml(r, id) {
+      var q = QMAP[id], past = C.isPast(q);
+      var ansIdx = r.mode === "exam" ? r.answers[r.ids.indexOf(id)] : null;
+      if (!past) {
+        var yours = r.mode === "exam" ? (ansIdx === null ? "未解答" : esc(q.choices[ansIdx])) : null;
+        return "<details><summary>" + fieldTag(q) + " " + esc(q.q.split("\n")[0]) + "</summary>" +
+          '<div class="q-text">' + esc(q.q) + "</div>" +
+          (yours !== null ? '<p class="ng">あなたの解答：' + yours + "</p>" : "") +
+          '<p class="ok">正解：' + esc(q.choices[q.answer]) + "</p><p>" + esc(q.explanation) + "</p><p>" + refLink(q) + "</p></details>";
+      }
+      var list = q.choices.map(function (c, i) {
+        return '<div><span class="num">' + C.KANA[i] + '</span><span class="body md">' + C.mdChoice(c) + "</span></div>";
+      }).join("");
+      var yoursP = r.mode === "exam" ? '<p class="ng">あなたの解答：' + (ansIdx === null ? "未解答" : C.KANA[ansIdx]) + "</p>" : "";
+      return "<details><summary>" + fieldTag(q) + " " + esc(C.mdPlain(q.q)) + "</summary>" +
+        '<div class="q-text md">' + questionHtml(q) + '</div><div class="past-choice-list">' + list + "</div>" +
+        yoursP + '<p class="ok"><strong>正解：' + C.KANA[q.answer] + "</strong></p>" + explanationHtml(q) + sourceHtml(q) + "</details>";
+    }
     function renderResult() {
       var r = lastResult, res = r.res, p = C.pct(res.correct, res.total);
+      var pastIds = res.ids.filter(function (id) { return PMAP[id]; });
+      var allPast = res.total > 0 && pastIds.length === res.total;
       $("r-title").textContent = r.title;
       if (!res.total) {
         $("r-score").textContent = "解答した問題はありません";
@@ -549,52 +1071,124 @@
       } else {
         $("r-score").textContent = res.correct + " / " + res.total + "（" + p + "%）";
         if (r.mode === "exam") {
-          var pass = p >= 60;
-          $("r-judge").innerHTML = '<div class="' + (pass ? "box-ok" : "box-ng") + '">' + (pass ? "合格基準（60%）に達しています。" : "合格基準（60%）まであと " + Math.max(0, Math.ceil(res.total * 0.6) - res.correct) + " 問です。") +
-            "（未解答 " + (res.total - res.answered) + " 問）</div>";
+          $("r-judge").innerHTML = passJudge(res, "（未解答 " + (res.total - res.answered) + " 問）");
         } else if (r.mode === "weak") {
           $("r-judge").innerHTML = '<p class="muted">のべ ' + r.tries + " 回解答し、" + r.firstTry + " 回正解しました。苦手問題の残り：" + weakList().length + "問</p>";
+        } else if (allPast) {
+          $("r-judge").innerHTML = passJudge(res, r.planned && r.planned > res.total ? "（" + r.planned + "問中 " + res.total + "問を解答）" : "");
         } else $("r-judge").textContent = "";
       }
       $("r-fields").innerHTML = '<div class="bars">' + barsSvg(res.byField) + "</div>" + fieldTable(res.byField);
+      $("r-topics-wrap").hidden = !pastIds.length;
+      if (pastIds.length) $("r-topics").innerHTML = topicResultTable(res.byTopic);
       var wrong = res.wrongIds;
       $("r-wrong-card").hidden = wrong.length === 0;
       $("btn-retry-wrong").hidden = wrong.length === 0;
-      $("r-wrong").innerHTML = wrong.map(function (id) {
-        var q = QMAP[id], ansIdx = r.mode === "exam" ? r.answers[r.ids.indexOf(id)] : null;
-        var yours = r.mode === "exam" ? (ansIdx === null ? "未解答" : esc(q.choices[ansIdx])) : null;
-        return "<details><summary>" + fieldTag(q) + " " + esc(q.q.split("\n")[0]) + "</summary>" +
-          '<div class="q-text">' + esc(q.q) + "</div>" +
-          (yours !== null ? '<p class="ng">あなたの解答：' + yours + "</p>" : "") +
-          '<p class="ok">正解：' + esc(q.choices[q.answer]) + "</p><p>" + esc(q.explanation) + "</p><p>" + refLink(q) + "</p></details>";
-      }).join("");
+      $("r-wrong").innerHTML = wrong.map(function (id) { return wrongItemHtml(r, id); }).join("");
       show("result");
     }
 
     // ---- 成績 ----
     function renderStats() {
-      var st = C.statsFromHistory(store.get(K.history, []), QMAP);
-      $("s-summary").textContent = st.total
-        ? "解答数 " + st.total + " 問、正答率 " + C.pct(st.correct, st.total) + "%（直近 " + C.HISTORY_MAX + " 件まで集計）。苦手問題 " + weakList().length + " 問。"
+      var hist = store.get(K.history, []);
+      var all = C.statsFromHistory(hist, QMAP), st = C.statsFromHistory(hist, OMAP), ps = C.statsFromHistory(hist, PMAP);
+      var pw = pastWeakList().length;
+      $("s-summary").textContent = all.total
+        ? "解答数 " + all.total + " 問、正答率 " + C.pct(all.correct, all.total) + "%（直近 " + C.HISTORY_MAX + " 件まで集計）。苦手問題 " + weakList().length + " 問" + (pw ? "（うち過去問 " + pw + " 問）" : "") + "。"
         : "まだ解答履歴がありません。";
-      $("s-bars").innerHTML = barsSvg(st.byField) + fieldTable(st.byField);
+      $("s-bars").innerHTML = '<p class="muted">解答数 ' + st.total + " 問" + (st.total ? "、正答率 " + C.pct(st.correct, st.total) + "%" : "") + "</p>" + barsSvg(st.byField) + fieldTable(st.byField);
       var topics = C.topicsOf(QUESTIONS, "");
       $("s-topics").innerHTML = "<tr><th>中分類</th><th>解答</th><th>正答率</th><th>問題数</th></tr>" + topics.map(function (t) {
         var x = st.byTopic[t], n = QUESTIONS.filter(function (q) { return q.topic === t; }).length;
         var cls = x && x.total ? (C.pct(x.correct, x.total) >= 60 ? "ok" : "ng") : "";
         return "<tr><td>" + esc(t) + "</td><td>" + (x ? x.total : 0) + '</td><td class="' + cls + '">' + (x && x.total ? C.pct(x.correct, x.total) + "%" : "—") + "</td><td>" + n + "</td></tr>";
       }).join("");
+      renderPastStats(ps);
       var exams = store.get(K.exams, []) || [];
-      $("s-exams").innerHTML = exams.length ? '<div class="table-wrap"><table><tr><th>日時</th><th>得点</th><th>所要時間</th></tr>' +
+      $("s-exams").innerHTML = exams.length ? '<div class="table-wrap"><table><tr><th>日時</th><th>種類</th><th>得点</th><th>所要時間</th></tr>' +
         exams.slice().reverse().map(function (e) {
-          var d = new Date(e.at);
+          var d = new Date(e.at), p = C.pct(e.correct, e.total);
           return "<tr><td>" + d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate() + " " + d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0") +
-            "</td><td>" + e.correct + " / " + e.total + "（" + C.pct(e.correct, e.total) + "%）</td><td>" + e.minutes + "分</td></tr>";
+            "</td><td>" + esc(e.title || "本番モード（オリジナル問題）") + "</td><td class=\"" + (p >= C.PASS_PCT ? "ok" : "ng") + "\">" + e.correct + " / " + e.total + "（" + p + "%）</td><td>" + e.minutes + "分</td></tr>";
         }).join("") + "</table></div>" : '<p class="muted">まだ記録がありません。</p>';
       show("stats");
     }
+    function renderPastStats(ps) {
+      if (!PAST.length) { $("s-past").innerHTML = '<p class="muted">過去問データ（data/past_questions.js）がまだありません。</p>'; return; }
+      var html = '<p class="muted">解答数 ' + ps.total + " 問" + (ps.total ? "、正答率 " + C.pct(ps.correct, ps.total) + "%" : "") + "（収録 " + EXAMS.length + "回分・" + PAST.length + "問）</p>";
+      html += '<div class="bars">' + barsSvg(ps.byField) + "</div>" + fieldTable(ps.byField);
+      html += "<h3>回ごと</h3>" + '<div class="table-wrap"><table><tr><th>回</th><th>解いた問題</th><th>解答数</th><th>正答率</th></tr>' +
+        EXAMS.map(function (e) {
+          var x = ps.byExam[e.id];
+          return "<tr><td>" + esc(e.label) + "</td><td>" + (x ? x.solved : 0) + " / " + e.count + "</td><td>" + (x ? x.total : 0) + "</td><td>" + pctCell(x ? x.correct : 0, x ? x.total : 0) + "</td></tr>";
+        }).join("") + "</table></div>";
+      var names = C.TOPIC_ORDER.slice();
+      C.topicsOf(PAST, "").forEach(function (t) { if (names.indexOf(t) < 0) names.push(t); });
+      html += "<h3>中分類ごと</h3>" + '<div class="table-wrap"><table><tr><th>中分類</th><th>解答数</th><th>正答率</th><th>問題数</th></tr>' +
+        names.map(function (t) {
+          var x = ps.byTopic[t], n = PAST.filter(function (q) { return q.topic === t; }).length, f = C.TOPIC_FIELD[t];
+          return "<tr><td>" + (f ? '<span class="tag ' + f + '" title="' + esc(C.FIELDS[f]) + '">' + esc(C.FIELDS[f].charAt(0)) + "</span> " : "") + esc(t) + "</td><td>" + (x ? x.total : 0) + "</td><td>" + pctCell(x ? x.correct : 0, x ? x.total : 0) + "</td><td>" + n + "</td></tr>";
+        }).join("") + "</table></div>";
+      $("s-past").innerHTML = html;
+    }
+
+    // ---- 図の拡大表示 ----
+    var lb = $("lightbox"), lbImg = $("lb-img"), lbReturn = null;
+    function openLightbox(img) {
+      lbReturn = img;
+      lbImg.src = img.getAttribute("src");
+      lbImg.alt = img.alt || "";
+      lbImg.classList.remove("actual");
+      lb.hidden = false;
+      document.documentElement.style.overflow = "hidden";
+      $("lb-close").focus();
+    }
+    function closeLightbox() {
+      lb.hidden = true;
+      document.documentElement.style.overflow = "";
+      lbImg.removeAttribute("src");
+      if (lbReturn && lbReturn.focus) lbReturn.focus({ preventScroll: true });
+    }
+    lb.addEventListener("click", function (e) {
+      if (e.target === lbImg) lbImg.classList.toggle("actual");
+      else closeLightbox();
+    });
+    document.addEventListener("click", function (e) {
+      var img = e.target.closest && e.target.closest("img.zoomable");
+      if (img && !img.closest(".choice") && !img.closest("#lightbox")) openLightbox(img);
+    });
+    document.addEventListener("keydown", function (e) {
+      var img = e.target;
+      if ((e.key === "Enter" || e.key === " ") && img && img.tagName === "IMG" && img.classList.contains("zoomable") && !img.closest(".choice")) {
+        e.preventDefault(); e.stopImmediatePropagation(); openLightbox(img);
+      }
+    }, true);
+    // 図が読み込めないときは、壊れた画像の代わりに案内を出す
+    document.addEventListener("error", function (e) {
+      var t = e.target;
+      if (t && t.tagName === "IMG" && t.classList.contains("zoomable")) {
+        var note = document.createElement("span");
+        note.className = "fig-missing";
+        note.textContent = "（図を読み込めませんでした：" + t.getAttribute("src") + "）";
+        t.replaceWith(note);
+      }
+    }, true);
+    // キーボードでも図を開けるように tabindex を付ける
+    new MutationObserver(function () {
+      Array.prototype.forEach.call(document.querySelectorAll("main img.zoomable:not([tabindex])"), function (img) {
+        if (!img.closest(".choice")) { img.tabIndex = 0; img.setAttribute("role", "button"); img.setAttribute("aria-label", (img.alt || "図") + "（拡大）"); }
+      });
+    }).observe(document.querySelector("main"), { childList: true, subtree: true });
 
     // ---- イベント ----
+    Array.prototype.forEach.call(document.querySelectorAll("[data-tab]"), function (b) {
+      b.addEventListener("click", function () { selectTab(b.dataset.tab); setHash(b.dataset.tab === "past" ? "#past" : "#original"); });
+    });
+    window.addEventListener("hashchange", function () {
+      if (session) return;
+      selectTab(location.hash === "#past" ? "past" : "orig");
+      refreshHome(); show("home");
+    });
     $("sel-field").addEventListener("change", refreshTopics);
     $("sel-topic").addEventListener("change", refreshPoolInfo);
     $("chk-calc").addEventListener("change", refreshPoolInfo);
@@ -610,15 +1204,48 @@
       });
     });
     $("btn-exam").addEventListener("click", function () {
-      var ex = store.get(K.exam, null);
-      if (ex && C.remainingMs(ex, Date.now()) > 0 && !confirm("途中の本番モードを破棄して、新しく始めますか？")) return;
+      if (resumable(K.exam) && !confirm("途中の本番モードを破棄して、新しく始めますか？")) return;
       store.set(K.exam, null);
-      startExam(false);
+      startExam("orig", false);
     });
-    $("btn-exam-resume").addEventListener("click", function () { startExam(true); });
+    $("btn-exam-resume").addEventListener("click", function () { startExam("orig", true); });
     $("btn-weak").addEventListener("click", function () {
       var w = weakList(); if (!w.length) return;
       startPractice(APL.shuffle(w).map(function (id) { return QMAP[id]; }), "苦手問題の復習", "weak");
+    });
+    // 過去問
+    $("past-exam").addEventListener("change", refreshPastExamInfo);
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="past-exam-mode"]'), function (r) { r.addEventListener("change", refreshPastExamInfo); });
+    ["past-field", "past-from", "past-to", "past-calc"].forEach(function (id) { $(id).addEventListener("change", refreshPastTopics); });
+    $("past-topic").addEventListener("change", refreshPastPool);
+    $("btn-past-exam").addEventListener("click", function () {
+      var e = examById($("past-exam").value); if (!e) return;
+      if (pastExamMode() === "step") {
+        startPractice(C.pastExamIds(PAST, e.id).map(function (id) { return QMAP[id]; }), e.label + " 過去問（1問ずつ）", "practice", { pastExam: e.id });
+        return;
+      }
+      var cur = resumable(K.pastExam);
+      if (cur && !confirm("途中の「" + (cur.title || "過去問") + "」を破棄して、新しく始めますか？")) return;
+      store.set(K.pastExam, null);
+      startExam("past", false, { examId: e.id });
+    });
+    $("btn-past-exam-resume").addEventListener("click", function () { startExam("past", true); });
+    $("btn-past-topic").addEventListener("click", function () {
+      var f = $("past-field").value, t = $("past-topic").value, range = pastRangeExams();
+      var picked = C.pickRandom(currentPastPool(), Number($("past-count").value));
+      if ($("past-order").value === "seq") picked = C.sortByExamNo(picked);
+      var rangeLabel = range.length === EXAMS.length ? "" : "・" + examById(range[0]).label + (range.length > 1 ? "〜" + examById(range[range.length - 1]).label : "");
+      startPractice(picked, "過去問 " + (t || (f ? C.FIELDS[f] : "全分野")) + rangeLabel + ($("past-calc").checked ? "（計算問題）" : ""), "practice");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-past-random]"), function (b) {
+      b.addEventListener("click", function () {
+        var n = Number(b.dataset.pastRandom);
+        startPractice(C.pickRandom(PAST, n), "過去問ランダム" + n + "問", "practice");
+      });
+    });
+    $("btn-past-weak").addEventListener("click", function () {
+      var w = pastWeakList(); if (!w.length) return;
+      startPractice(APL.shuffle(w).map(function (id) { return QMAP[id]; }), "過去問の苦手復習", "weak");
     });
     $("btn-stats").addEventListener("click", renderStats);
     $("btn-result-stats").addEventListener("click", renderStats);
@@ -630,7 +1257,7 @@
     });
     $("btn-reset").addEventListener("click", function () {
       if (!confirm("解答履歴・苦手問題・本番モードの記録をすべて消去します。よろしいですか？")) return;
-      [K.history, K.weak, K.exams, K.exam].forEach(function (k) { store.set(k, null); });
+      [K.history, K.weak, K.exams, K.exam, K.pastExam].forEach(function (k) { store.set(k, null); });
       renderStats();
     });
     $("q-choices").addEventListener("click", function (e) {
@@ -647,6 +1274,10 @@
       if (confirm((left ? "未解答が " + left + " 問あります。" : "") + "採点して終了しますか？")) finishExam();
     });
     document.addEventListener("keydown", function (e) {
+      if (!lb.hidden) {
+        if (e.key === "Escape") { e.preventDefault(); closeLightbox(); }
+        return;
+      }
       if (!session || $("view-quiz").hidden || e.ctrlKey || e.metaKey || e.altKey) return;
       var tag = (e.target.tagName || "").toLowerCase();
       if (tag === "select" || tag === "textarea" || (tag === "input" && e.target.type !== "checkbox")) return;
@@ -656,15 +1287,18 @@
       else if (session.mode === "exam" && e.key === "ArrowLeft") { e.preventDefault(); go(session.pos - 1); }
     });
 
-    if (!QUESTIONS.length) {
-      $("view-home").innerHTML = '<div class="box-ng">問題データ（data/questions.js）を読み込めませんでした。</div>';
-      return;
-    }
-    refreshTopics();
+    // ---- 初期化 ----
+    initPast();
+    if (QUESTIONS.length) refreshTopics();
+    else $("home-orig").innerHTML = '<div class="box-ng">問題データ（data/questions.js）を読み込めませんでした。</div>';
     refreshHome();
+    selectTab(location.hash === "#past" || (!QUESTIONS.length && PAST.length) ? "past" : "orig");
     // 時間切れのまま残っている本番モードは、開いた時点で採点する
-    var pending = store.get(K.exam, null);
-    if (pending && pending.ids && C.remainingMs(pending, Date.now()) <= 0) startExam(true);
+    [["orig", K.exam], ["past", K.pastExam]].some(function (x) {
+      var pending = store.get(x[1], null);
+      if (pending && pending.ids && C.remainingMs(pending, Date.now()) <= 0) { startExam(x[0], true); return true; }
+      return false;
+    });
   })();
   </script>
 </body>
