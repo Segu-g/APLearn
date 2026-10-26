@@ -1,0 +1,33 @@
+#EXTM3U
+#EXTINF:324,第1回 試験の全体像とCBT
+ep01_exam-overview.mp3
+#EXTINF:375,第2回 基数変換と2の補数
+ep02_radix-complement.mp3
+#EXTINF:302,第3回 稼働率とRAID
+ep03_availability-raid.mp3
+#EXTINF:290,第4回 CPUの性能とキャッシュ
+ep04_cpu-cache.mp3
+#EXTINF:312,第5回 OS：スケジューリングと仮想記憶・ページ置換
+ep05_os-virtual-memory.mp3
+#EXTINF:298,第6回 データベース：正規化とSQL
+ep06_db-normalization-sql.mp3
+#EXTINF:281,第7回 トランザクションと障害回復
+ep07_db-transaction.mp3
+#EXTINF:314,第8回 ネットワーク：TCP/IPとサブネット
+ep08_network-subnet.mp3
+#EXTINF:330,第9回 暗号とデジタル署名・PKI
+ep09_crypto-pki.mp3
+#EXTINF:288,第10回 攻撃手法と対策
+ep10_web-attacks.mp3
+#EXTINF:322,第11回 認証とネットワークセキュリティ
+ep11_auth-network-security.mp3
+#EXTINF:272,第12回 開発プロセスとテスト技法
+ep12_dev-test.mp3
+#EXTINF:300,第13回 プロジェクトマネジメント：クリティカルパスとEVM
+ep13_pm-evm-cpm.mp3
+#EXTINF:276,第14回 サービスマネジメントとシステム監査
+ep14_service-audit.mp3
+#EXTINF:297,第15回 経営戦略と会計
+ep15_strategy-accounting.mp3
+#EXTINF:282,第16回 法務
+ep16_law.mp3

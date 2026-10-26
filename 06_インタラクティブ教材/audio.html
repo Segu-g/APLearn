@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>聞き流し講座</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+    .ep-list { list-style: none; margin: 0; padding: 0; }
+    .ep-list li + li { margin-top: 6px; }
+    .ep-list button {
+      width: 100%; text-align: left; display: flex; gap: 8px; align-items: baseline;
+      background: var(--surface); padding: 8px 10px; line-height: 1.45;
+    }
+    .ep-list button[aria-current="true"] { border-color: var(--accent); background: var(--accent-weak); }
+    .ep-list .num { font-family: var(--mono); color: var(--text-sub); font-size: 13px; min-width: 2.2em; }
+    .ep-list .ttl { flex: 1; font-size: 14px; }
+    .ep-list .dur { color: var(--text-sub); font-size: 12px; white-space: nowrap; }
+    .ep-list .done { color: var(--ok); font-size: 12px; }
+    .player { position: sticky; top: 56px; z-index: 5; }
+    audio { width: 100%; margin-top: 8px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+    .controls button { padding: 4px 12px; font-size: 14px; }
+    .controls button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .transcript { margin-top: 16px; }
+    .cue {
+      display: flex; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .cue:hover { background: var(--surface-2); }
+    .cue.active { background: var(--accent-weak); border-color: var(--accent); }
+    .cue .who { font-size: 12px; font-weight: 700; min-width: 5.5em; padding-top: 3px; }
+    .cue .who.metan { color: var(--mgmt); }
+    .cue .who.zundamon { color: var(--ok); }
+    .cue .txt { flex: 1; }
+    .empty { padding: 24px; text-align: center; color: var(--text-sub); }
+  </style>
+</head>
+<body data-root="./" data-title="聞き流し講座">
+  <main>
+    <h1>聞き流し講座</h1>
+    <p class="lead">四国めたん先生とずんだもんの掛け合いで、頻出テーマを1回5〜7分で聞けます。セリフをクリックするとその位置から再生します。</p>
+
+    <div id="app" class="layout">
+      <nav class="card" aria-label="エピソード一覧">
+        <h2 style="margin-top:0">エピソード</h2>
+        <ol id="episodes" class="ep-list"></ol>
+        <label style="display:flex;gap:6px;align-items:center;margin-top:12px">
+          <input type="checkbox" id="autonext" checked> 終わったら次の回へ
+        </label>
+      </nav>
+
+      <section>
+        <div class="card player">
+          <div id="ep-title" style="font-weight:700"></div>
+          <div id="ep-summary" class="muted"></div>
+          <audio id="audio" controls preload="metadata"></audio>
+          <div class="controls" id="speeds" aria-label="再生速度">
+            <span class="muted">速度</span>
+          </div>
+        </div>
+        <div class="card transcript">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <h2 style="margin:0">文字起こし</h2>
+            <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="follow" checked> 自動スクロール</label>
+          </div>
+          <div id="cues" style="margin-top:8px"></div>
+          <div id="related" class="muted" style="margin-top:12px"></div>
+        </div>
+      </section>
+    </div>
+
+    <p class="footer-note">音声合成：VOICEVOX:四国めたん、VOICEVOX:ずんだもん。音声は <code>07_オーディオ教材/tools/build_audio.py</code> で台本から生成しています。</p>
+  </main>
+
+  <script src="assets/common.js"></script>
+  <script src="data/audio_index.js"></script>
+  <script>
+  (function () {
+    const EPISODES = window.APL_DATA_AUDIO || [];
+    const AUDIO_DIR = "../07_オーディオ教材/audio/";
+    const NAMES = { metan: "四国めたん", zundamon: "ずんだもん" };
+    const SPEEDS = [0.8, 1, 1.25, 1.5, 1.75, 2];
+    const { store, esc } = APL;
+
+    const audio = document.getElementById("audio");
+    const listEl = document.getElementById("episodes");
+    const cuesEl = document.getElementById("cues");
+    const follow = document.getElementById("follow");
+    const autonext = document.getElementById("autonext");
+
+    if (!EPISODES.length) {
+      document.getElementById("app").innerHTML =
+        '<div class="card empty">音声がまだ生成されていません。<br><code>python3 07_オーディオ教材/tools/build_audio.py</code> を実行してください。</div>';
+      return;
+    }
+
+    const progress = store.get("audio-progress", {}); // { id: { pos, done } }
+    let current = -1;
+    let cueNodes = [];
+    let activeCue = -1;
+
+    function fmt(sec) {
+      const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+      return m + ":" + String(s).padStart(2, "0");
+    }
+
+    function renderList() {
+      listEl.innerHTML = "";
+      EPISODES.forEach((ep, i) => {
+        const li = document.createElement("li");
+        const done = progress[ep.id] && progress[ep.id].done;
+        li.innerHTML =
+          '<button type="button"' + (i === current ? ' aria-current="true"' : "") + ">" +
+          '<span class="num">' + esc(ep.id.replace("ep", "")) + "</span>" +
+          '<span class="ttl">' + esc(ep.title.replace(/^第\d+回\s*/, "")) +
+          (done ? ' <span class="done">✓ 聴いた</span>' : "") + "</span>" +
+          '<span class="dur">' + fmt(ep.duration) + "</span></button>";
+        li.querySelector("button").addEventListener("click", () => load(i, true));
+        listEl.appendChild(li);
+      });
+    }
+
+    function renderSpeeds() {
+      const box = document.getElementById("speeds");
+      const saved = store.get("audio-speed", 1);
+      SPEEDS.forEach((sp) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = sp + "×";
+        b.setAttribute("aria-pressed", String(sp === saved));
+        b.addEventListener("click", () => {
+          audio.playbackRate = sp;
+          store.set("audio-speed", sp);
+          box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        });
+        box.appendChild(b);
+      });
+      audio.playbackRate = saved;
+    }
+
+    function load(i, autoplay) {
+      current = i;
+      const ep = EPISODES[i];
+      store.set("audio-last", ep.id);
+      document.getElementById("ep-title").textContent = ep.title;
+      document.getElementById("ep-summary").textContent = ep.summary;
+      audio.src = AUDIO_DIR + ep.file;
+      audio.playbackRate = store.get("audio-speed", 1);
+      const pos = progress[ep.id] && !progress[ep.id].done ? progress[ep.id].pos : 0;
+      audio.addEventListener("loadedmetadata", function once() {
+        audio.removeEventListener("loadedmetadata", once);
+        if (pos) audio.currentTime = pos;
+        audio.playbackRate = store.get("audio-speed", 1);
+      });
+      if (autoplay) audio.play().catch(() => {});
+
+      cuesEl.innerHTML = "";
+      cueNodes = ep.cues.map((c) => {
+        const div = document.createElement("div");
+        div.className = "cue";
+        div.innerHTML = '<span class="who ' + esc(c.s) + '">' + esc(NAMES[c.s] || c.s) + '</span><span class="txt">' + esc(c.t) + "</span>";
+        div.addEventListener("click", () => { audio.currentTime = c.start; audio.play().catch(() => {}); });
+        cuesEl.appendChild(div);
+        return div;
+      });
+      activeCue = -1;
+
+      const rel = document.getElementById("related");
+      rel.innerHTML = ep.related.length
+        ? "関連資料：" + ep.related.map((p) => '<a href="' + esc(p) + '">' + esc(p.split("/").pop().replace(/\.md$/, "")) + "</a>").join(" ／ ")
+        : "";
+      renderList();
+    }
+
+    audio.addEventListener("timeupdate", () => {
+      const ep = EPISODES[current];
+      if (!ep) return;
+      const t = audio.currentTime;
+      let idx = -1;
+      for (let k = 0; k < ep.cues.length; k++) {
+        if (ep.cues[k].start <= t + 0.05) idx = k; else break;
+      }
+      if (idx !== activeCue) {
+        if (activeCue >= 0) cueNodes[activeCue].classList.remove("active");
+        if (idx >= 0) {
+          cueNodes[idx].classList.add("active");
+          if (follow.checked) cueNodes[idx].scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+        activeCue = idx;
+      }
+      if (Math.floor(t) % 5 === 0) {
+        progress[ep.id] = Object.assign({}, progress[ep.id], { pos: t });
+        store.set("audio-progress", progress);
+      }
+    });
+
+    audio.addEventListener("ended", () => {
+      const ep = EPISODES[current];
+      progress[ep.id] = { pos: 0, done: true };
+      store.set("audio-progress", progress);
+      if (autonext.checked && current + 1 < EPISODES.length) load(current + 1, true);
+      else renderList();
+    });
+
+    renderSpeeds();
+    const last = store.get("audio-last", null);
+    const start = Math.max(0, EPISODES.findIndex((e) => e.id === last));
+    load(start, false);
+  })();
+  </script>
+</body>
+</html>
