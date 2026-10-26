@@ -1,29 +1,29 @@
 #EXTM3U
 #EXTINF:144,用語聞き流し1 基礎理論・AI
 g01_glossary.mp3
-#EXTINF:206,用語聞き流し2 コンピュータ構成要素・ハードウェア
+#EXTINF:187,用語聞き流し2 コンピュータ構成要素・ハードウェア
 g02_glossary.mp3
 #EXTINF:220,用語聞き流し3 システム構成要素・ソフトウェア
 g03_glossary.mp3
-#EXTINF:203,用語聞き流し4 データベース
+#EXTINF:184,用語聞き流し4 データベース
 g04_glossary.mp3
 #EXTINF:358,用語聞き流し5 ネットワーク
 g05_glossary.mp3
-#EXTINF:440,用語聞き流し6 情報セキュリティ
+#EXTINF:398,用語聞き流し6 情報セキュリティ
 g06_glossary.mp3
 #EXTINF:178,用語聞き流し7 システム開発技術
 g07_glossary.mp3
-#EXTINF:194,用語聞き流し8 プロジェクトマネジメント
+#EXTINF:177,用語聞き流し8 プロジェクトマネジメント
 g08_glossary.mp3
 #EXTINF:185,用語聞き流し9 サービスマネジメント
 g09_glossary.mp3
-#EXTINF:97,用語聞き流し10 システム監査・内部統制
+#EXTINF:89,用語聞き流し10 システム監査・内部統制
 g10_glossary.mp3
 #EXTINF:197,用語聞き流し11 システム戦略・調達
 g11_glossary.mp3
-#EXTINF:282,用語聞き流し12 経営戦略・マーケティング
+#EXTINF:258,用語聞き流し12 経営戦略・マーケティング
 g12_glossary.mp3
 #EXTINF:206,用語聞き流し13 企業活動・会計
 g13_glossary.mp3
-#EXTINF:159,用語聞き流し14 法務・標準化
+#EXTINF:146,用語聞き流し14 法務・標準化
 g14_glossary.mp3

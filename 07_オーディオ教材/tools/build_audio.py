@@ -43,7 +43,27 @@ GAP_SWITCH = 0.45  # 話者が交代するときの間（秒）
 SPEAKERS = {
     "metan": {"id": 2, "name": "四国めたん", "speed": 1.08},
     "zundamon": {"id": 3, "name": "ずんだもん", "speed": 1.08},
+    "tsumugi": {"id": 8, "name": "春日部つむぎ", "speed": 1.08},
+    "himari": {"id": 14, "name": "冥鳴ひまり", "speed": 1.08},
 }
+
+# 一覧の並び順（解説講座 → 科目B攻略編 → 用語聞き流し）
+ORDER = ("ep", "b", "g")
+
+
+def sort_key(ep_id):
+    prefix = ep_id.rstrip("0123456789")
+    return (ORDER.index(prefix) if prefix in ORDER else len(ORDER), ep_id)
+
+
+def credits(ep):
+    """台本に登場する話者のクレジット表記（登場順）。"""
+    names = []
+    for line in ep["lines"]:
+        sp = line.get("speaker")
+        if sp and SPEAKERS[sp]["name"] not in names:
+            names.append(SPEAKERS[sp]["name"])
+    return ["VOICEVOX:" + n for n in names]
 
 
 def post(path, params, body=None):
@@ -122,7 +142,7 @@ def build(script_path):
         mp3_path = os.path.join(AUDIO, name + ".mp3")
         subprocess.run(
             [FFMPEG, "-y", "-loglevel", "error", "-i", wav_path, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", str(RATE), "-ac", "1", "-b:a", "48k",
-             "-metadata", f"title={ep['title']}", "-metadata", "artist=VOICEVOX:四国めたん, VOICEVOX:ずんだもん",
+             "-metadata", f"title={ep['title']}", "-metadata", "artist=" + ", ".join(credits(ep)),
              "-metadata", "album=APLearn 応用情報技術者試験 聞き流し講座", mp3_path],
             check=True,
         )
@@ -146,7 +166,7 @@ def write_transcript(name, ep, duration):
     m, s = divmod(int(duration), 60)
     out = [f"# {ep['title']}", "", f"> {ep.get('summary', '')}", "",
            f"- 音声: [../audio/{name}.mp3](../audio/{name}.mp3)（約{m}分{s:02d}秒）",
-           "- 音声合成: VOICEVOX:四国めたん、VOICEVOX:ずんだもん", ""]
+           "- 音声合成: " + "、".join(credits(ep)), ""]
     for line in ep["lines"]:
         if "pause" in line:
             out.append(f"*（{line['pause']:g}秒 考えてみよう）*")
@@ -183,7 +203,7 @@ def main():
     with open(INDEX_JS, "w", encoding="utf-8") as f:
         f.write("// 自動生成: 07_オーディオ教材/tools/build_audio.py\n")
         f.write("window.APL_DATA_AUDIO = ")
-        json.dump([index[k] for k in sorted(index)], f, ensure_ascii=False, separators=(",", ":"))
+        json.dump([index[k] for k in sorted(index, key=sort_key)], f, ensure_ascii=False, separators=(",", ":"))
         f.write(";\n")
 
 

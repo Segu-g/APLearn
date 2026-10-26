@@ -7,91 +7,91 @@
  ],
  "lines": [
   {
-   "speaker": "zundamon",
-   "text": "用語の聞き流し、コンピュータ構成要素・ハードウェア編なのだ。"
+   "speaker": "tsumugi",
+   "text": "用語の聞き流し、コンピュータ構成要素・ハードウェア編だよ！"
   },
   {
-   "speaker": "metan",
-   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+   "speaker": "himari",
+   "text": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CPU。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Central Processing Unit。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "中央処理装置。命令を解読・実行する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "GPU。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Graphics Processing Unit。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "画像処理装置。並列計算に強くAI学習にも使う"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ALU。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Arithmetic Logic Unit。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "算術論理演算装置。CPU内で演算を行う"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CPI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Cycles Per Instruction。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "1命令の実行に必要な平均クロック数"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "MIPS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Million Instructions Per Second。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "1秒間に実行できる命令数（百万単位）",
    "yomi": "1秒間に実行できる命令数、百万単位"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "FLOPS。",
    "yomi": "フロップス。"
   },
@@ -99,181 +99,181 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "FLoating-point Operations Per Second。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "1秒間の浮動小数点演算回数"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "RISC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Reduced Instruction Set Computer。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "命令を単純・固定長にしてパイプラインを効率化したCPU"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CISC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Complex Instruction Set Computer。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "複雑で可変長の命令を多く持つCPU"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SIMD。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Single Instruction Multiple Data。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "1命令で複数データを同時処理する並列方式"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DMA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Direct Memory Access。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "CPUを介さず装置とメモリ間で直接データ転送する方式"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DRAM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Dynamic Random Access Memory。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "リフレッシュが必要なメモリ。主記憶に使う"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SRAM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Static Random Access Memory。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "リフレッシュ不要で高速なメモリ。キャッシュに使う"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ROM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Read Only Memory。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "読出し専用メモリ（不揮発）",
    "yomi": "読出し専用メモリ、不揮発"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SSD。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Solid State Drive。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "フラッシュメモリを使った補助記憶装置"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "HDD。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Hard Disk Drive。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "磁気ディスク装置"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ECC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Error Correcting Code。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "誤り訂正符号。メモリの1ビット誤りを訂正する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "FPGA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Field Programmable Gate Array。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "利用者が回路構成を書き換えられる集積回路"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SoC。",
    "yomi": "エスオーシー。"
   },
@@ -281,46 +281,46 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "System on a Chip。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "1つのチップにシステムの主要機能を集積したもの"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "USB。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Universal Serial Bus。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "周辺機器接続用のシリアルインタフェース"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PWM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Pulse Width Modulation。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "パルス幅変調。モータ速度やLED輝度の制御に使う"
   },
   {
-   "speaker": "metan",
-   "text": "コンピュータ構成要素・ハードウェア編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+   "speaker": "himari",
+   "text": "コンピュータ構成要素・ハードウェア編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。"
   }
  ]
 }

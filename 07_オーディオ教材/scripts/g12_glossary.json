@@ -7,15 +7,15 @@
  ],
  "lines": [
   {
-   "speaker": "zundamon",
-   "text": "用語の聞き流し、経営戦略・マーケティング編なのだ。"
+   "speaker": "tsumugi",
+   "text": "用語の聞き流し、経営戦略・マーケティング編だよ！"
   },
   {
-   "speaker": "metan",
-   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+   "speaker": "himari",
+   "text": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SWOT。",
    "yomi": "スウォット。"
   },
@@ -23,105 +23,105 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Strengths, Weaknesses, Opportunities, Threats。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "強み・弱み・機会・脅威で現状を分析する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PPM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Product Portfolio Management。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "市場成長率と相対的市場シェアで事業を4分類する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "BSC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Balanced Scorecard。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "財務・顧客・業務プロセス・学習と成長の4視点で戦略を管理"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "KGI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Key Goal Indicator。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "重要目標達成指標。最終目標の達成度"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "KPI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Key Performance Indicator。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "重要業績評価指標。KGI達成に向けたプロセスの指標"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CSF。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Critical Success Factor。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "重要成功要因。目標達成のために最も重要な要因"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "OKR。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Objectives and Key Results。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "目標と主要な成果で組織の目標を管理する手法"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "M&A。",
    "yomi": "エムアンドエー。"
   },
@@ -129,91 +129,91 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Mergers and Acquisitions。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "企業の合併・買収"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "TOB。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Take Over Bid。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "株式公開買付け"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "MBO。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Management BuyOut。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "経営陣による自社の買収（※目標管理制度もMBOと略す）",
    "yomi": "経営陣による自社の買収、※目標管理制度もMBOと略す"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "OEM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Original Equipment Manufacturing。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "相手先ブランドで製品を製造すること"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CSR。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Corporate Social Responsibility。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "企業の社会的責任"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ESG。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Environment, Social, Governance。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "環境・社会・ガバナンスを重視する投資・経営の観点"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SDGs。",
    "yomi": "エスディージーズ。"
   },
@@ -221,31 +221,31 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Sustainable Development Goals。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "持続可能な開発目標（国連）",
    "yomi": "持続可能な開発目標、国連"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "STP。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Segmentation, Targeting, Positioning。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "市場細分化・標的市場の選定・自社の位置づけ"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "4P。",
    "yomi": "フォーピー。"
   },
@@ -253,15 +253,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Product, Price, Place, Promotion。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "売り手視点のマーケティングミックス"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "4C。",
    "yomi": "フォーシー。"
   },
@@ -269,15 +269,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Customer value, Cost, Convenience, Communication。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "買い手視点のマーケティングミックス"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "AIDMA。",
    "yomi": "アイドマ。"
   },
@@ -285,15 +285,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Attention, Interest, Desire, Memory, Action。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "消費者の購買行動モデル"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "AISAS。",
    "yomi": "アイサス。"
   },
@@ -301,61 +301,61 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Attention, Interest, Search, Action, Share。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "ネット時代の購買行動モデル"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "LTV。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Life Time Value。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "顧客生涯価値。1人の顧客が取引期間全体でもたらす利益"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CPA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Cost Per Acquisition。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "顧客1人（成果1件）の獲得単価",
    "yomi": "顧客1人、成果1件、の獲得単価"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SEO。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Search Engine Optimization。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "検索結果で上位に表示されるよう最適化する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "O2O。",
    "yomi": "オーツーオー。"
   },
@@ -363,60 +363,60 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Online to Offline。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "ネットから実店舗へ顧客を誘導する施策"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "MOT。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Management Of Technology。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "技術経営"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "RFM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Recency, Frequency, Monetary。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "最終購買日・購買頻度・購買金額で顧客を分析する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "EC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Electronic Commerce。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "電子商取引"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "B2B / B2C。",
    "yomi": "ビートゥービー、ビートゥーシー。"
   },
@@ -424,17 +424,17 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Business to Business / Business to Consumer。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "企業間取引／企業と消費者の取引",
    "yomi": "企業間取引、企業と消費者の取引"
   },
   {
-   "speaker": "metan",
-   "text": "経営戦略・マーケティング編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+   "speaker": "himari",
+   "text": "経営戦略・マーケティング編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。"
   }
  ]
 }

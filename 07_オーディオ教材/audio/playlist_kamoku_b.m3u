@@ -1,0 +1,23 @@
+#EXTM3U
+#EXTINF:575,科目B攻略1 情報セキュリティ
+b01_security.mp3
+#EXTINF:477,科目B攻略2 経営戦略
+b02_strategy.mp3
+#EXTINF:534,科目B攻略3 プログラミング
+b03_programming.mp3
+#EXTINF:577,科目B攻略4 システムアーキテクチャ
+b04_architecture.mp3
+#EXTINF:513,科目B攻略5 ネットワーク
+b05_network.mp3
+#EXTINF:585,科目B攻略6 データベース
+b06_database.mp3
+#EXTINF:471,科目B攻略7 組込みシステム開発
+b07_embedded.mp3
+#EXTINF:515,科目B攻略8 情報システム開発
+b08_sysdev.mp3
+#EXTINF:520,科目B攻略9 プロジェクトマネジメント
+b09_pm.mp3
+#EXTINF:535,科目B攻略10 サービスマネジメント
+b10_service.mp3
+#EXTINF:518,科目B攻略11 システム監査
+b11_audit.mp3

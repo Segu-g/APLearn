@@ -2,123 +2,123 @@
 
 > 法務・標準化の頻出略語14語を、略語 → 間 → 正式名称と意味の順に読み上げます。
 
-- 音声: [../audio/g14_glossary.mp3](../audio/g14_glossary.mp3)（約2分39秒）
-- 音声合成: VOICEVOX:四国めたん、VOICEVOX:ずんだもん
+- 音声: [../audio/g14_glossary.mp3](../audio/g14_glossary.mp3)（約2分26秒）
+- 音声合成: VOICEVOX:春日部つむぎ、VOICEVOX:冥鳴ひまり
 
-**ずんだもん**：用語の聞き流し、法務・標準化編なのだ。
+**春日部つむぎ**：用語の聞き流し、法務・標準化編だよ！
 
-**四国めたん**：略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。
+**冥鳴ひまり**：略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。
 
-**四国めたん**：JIS。
-
-*（1.5秒 考えてみよう）*
-
-**ずんだもん**：Japanese Industrial Standards。
-
-**ずんだもん**：日本産業規格
-
-**四国めたん**：ISO。
+**冥鳴ひまり**：JIS。
 
 *（1.5秒 考えてみよう）*
 
-**ずんだもん**：International Organization for Standardization。
+**春日部つむぎ**：Japanese Industrial Standards。
 
-**ずんだもん**：国際標準化機構
+**春日部つむぎ**：日本産業規格
 
-**四国めたん**：IEC。
-
-*（1.5秒 考えてみよう）*
-
-**ずんだもん**：International Electrotechnical Commission。
-
-**ずんだもん**：国際電気標準会議
-
-**四国めたん**：IEEE。
+**冥鳴ひまり**：ISO。
 
 *（1.5秒 考えてみよう）*
 
-**ずんだもん**：Institute of Electrical and Electronics Engineers。
+**春日部つむぎ**：International Organization for Standardization。
 
-**ずんだもん**：米国電気電子学会。LAN規格（IEEE 802）を定める
+**春日部つむぎ**：国際標準化機構
 
-**四国めたん**：IETF。
-
-*（1.5秒 考えてみよう）*
-
-**ずんだもん**：Internet Engineering Task Force。
-
-**ずんだもん**：インターネット技術の標準（RFC）を策定する組織
-
-**四国めたん**：W3C。
+**冥鳴ひまり**：IEC。
 
 *（1.5秒 考えてみよう）*
 
-**ずんだもん**：World Wide Web Consortium。
+**春日部つむぎ**：International Electrotechnical Commission。
 
-**ずんだもん**：Web技術（HTML等）の標準化団体
+**春日部つむぎ**：国際電気標準会議
 
-**四国めたん**：RFC。
-
-*（1.5秒 考えてみよう）*
-
-**ずんだもん**：Request For Comments。
-
-**ずんだもん**：IETFが発行するインターネット技術の仕様文書
-
-**四国めたん**：GDPR。
+**冥鳴ひまり**：IEEE。
 
 *（1.5秒 考えてみよう）*
 
-**ずんだもん**：General Data Protection Regulation。
+**春日部つむぎ**：Institute of Electrical and Electronics Engineers。
 
-**ずんだもん**：EU一般データ保護規則
+**春日部つむぎ**：米国電気電子学会。LAN規格（IEEE 802）を定める
 
-**四国めたん**：PL法。
-
-*（1.5秒 考えてみよう）*
-
-**ずんだもん**：Product Liability（製造物責任法）。
-
-**ずんだもん**：製品の欠陥による損害について製造業者の責任を定める法律
-
-**四国めたん**：SLA（契約）。
+**冥鳴ひまり**：IETF。
 
 *（1.5秒 考えてみよう）*
 
-**ずんだもん**：Service Level Agreement。
+**春日部つむぎ**：Internet Engineering Task Force。
 
-**ずんだもん**：法務でもサービス品質の契約条件として出題される
+**春日部つむぎ**：インターネット技術の標準（RFC）を策定する組織
 
-**四国めたん**：NDA。
-
-*（1.5秒 考えてみよう）*
-
-**ずんだもん**：Non-Disclosure Agreement。
-
-**ずんだもん**：秘密保持契約（再掲）
-
-**四国めたん**：CC。
+**冥鳴ひまり**：W3C。
 
 *（1.5秒 考えてみよう）*
 
-**ずんだもん**：Creative Commons。
+**春日部つむぎ**：World Wide Web Consortium。
 
-**ずんだもん**：著作物の利用条件を示すライセンス
+**春日部つむぎ**：Web技術（HTML等）の標準化団体
 
-**四国めたん**：CC（評価基準）。
-
-*（1.5秒 考えてみよう）*
-
-**ずんだもん**：Common Criteria。
-
-**ずんだもん**：ISO/IEC 15408。IT製品のセキュリティ評価基準
-
-**四国めたん**：PPP / PFI。
+**冥鳴ひまり**：RFC。
 
 *（1.5秒 考えてみよう）*
 
-**ずんだもん**：Public-Private Partnership / Private Finance Initiative。
+**春日部つむぎ**：Request For Comments。
 
-**ずんだもん**：官民連携／民間資金を活用した公共事業
+**春日部つむぎ**：IETFが発行するインターネット技術の仕様文書
 
-**四国めたん**：法務・標準化編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。
+**冥鳴ひまり**：GDPR。
+
+*（1.5秒 考えてみよう）*
+
+**春日部つむぎ**：General Data Protection Regulation。
+
+**春日部つむぎ**：EU一般データ保護規則
+
+**冥鳴ひまり**：PL法。
+
+*（1.5秒 考えてみよう）*
+
+**春日部つむぎ**：Product Liability（製造物責任法）。
+
+**春日部つむぎ**：製品の欠陥による損害について製造業者の責任を定める法律
+
+**冥鳴ひまり**：SLA（契約）。
+
+*（1.5秒 考えてみよう）*
+
+**春日部つむぎ**：Service Level Agreement。
+
+**春日部つむぎ**：法務でもサービス品質の契約条件として出題される
+
+**冥鳴ひまり**：NDA。
+
+*（1.5秒 考えてみよう）*
+
+**春日部つむぎ**：Non-Disclosure Agreement。
+
+**春日部つむぎ**：秘密保持契約（再掲）
+
+**冥鳴ひまり**：CC。
+
+*（1.5秒 考えてみよう）*
+
+**春日部つむぎ**：Creative Commons。
+
+**春日部つむぎ**：著作物の利用条件を示すライセンス
+
+**冥鳴ひまり**：CC（評価基準）。
+
+*（1.5秒 考えてみよう）*
+
+**春日部つむぎ**：Common Criteria。
+
+**春日部つむぎ**：ISO/IEC 15408。IT製品のセキュリティ評価基準
+
+**冥鳴ひまり**：PPP / PFI。
+
+*（1.5秒 考えてみよう）*
+
+**春日部つむぎ**：Public-Private Partnership / Private Finance Initiative。
+
+**春日部つむぎ**：官民連携／民間資金を活用した公共事業
+
+**冥鳴ひまり**：法務・標準化編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。

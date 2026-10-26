@@ -7,109 +7,109 @@
  ],
  "lines": [
   {
-   "speaker": "zundamon",
-   "text": "用語の聞き流し、データベース編なのだ。"
+   "speaker": "tsumugi",
+   "text": "用語の聞き流し、データベース編だよ！"
   },
   {
-   "speaker": "metan",
-   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+   "speaker": "himari",
+   "text": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DBMS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "DataBase Management System。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "データベース管理システム"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "RDBMS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Relational DBMS。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "表形式（関係モデル）のDBMS",
    "yomi": "表形式、関係モデル、のDBMS"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SQL。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Structured Query Language。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "関係データベースを操作する言語"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DDL。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Data Definition Language。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "データ定義言語（CREATE、DROP など）",
    "yomi": "データ定義言語、CREATE、DROP など"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DML。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Data Manipulation Language。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "データ操作言語（SELECT、INSERT、UPDATE、DELETE）",
    "yomi": "データ操作言語、SELECT、INSERT、UPDATE、DELETE"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DCL。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Data Control Language。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "データ制御言語（GRANT、REVOKE など）",
    "yomi": "データ制御言語、GRANT、REVOKE など"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "E-R図。",
    "yomi": "イーアールず。"
   },
@@ -117,15 +117,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Entity-Relationship Diagram。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "実体と関連でデータ構造を表す図"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ACID。",
    "yomi": "アシッド。"
   },
@@ -133,15 +133,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Atomicity, Consistency, Isolation, Durability。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "トランザクションが満たすべき4つの性質"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "2PC。",
    "yomi": "ツーフェーズコミット。"
   },
@@ -149,31 +149,31 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Two-Phase Commit。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "2相コミット。分散DBで全サイトの更新をそろえる手順"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "NoSQL。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Not only SQL。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "関係モデル以外のDB（キーバリュー型、ドキュメント型など）",
    "yomi": "関係モデル以外のDB、キーバリュー型、ドキュメント型など"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "KVS。",
    "yomi": "ケーブイエス。"
   },
@@ -181,15 +181,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Key-Value Store。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "キーと値の組でデータを管理するNoSQL"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "BASE。",
    "yomi": "ベース。"
   },
@@ -197,75 +197,75 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Basically Available, Soft state, Eventually consistent。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "結果整合性を重視するNoSQLの特性"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DWH。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Data WareHouse。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "意思決定のために時系列データを統合・蓄積するDB"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "OLAP。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "OnLine Analytical Processing。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "DWHのデータを多次元で分析する処理"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ETL。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Extract, Transform, Load。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "データを抽出・変換・格納してDWHに取り込む処理"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "BI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Business Intelligence。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "蓄積データを分析し経営判断に活かす手法・ツール"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CRUD。",
    "yomi": "クラッド。"
   },
@@ -273,32 +273,32 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Create, Read, Update, Delete。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "データの基本操作。CRUD図で機能とデータの関係を表す"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "WAL。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Write-Ahead Logging。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "更新前にログを先に書き込む方式（障害回復の前提）",
    "yomi": "更新前にログを先に書き込む方式、障害回復の前提"
   },
   {
-   "speaker": "metan",
-   "text": "データベース編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+   "speaker": "himari",
+   "text": "データベース編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。"
   }
  ]
 }

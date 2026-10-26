@@ -7,46 +7,46 @@
  ],
  "lines": [
   {
-   "speaker": "zundamon",
-   "text": "用語の聞き流し、情報セキュリティ編なのだ。"
+   "speaker": "tsumugi",
+   "text": "用語の聞き流し、情報セキュリティ編だよ！"
   },
   {
-   "speaker": "metan",
-   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+   "speaker": "himari",
+   "text": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CIA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Confidentiality, Integrity, Availability。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "機密性・完全性・可用性。情報セキュリティの3要素"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ISMS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Information Security Management System。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "情報セキュリティマネジメントシステム（JIS Q 27001）",
    "yomi": "情報セキュリティマネジメントシステム、JIS Q 27001"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CSIRT。",
    "yomi": "シーサート。"
   },
@@ -54,15 +54,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Computer Security Incident Response Team。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "セキュリティインシデントに対応する組織"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SOC。",
    "yomi": "ソック。"
   },
@@ -70,136 +70,136 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Security Operation Center。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "セキュリティ機器を24時間監視・分析する組織"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PKI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Public Key Infrastructure。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "公開鍵基盤。認証局が証明書で公開鍵の正当性を保証"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Certificate Authority。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "認証局。デジタル証明書を発行する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CRL。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Certificate Revocation List。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "失効したデジタル証明書の一覧"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "OCSP。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Online Certificate Status Protocol。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "証明書の失効状態をオンラインで確認する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "TLS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Transport Layer Security。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "通信の暗号化・サーバ認証を行うプロトコル（SSLの後継）",
    "yomi": "通信の暗号化・サーバ認証を行うプロトコル、SSLの後継"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "AES。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Advanced Encryption Standard。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "代表的な共通鍵暗号"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "RSA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Rivest-Shamir-Adleman。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "素因数分解の困難性を利用した公開鍵暗号"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ECC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Elliptic Curve Cryptography。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "楕円曲線暗号。短い鍵長で高い安全性"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SHA-256。",
    "yomi": "シャー、ニーゴーロク。"
   },
@@ -207,15 +207,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Secure Hash Algorithm 256。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "256ビットのハッシュ値を出力するハッシュ関数"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "MAC。",
    "yomi": "マック。"
   },
@@ -223,16 +223,16 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Message Authentication Code。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "メッセージ認証符号。改ざん検知に使う（ネットワークのMACとは別）",
    "yomi": "メッセージ認証符号。改ざん検知に使う、ネットワークのMACとは別"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "HMAC。",
    "yomi": "エイチマック。"
   },
@@ -240,61 +240,61 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Hash-based MAC。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "ハッシュ関数と共通鍵を使うメッセージ認証符号"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "MFA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Multi-Factor Authentication。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "多要素認証（知識・所持・生体のうち2つ以上）",
    "yomi": "多要素認証、知識・所持・生体のうち2つ以上"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "OTP。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "One-Time Password。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "一度しか使えないパスワード"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SSO。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Single Sign-On。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "一度の認証で複数システムを利用できる仕組み"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SAML。",
    "yomi": "サムル。"
   },
@@ -302,45 +302,45 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Security Assertion Markup Language。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "SSOで認証情報をやり取りするXMLベースの標準"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "IDS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Intrusion Detection System。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "侵入検知システム。不正な通信を検知・通知する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "IPS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Intrusion Prevention System。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "侵入防止システム。不正な通信を検知して遮断する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "WAF。",
    "yomi": "ワフ。"
   },
@@ -348,46 +348,46 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Web Application Firewall。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Webアプリへの攻撃（SQLインジェクション等）を防ぐ",
    "yomi": "Webアプリへの攻撃、SQLインジェクション等、を防ぐ"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "UTM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Unified Threat Management。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "FW・IPS・ウイルス対策などを1台に統合した機器"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "EDR。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Endpoint Detection and Response。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "端末の挙動を監視し、侵害の検知・対応を行う"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SIEM。",
    "yomi": "シーム。"
   },
@@ -395,30 +395,30 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Security Information and Event Management。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "各種ログを集約・相関分析して脅威を検知する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DMZ。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "DeMilitarized Zone。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "外部公開サーバを置く、内部LANと外部の中間セグメント"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DoS。",
    "yomi": "ドス。"
   },
@@ -426,15 +426,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Denial of Service。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "大量の要求でサービスを妨害する攻撃"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DDoS。",
    "yomi": "ディードス。"
   },
@@ -442,90 +442,90 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Distributed DoS。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "多数の機器から同時に行うDoS攻撃"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "XSS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Cross-Site Scripting。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "悪意のあるスクリプトを他の利用者のブラウザで実行させる攻撃"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CSRF。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Cross-Site Request Forgery。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "利用者に意図しないリクエストを送信させる攻撃"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "APT。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Advanced Persistent Threat。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "特定組織を長期間狙う高度な標的型攻撃"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "BEC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Business Email Compromise。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "ビジネスメール詐欺。取引先等を装い送金させる"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SPF。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Sender Policy Framework。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "送信元メールサーバのIPアドレスをDNSで検証する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DKIM。",
    "yomi": "ディーキム。"
   },
@@ -533,15 +533,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "DomainKeys Identified Mail。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "メールにデジタル署名を付けて送信ドメインを検証する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "DMARC。",
    "yomi": "ディーマーク。"
   },
@@ -549,16 +549,16 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Domain-based Message Authentication, Reporting and Conformance。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "SPF/DKIMの検証結果に基づく処理方針を送信側が宣言する",
    "yomi": "SPF、DKIMの検証結果に基づく処理方針を送信側が宣言する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "S/MIME。",
    "yomi": "エスマイム。"
   },
@@ -566,15 +566,15 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Secure/Multipurpose Internet Mail Extensions。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "公開鍵暗号によるメールの暗号化・署名"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "WPA3。",
    "yomi": "ダブリューピーエースリー。"
   },
@@ -582,60 +582,60 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Wi-Fi Protected Access 3。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "無線LANの暗号化・認証規格"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CVE。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Common Vulnerabilities and Exposures。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "脆弱性に付けられる共通の識別番号"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CVSS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Common Vulnerability Scoring System。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "脆弱性の深刻度を評価する共通の基準"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "TPM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Trusted Platform Module。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "鍵の生成・保管を行う耐タンパ性のあるチップ"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "NISC。",
    "yomi": "ニスク。"
   },
@@ -643,17 +643,17 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "National center of Incident readiness and Strategy for Cybersecurity。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "内閣サイバーセキュリティセンター（2025年7月に国家サイバー統括室へ改組）",
    "yomi": "内閣サイバーセキュリティセンター、2025年7月に国家サイバー統括室へ改組"
   },
   {
-   "speaker": "metan",
-   "text": "情報セキュリティ編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+   "speaker": "himari",
+   "text": "情報セキュリティ編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。"
   }
  ]
 }

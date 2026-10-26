@@ -34,6 +34,22 @@ YOMI = {
 }
 
 
+PAIRS = [
+    {
+        "asker": "metan", "answerer": "zundamon",
+        "intro": "用語の聞き流し、{cat}編なのだ。",
+        "rule": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。",
+        "outro": "{cat}編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。",
+    },
+    {
+        "asker": "himari", "answerer": "tsumugi",
+        "intro": "用語の聞き流し、{cat}編だよ！",
+        "rule": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。",
+        "outro": "{cat}編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。",
+    },
+]
+
+
 def load_glossary():
     with open(GLOSSARY_JS, encoding="utf-8") as f:
         src = f.read()
@@ -54,23 +70,26 @@ def main():
             cats.append(t["category"])
     for i, cat in enumerate(cats, 1):
         items = [t for t in terms if t["category"] == cat]
+        # 奇数回はめたん（略語）＋ずんだもん（意味）、偶数回はひまり（略語）＋つむぎ（意味）
+        cast = PAIRS[(i - 1) % len(PAIRS)]
+        asker, answerer = cast["asker"], cast["answerer"]
         lines = [
-            {"speaker": "zundamon", "text": f"用語の聞き流し、{cat}編なのだ。"},
-            {"speaker": "metan", "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"},
+            {"speaker": answerer, "text": cast["intro"].format(cat=cat)},
+            {"speaker": asker, "text": cast["rule"]},
         ]
         for t in items:
-            line = {"speaker": "metan", "text": f"{t['abbr']}。"}
+            line = {"speaker": asker, "text": f"{t['abbr']}。"}
             if t["abbr"] in YOMI:
                 line["yomi"] = YOMI[t["abbr"]] + "。"
             lines.append(line)
             lines.append({"pause": 1.5})
             if re.search(r"[A-Za-z]", t["full"]):
-                lines.append({"speaker": "zundamon", "text": f"{t['full']}。"})
-            m = {"speaker": "zundamon", "text": t["meaning"]}
+                lines.append({"speaker": answerer, "text": f"{t['full']}。"})
+            m = {"speaker": answerer, "text": t["meaning"]}
             if speakable(t["meaning"]) != t["meaning"]:
                 m["yomi"] = speakable(t["meaning"])
             lines.append(m)
-        lines.append({"speaker": "metan", "text": f"{cat}編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"})
+        lines.append({"speaker": asker, "text": cast["outro"].format(cat=cat)})
         script = {
             "id": f"g{i:02d}",
             "title": f"用語聞き流し{i} {cat}",

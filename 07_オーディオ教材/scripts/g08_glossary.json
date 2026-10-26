@@ -7,15 +7,15 @@
  ],
  "lines": [
   {
-   "speaker": "zundamon",
-   "text": "用語の聞き流し、プロジェクトマネジメント編なのだ。"
+   "speaker": "tsumugi",
+   "text": "用語の聞き流し、プロジェクトマネジメント編だよ！"
   },
   {
-   "speaker": "metan",
-   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+   "speaker": "himari",
+   "text": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PMBOK。",
    "yomi": "ピンボック。"
   },
@@ -23,242 +23,242 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Project Management Body Of Knowledge。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "PMIが発行するプロジェクトマネジメントの知識体系ガイド"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PMO。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Project Management Office。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "組織内のプロジェクトを横断的に支援・管理する部門"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "WBS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Work Breakdown Structure。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "成果物・作業を階層的に分解した構造"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "EVM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Earned Value Management。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "出来高で進捗とコストを管理する手法"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PV。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Planned Value。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "計画価値。ある時点までに予定していた作業の予算"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "EV。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Earned Value。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "出来高。実際に完了した作業の予算上の価値"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "AC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Actual Cost。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "実コスト。実際にかかった費用"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "BAC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Budget At Completion。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "完成時総予算"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "EAC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Estimate At Completion。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "完成時総コスト見積り"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ETC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Estimate To Complete。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "残作業のコスト見積り"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SPI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Schedule Performance Index。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "スケジュール効率指数（EV / PV）",
    "yomi": "スケジュール効率指数、EV 、 PV"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CPI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Cost Performance Index。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "コスト効率指数（EV / AC）（CPUのCPIとは別）",
    "yomi": "コスト効率指数、EV 、 AC、CPUのCPIとは別"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PERT。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Program Evaluation and Review Technique。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "アローダイアグラムで日程を管理する手法"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CPM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Critical Path Method。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "クリティカルパス法。最長経路で所要期間を求める"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PDM。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Precedence Diagramming Method。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "プレシデンスダイアグラム法。FS・SS等の依存関係で表す"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "FP。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Function Point。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "機能の数と複雑さからソフトウェア規模を見積もる単位"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "COCOMO。",
    "yomi": "ココモ。"
   },
@@ -266,48 +266,48 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "COnstructive COst MOdel。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "プログラム規模（行数）から工数を見積もるモデル",
    "yomi": "プログラム規模、行数、から工数を見積もるモデル"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "RACI。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Responsible, Accountable, Consulted, Informed。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "作業ごとの役割分担を示す責任分担表"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "RFC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Request For Change。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "変更要求（SMの変更管理でも使う）",
    "yomi": "変更要求、SMの変更管理でも使う"
   },
   {
-   "speaker": "metan",
-   "text": "プロジェクトマネジメント編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+   "speaker": "himari",
+   "text": "プロジェクトマネジメント編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。"
   }
  ]
 }

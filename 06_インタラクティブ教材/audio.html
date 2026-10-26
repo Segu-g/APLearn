@@ -31,9 +31,11 @@
     }
     .cue:hover { background: var(--surface-2); }
     .cue.active { background: var(--accent-weak); border-color: var(--accent); }
-    .cue .who { font-size: 12px; font-weight: 700; min-width: 5.5em; padding-top: 3px; }
+    .cue .who { font-size: 12px; font-weight: 700; min-width: 6.5em; padding-top: 3px; }
     .cue .who.metan { color: var(--mgmt); }
     .cue .who.zundamon { color: var(--ok); }
+    .cue .who.tsumugi { color: var(--warn); }
+    .cue .who.himari { color: var(--strat); }
     .cue .txt { flex: 1; }
     .empty { padding: 24px; text-align: center; color: var(--text-sub); }
   </style>
@@ -41,7 +43,7 @@
 <body data-root="./" data-title="聞き流し講座">
   <main>
     <h1>聞き流し講座</h1>
-    <p class="lead">四国めたん先生とずんだもんの掛け合いで、頻出テーマを1回5〜7分で聞けます。セリフをクリックするとその位置から再生します。</p>
+    <p class="lead">四国めたん先生とずんだもんの「解説講座」、冥鳴ひまりと春日部つむぎの「科目B攻略編」、略語の「用語聞き流し」を聞けます。セリフをクリックするとその位置から再生します。</p>
 
     <div id="app" class="layout">
       <nav class="card" aria-label="エピソード一覧">
@@ -72,7 +74,7 @@
       </section>
     </div>
 
-    <p class="footer-note">音声合成：VOICEVOX:四国めたん、VOICEVOX:ずんだもん。音声は <code>07_オーディオ教材/tools/build_audio.py</code> で台本から生成しています。</p>
+    <p class="footer-note">音声合成：VOICEVOX:四国めたん、VOICEVOX:ずんだもん、VOICEVOX:春日部つむぎ、VOICEVOX:冥鳴ひまり。音声は <code>07_オーディオ教材/tools/build_audio.py</code> で台本から生成しています。</p>
   </main>
 
   <script src="assets/common.js"></script>
@@ -81,7 +83,8 @@
   (function () {
     const EPISODES = window.APL_DATA_AUDIO || [];
     const AUDIO_DIR = "../07_オーディオ教材/audio/";
-    const NAMES = { metan: "四国めたん", zundamon: "ずんだもん" };
+    const NAMES = { metan: "四国めたん", zundamon: "ずんだもん", tsumugi: "春日部つむぎ", himari: "冥鳴ひまり" };
+    const GROUPS = { ep: "解説講座", b: "科目B攻略編", g: "用語聞き流し" };
     const SPEEDS = [0.8, 1, 1.25, 1.5, 1.75, 2];
     const { store, esc } = APL;
 
@@ -111,7 +114,7 @@
       listEl.innerHTML = "";
       let group = "";
       EPISODES.forEach((ep, i) => {
-        const g = ep.id.startsWith("g") ? "用語聞き流し" : "解説講座";
+        const g = GROUPS[ep.id.replace(/\d+$/, "")] || "その他";
         if (g !== group) {
           group = g;
           const h = document.createElement("li");
@@ -124,8 +127,8 @@
         const done = progress[ep.id] && progress[ep.id].done;
         li.innerHTML =
           '<button type="button"' + (i === current ? ' aria-current="true"' : "") + ">" +
-          '<span class="num">' + esc(ep.id.replace(/^(ep|g)/, "")) + "</span>" +
-          '<span class="ttl">' + esc(ep.title.replace(/^(第\d+回|用語聞き流し\d+)\s*/, "")) +
+          '<span class="num">' + esc(ep.id.replace(/^(ep|b|g)/, "")) + "</span>" +
+          '<span class="ttl">' + esc(ep.title.replace(/^(第\d+回|用語聞き流し\d+|科目B攻略\d+)\s*/, "")) +
           (done ? ' <span class="done">✓ 聴いた</span>' : "") + "</span>" +
           '<span class="dur">' + fmt(ep.duration) + "</span></button>";
         li.querySelector("button").addEventListener("click", () => load(i, true));

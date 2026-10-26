@@ -7,15 +7,15 @@
  ],
  "lines": [
   {
-   "speaker": "zundamon",
-   "text": "用語の聞き流し、システム監査・内部統制編なのだ。"
+   "speaker": "tsumugi",
+   "text": "用語の聞き流し、システム監査・内部統制編だよ！"
   },
   {
-   "speaker": "metan",
-   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+   "speaker": "himari",
+   "text": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "COSO。",
    "yomi": "コソ。"
   },
@@ -23,16 +23,16 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Committee of Sponsoring Organizations of the Treadway Commission。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "内部統制のフレームワーク（3目的・5構成要素）を示した組織",
    "yomi": "内部統制のフレームワーク、3目的・5構成要素、を示した組織"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "COBIT。",
    "yomi": "コビット。"
   },
@@ -40,31 +40,31 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Control OBjectives for Information and related Technology。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "ITガバナンス・管理のフレームワーク（ISACA）",
    "yomi": "ITガバナンス・管理のフレームワーク、ISACA"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CSA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Control Self-Assessment。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "統制自己評価。業務担当者自身が内部統制を評価する"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CAAT。",
    "yomi": "キャット。"
   },
@@ -72,57 +72,57 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Computer Assisted Audit Techniques。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "コンピュータ支援監査技法"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ITF。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Integrated Test Facility。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "本番システムに監査用の架空口座を設けて検証する技法"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "J-SOX。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "上場企業に財務報告に係る内部統制の評価・監査を求める制度"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "GRC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Governance, Risk management, Compliance。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "ガバナンス・リスク管理・コンプライアンスの統合的な取組み"
   },
   {
-   "speaker": "metan",
-   "text": "システム監査・内部統制編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+   "speaker": "himari",
+   "text": "システム監査・内部統制編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。"
   }
  ]
 }

@@ -7,153 +7,153 @@
  ],
  "lines": [
   {
-   "speaker": "zundamon",
-   "text": "用語の聞き流し、法務・標準化編なのだ。"
+   "speaker": "tsumugi",
+   "text": "用語の聞き流し、法務・標準化編だよ！"
   },
   {
-   "speaker": "metan",
-   "text": "略語を読み上げたら、少し間をあけるわね。意味を思い浮かべてから答えを聞いてね。"
+   "speaker": "himari",
+   "text": "略語を読んだら、少しだけ間をあけますね。意味を思い浮かべてから、答えを聞いてください。"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "JIS。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Japanese Industrial Standards。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "日本産業規格"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "ISO。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "International Organization for Standardization。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "国際標準化機構"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "IEC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "International Electrotechnical Commission。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "国際電気標準会議"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "IEEE。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Institute of Electrical and Electronics Engineers。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "米国電気電子学会。LAN規格（IEEE 802）を定める",
    "yomi": "米国電気電子学会。LAN規格、IEEE 802、を定める"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "IETF。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Internet Engineering Task Force。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "インターネット技術の標準（RFC）を策定する組織",
    "yomi": "インターネット技術の標準、RFC、を策定する組織"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "W3C。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "World Wide Web Consortium。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Web技術（HTML等）の標準化団体",
    "yomi": "Web技術、HTML等、の標準化団体"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "RFC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Request For Comments。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "IETFが発行するインターネット技術の仕様文書"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "GDPR。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "General Data Protection Regulation。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "EU一般データ保護規則"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PL法。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Product Liability（製造物責任法）。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "製品の欠陥による損害について製造業者の責任を定める法律"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "SLA（契約）。",
    "yomi": "エスエルエー。"
   },
@@ -161,46 +161,46 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Service Level Agreement。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "法務でもサービス品質の契約条件として出題される"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "NDA。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Non-Disclosure Agreement。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "秘密保持契約（再掲）",
    "yomi": "秘密保持契約、再掲"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CC。"
   },
   {
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Creative Commons。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "著作物の利用条件を示すライセンス"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "CC（評価基準）。",
    "yomi": "シーシー。"
   },
@@ -208,16 +208,16 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Common Criteria。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "ISO/IEC 15408。IT製品のセキュリティ評価基準",
    "yomi": "ISO、IEC 15408。IT製品のセキュリティ評価基準"
   },
   {
-   "speaker": "metan",
+   "speaker": "himari",
    "text": "PPP / PFI。",
    "yomi": "ピーピーピー、ピーエフアイ。"
   },
@@ -225,17 +225,17 @@
    "pause": 1.5
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "Public-Private Partnership / Private Finance Initiative。"
   },
   {
-   "speaker": "zundamon",
+   "speaker": "tsumugi",
    "text": "官民連携／民間資金を活用した公共事業",
    "yomi": "官民連携、民間資金を活用した公共事業"
   },
   {
-   "speaker": "metan",
-   "text": "法務・標準化編は、ここまでよ。聞き取れなかった用語は、略語カードで復習してね。"
+   "speaker": "himari",
+   "text": "法務・標準化編は、ここまでです。聞き取れなかった用語は、略語カードで復習しましょうね。"
   }
  ]
 }
