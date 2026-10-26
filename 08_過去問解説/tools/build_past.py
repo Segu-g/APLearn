@@ -234,9 +234,77 @@ def build_b(exams):
     write(os.path.join(B_DIR, "README.md"), "\n".join(index))
 
 
+# ---------------------------------------------------------------- 全体 README
+def build_readme(a_exams, b_exams):
+    from collections import Counter
+    n_ex = len(a_exams)
+    cat = Counter()
+    kw = defaultdict(list)
+    for ex in a_exams:
+        for q in ex["questions"]:
+            cat[q["category"]] += 1
+            for k in q["keywords"]:
+                kw[k.strip()].append((ex, q))
+    lines = [
+        "# 過去問解説（IPA 公表問題）",
+        "",
+        "> IPA が公表している応用情報技術者試験の過去問題を、出典を明記して教材化したものです。問題の著作権は IPA にあります。"
+        "解説・解き方ガイドはオリジナルです（IPA「試験制度に関するよくある質問」の過去問題の使用に関する方針に基づく）。",
+        "",
+        "## 収録内容",
+        "",
+        f"- **科目A（旧午前）**：{n_ex}回分・{sum(len(e['questions']) for e in a_exams)}問。全問の書き起こしとオリジナル解説",
+        f"- **科目B（旧午後）**：{len(b_exams)}回分・{sum(len(e['problems']) for e in b_exams)}問。分野別の解き方ガイド（問題文は IPA の PDF を参照）",
+        "",
+        "## 使い方",
+        "",
+        "1. まず [インタラクティブ教材の四択クイズ](../06_インタラクティブ教材/quiz.html#past) の「IPA過去問」タブで、1回分を本番形式（80問・150分）で解く。",
+        "2. 間違えた問題の解説を読み、関連する解説資料（01〜03）に戻って理解する。",
+        "3. [分野別索引](科目A/分野別索引.md) で苦手な中分類の過去問をまとめて解く。",
+        "4. 科目B は [分野別ガイド](科目B/README.md) で、選んだ分野の過去問を PDF で解いてから答え合わせをする。",
+        "",
+        "## 科目A 回別一覧",
+        "",
+        "| 回 | 解説集 |",
+        "|---|---|",
+    ]
+    for ex in a_exams:
+        lines.append(f"| {ex['label']} | [{ex['id']}.md](科目A/{ex['id']}.md) |")
+    lines += [
+        "",
+        "## 中分類別の出題数（勉強の優先順位の目安）",
+        "",
+        f"{n_ex}回分の合計と、1回（80問）あたりの平均です。平均が多い分野ほど得点源になります。",
+        "",
+        "| 中分類 | 合計 | 1回あたり |",
+        "|---|---|---|",
+    ]
+    for c in CATEGORY_ORDER:
+        if cat[c]:
+            lines.append(f"| [{c}](科目A/分野別索引.md#{c}) | {cat[c]} | {cat[c] / n_ex:.1f} |")
+    rep = sorted(((k, v) for k, v in kw.items() if len({e['id'] for e, _ in v}) >= 3),
+                 key=lambda kv: (-len({e['id'] for e, _ in kv[1]}), kv[0]))
+    lines += [
+        "",
+        "## 繰り返し出題されているキーワード",
+        "",
+        "3回以上の試験で出題されたキーワードです。科目A は過去問の類題が多いので、ここに並ぶ用語は確実に説明できるようにしておきましょう。",
+        "",
+        "| キーワード | 出題回数 | 出題例 |",
+        "|---|---|---|",
+    ]
+    for k, v in rep[:120]:
+        n = len({e['id'] for e, _ in v})
+        links = "、".join(f"[{e['label'].replace('年度', '')} 問{q['no']}](科目A/{e['id']}.md#q{q['no']:02d})" for e, q in v[:4])
+        lines.append(f"| {k} | {n} | {links} |")
+    write(os.path.join(BASE, "README.md"), "\n".join(lines))
+
+
 def main():
-    na = build_a(load_dir(A_DIR))
-    build_b(load_dir(B_DIR))
+    a_exams, b_exams = load_dir(A_DIR), load_dir(B_DIR)
+    na = build_a(a_exams)
+    build_b(b_exams)
+    build_readme(a_exams, b_exams)
     print(f"科目A {na}問、科目B を生成しました")
 
 
