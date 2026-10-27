@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>用語ドリル</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    [hidden] { display: none !important; }
+    .tabs { display: flex; gap: 8px; margin: 16px 0 14px; flex-wrap: wrap; }
+    .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .meter { height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+    .meter > div { height: 100%; background: var(--ok); width: 0; transition: width .2s; }
+    .stars { color: var(--warn); white-space: nowrap; letter-spacing: -1px; }
+    .q-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; color: var(--text-sub); font-size: 13px; }
+    .q-text { font-size: 18px; line-height: 1.7; margin: 12px 0 16px; overflow-wrap: anywhere; }
+    .q-text.term { font-size: 26px; font-weight: 700; }
+    .choices { display: grid; gap: 10px; }
+    .choices button { text-align: left; padding: 12px 14px; font-size: 15px; line-height: 1.6; white-space: normal; overflow-wrap: anywhere; }
+    .choices button .k { font-family: var(--mono); color: var(--text-sub); margin-right: 8px; }
+    .choices button:disabled { opacity: 1; cursor: default; }
+    .choices button.correct { background: var(--ok-weak); border-color: var(--ok); }
+    .choices button.wrong { background: var(--ng-weak); border-color: var(--ng); }
+    .explain { margin-top: 14px; }
+    .explain p { margin: 6px 0; }
+    .flash {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+      width: 100%; min-height: 220px; padding: 20px 16px; margin: 14px 0;
+      background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer;
+      overflow-wrap: anywhere; line-height: 1.7; font-size: 16px;
+    }
+    .flash:hover { border-color: var(--accent); }
+    .flash.back { border-color: var(--accent); }
+    .flash .side { font-size: 12px; color: var(--text-sub); margin-bottom: 8px; }
+    .flash .big { font-size: 28px; font-weight: 700; line-height: 1.4; }
+    .flash .sub { color: var(--text-sub); font-size: 14px; }
+    .judge { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .judge button { padding: 12px 8px; font-size: 16px; }
+    button.known { background: var(--ok-weak); border-color: var(--ok); color: var(--text); }
+    button.learning { background: var(--ng-weak); border-color: var(--ng); color: var(--text); }
+    .list-table td { line-height: 1.6; }
+    .list-table .tt { font-weight: 700; min-width: 8em; }
+    .list-table .en { display: block; font-weight: 400; font-size: 12px; color: var(--text-sub); }
+    .list-table .pt { display: block; margin-top: 4px; font-size: 13px; color: var(--text-sub); }
+    .st-badge { font-size: 12px; white-space: nowrap; }
+    .pair { border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; background: var(--surface); }
+    .pair + .pair { margin-top: 10px; }
+    .pair .ab { font-weight: 700; }
+    .pair .vs { color: var(--text-sub); margin: 0 6px; font-weight: 400; }
+    .pair details summary { cursor: pointer; color: var(--accent); font-size: 14px; margin-top: 4px; }
+    .prog-row { display: grid; grid-template-columns: minmax(9em, 14em) 1fr 7.5em; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .prog-row .num { text-align: right; color: var(--text-sub); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .kbd { font-family: var(--mono); font-size: 12px; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface-2); }
+    @media (max-width: 600px) {
+      .prog-row { grid-template-columns: 1fr 6.5em; }
+      .prog-row .meter { grid-column: 1 / -1; grid-row: 2; }
+      /* 狭い画面では一覧を1語1枚のカード状に並べる */
+      .list-table, .list-table tbody, .list-table tr, .list-table td { display: block; width: auto; }
+      .list-table tr:first-child { display: none; }
+      .list-table tr { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; background: var(--surface); }
+      .list-table td { border: none; padding: 2px 0; }
+      .list-table td:empty { display: none; }
+    }
+  </style>
+</head>
+<body data-root="./" data-title="用語ドリル">
+  <main>
+    <h1>用語ドリル</h1>
+    <p class="lead">シラバス全23分野の用語を、4択テスト・カード・一覧で覚えます。正解した語は習得度が上がり、間違えた語は「苦手」としてくり返し出題されます（記録はこのブラウザにだけ保存）。</p>
+
+    <div class="card">
+      <div class="row">
+        <div class="field"><label for="sel-field">分野</label>
+          <select id="sel-field">
+            <option value="">すべて</option>
+            <option value="tech">テクノロジ系</option>
+            <option value="mgmt">マネジメント系</option>
+            <option value="strat">ストラテジ系</option>
+          </select></div>
+        <div class="field"><label for="sel-cat">中分類</label><select id="sel-cat"></select></div>
+        <div class="field"><label for="sel-imp">重要度</label>
+          <select id="sel-imp">
+            <option value="3">★★★ のみ</option>
+            <option value="2">★★ 以上</option>
+            <option value="1">すべて</option>
+          </select></div>
+        <div class="field"><label for="sel-status">出題する語</label>
+          <select id="sel-status">
+            <option value="">すべて</option>
+            <option value="todo">未習得のみ</option>
+            <option value="weak">苦手のみ</option>
+          </select></div>
+      </div>
+      <p class="muted" id="scope-info" style="margin-bottom:6px"></p>
+      <div class="meter" aria-hidden="true"><div id="scope-meter"></div></div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-view="test" aria-selected="true">4択テスト</button>
+      <button type="button" role="tab" data-view="cards" aria-selected="false">カード</button>
+      <button type="button" role="tab" data-view="list" aria-selected="false">一覧・検索</button>
+      <button type="button" role="tab" data-view="pairs" aria-selected="false">まぎらわしい用語</button>
+      <button type="button" role="tab" data-view="progress" aria-selected="false">進み具合</button>
+    </div>
+
+    <!-- 4択テスト -->
+    <section id="view-test">
+      <div class="card" id="test-setup">
+        <div class="row">
+          <div class="field"><label for="sel-dir">出題の向き</label>
+            <select id="sel-dir">
+              <option value="d2t">説明 → 用語を選ぶ</option>
+              <option value="t2d">用語 → 説明を選ぶ</option>
+              <option value="mix">ランダムに混ぜる</option>
+            </select></div>
+          <div class="field"><label for="sel-count">問題数</label>
+            <select id="sel-count">
+              <option value="10">10問</option>
+              <option value="20" selected>20問</option>
+              <option value="40">40問</option>
+            </select></div>
+          <button type="button" class="primary" id="btn-start">テスト開始</button>
+        </div>
+        <p class="muted" style="margin-bottom:0">習得度の低い語・苦手な語から優先して出題します。選択肢は同じ分野の用語から作ります。キーボードの <span class="kbd">1</span>〜<span class="kbd">4</span> で回答、<span class="kbd">Enter</span> で次へ。</p>
+      </div>
+      <div class="card" id="test-run" hidden>
+        <div class="q-head"><strong id="q-num"></strong><span id="q-cat"></span><span class="stars" id="q-imp"></span><span id="q-score"></span></div>
+        <div class="q-text" id="q-text"></div>
+        <div class="choices" id="q-choices"></div>
+        <div class="explain" id="q-explain" hidden></div>
+        <div class="actions" style="margin-top:14px">
+          <button type="button" class="primary" id="btn-next" hidden>次へ（Enter）</button>
+          <button type="button" id="btn-quit">やめる</button>
+        </div>
+      </div>
+      <div class="card" id="test-result" hidden></div>
+    </section>
+
+    <!-- カード -->
+    <section id="view-cards" hidden>
+      <div class="card">
+        <div class="row">
+          <div class="field"><label for="sel-cdir">表面</label>
+            <select id="sel-cdir">
+              <option value="term">用語</option>
+              <option value="desc">説明</option>
+            </select></div>
+          <button type="button" id="btn-reshuffle">シャッフルしてやり直す</button>
+          <strong id="card-progress"></strong>
+        </div>
+        <button type="button" class="flash" id="flash" aria-live="polite"></button>
+        <div class="judge" id="judge">
+          <button type="button" class="learning" id="btn-learning">まだ（←）</button>
+          <button type="button" class="known" id="btn-known">覚えた（→）</button>
+        </div>
+        <div id="card-done" hidden></div>
+        <p class="muted">キーボード：<span class="kbd">Space</span> 表裏を切替え、<span class="kbd">→</span> 覚えた、<span class="kbd">←</span> まだ。</p>
+      </div>
+    </section>
+
+    <!-- 一覧 -->
+    <section id="view-list" hidden>
+      <div class="card">
+        <div class="row">
+          <div class="field" style="flex:1; min-width: 200px"><label for="q-search">検索（用語・英語・説明）</label>
+            <input type="text" id="q-search" placeholder="例：サブネット、ITIL、損益分岐点" autocomplete="off"></div>
+        </div>
+        <p class="muted" id="list-info"></p>
+        <div class="table-wrap"><table class="list-table" id="list-table"></table></div>
+        <div class="actions" style="margin-top:12px"><button type="button" id="btn-more" hidden>さらに表示</button></div>
+      </div>
+    </section>
+
+    <!-- まぎらわしい用語 -->
+    <section id="view-pairs" hidden>
+      <div class="card">
+        <p class="muted" style="margin-top:0">2つの用語の違いを自分の言葉で説明してから、「違いを見る」で確かめましょう。上の「中分類」「分野」で絞り込めます。</p>
+        <div id="pairs-list"></div>
+      </div>
+    </section>
+
+    <!-- 進み具合 -->
+    <section id="view-progress" hidden>
+      <div class="card">
+        <p class="muted" style="margin-top:0">「習得」は、テストかカードで2回以上続けて正解・「覚えた」にした語です。分野名をクリックすると、その分野に切り替わります。</p>
+        <div id="prog-list"></div>
+        <div class="actions" style="margin-top:14px"><button type="button" id="btn-reset">選択中の範囲の記録をリセット</button></div>
+      </div>
+    </section>
+
+    <h2>関連資料</h2>
+    <ul>
+      <li><a href="../09_用語集/README.md">用語集（Markdown・分野別）</a> と <a href="../09_用語集/00_最重要用語まとめ.md">最重要用語まとめ</a></li>
+      <li><a href="flashcards.html">略語カード</a>（英字略語の正式名称）</li>
+    </ul>
+    <p class="footer-note">用語の範囲は IPA「応用情報技術者試験 シラバス Ver.7.2」。過去問リンクは IPA 公表の科目A問題の解説ページへ。</p>
+  </main>
+
+  <script src="assets/common.js"></script>
+  <script src="data/terms.js"></script>
+  <script>
+  (function () {
+    const { store, shuffle, esc } = APL;
+    const DATA = window.APL_DATA_TERMS;
+    if (!DATA) {
+      document.querySelector("main").insertAdjacentHTML("beforeend", '<div class="card">用語データがありません。<code>python3 09_用語集/tools/build_terms.py</code> を実行してください。</div>');
+      return;
+    }
+    const CATS = {};
+    DATA.cats.forEach((c) => { CATS[c.no] = c; });
+    const TERMS = DATA.terms.map((t, idx) => Object.assign({ idx: idx, key: t.c + "|" + t.t }, t));
+    const STARS = { 3: "★★★", 2: "★★", 1: "★" };
+    const MASTER = 2;  // 連続正解がこの回数以上で「習得」
+
+    const prog = store.get("terms-progress", {});  // key → { b: 連続正解, w: 誤答回数, n: 正解回数 }
+    const prefs = store.get("terms-prefs", { field: "", cat: "", imp: "3", status: "", view: "test" });
+    function save() { store.set("terms-progress", prog); }
+    function rec(t) { return prog[t.key] || { b: 0, w: 0, n: 0 }; }
+    function mastered(t) { return rec(t).b >= MASTER; }
+    function weak(t) { const r = rec(t); return r.w > 0 && r.b < MASTER; }
+    function mark(t, ok) {
+      const r = rec(t);
+      if (ok) { r.b += 1; r.n += 1; } else { r.b = 0; r.w += 1; }
+      prog[t.key] = r;
+      save();
+    }
+
+    const $ = (id) => document.getElementById(id);
+    const selField = $("sel-field"), selCat = $("sel-cat"), selImp = $("sel-imp"), selStatus = $("sel-status");
+
+    function fillCats() {
+      const f = selField.value;
+      const cur = selCat.value;
+      selCat.innerHTML = '<option value="">すべて</option>' + DATA.cats
+        .filter((c) => !f || c.field === f)
+        .map((c) => '<option value="' + c.no + '">' + String(c.no).padStart(2, "0") + " " + esc(c.name) + "</option>").join("");
+      if ([...selCat.options].some((o) => o.value === cur)) selCat.value = cur;
+    }
+
+    // 絞り込み（status は出題用。一覧・進み具合では使わない）
+    function scope(useStatus) {
+      const f = selField.value, c = selCat.value, imp = +selImp.value, st = selStatus.value;
+      return TERMS.filter((t) => {
+        if (c && String(t.c) !== c) return false;
+        if (f && CATS[t.c].field !== f) return false;
+        if (t.i < imp) return false;
+        if (useStatus && st === "todo" && mastered(t)) return false;
+        if (useStatus && st === "weak" && !weak(t)) return false;
+        return true;
+      });
+    }
+
+    function updateScope() {
+      const all = scope(false);
+      const m = all.filter(mastered).length;
+      const w = all.filter(weak).length;
+      $("scope-info").textContent = "対象 " + all.length + "語 ／ 習得 " + m + "語（" + (all.length ? Math.round(m * 100 / all.length) : 0) + "%） ／ 苦手 " + w + "語";
+      $("scope-meter").style.width = (all.length ? m * 100 / all.length : 0) + "%";
+      prefs.field = selField.value; prefs.cat = selCat.value; prefs.imp = selImp.value; prefs.status = selStatus.value;
+      store.set("terms-prefs", prefs);
+    }
+
+    function catLabel(t) { return String(t.c).padStart(2, "0") + " " + CATS[t.c].name; }
+    function pastLinks(t) {
+      return (t.x || []).map((p) => {
+        const i = p.lastIndexOf("-"), sid = p.slice(0, i), no = p.slice(i + 1);
+        return '<a href="../08_過去問解説/科目A/' + sid + ".md#q" + no + '" target="_blank" rel="noopener">' + esc((DATA.sessions[sid] || sid) + "問" + (+no)) + "</a>";
+      }).join(" ");
+    }
+    function srcLink(t) { return t.r ? ' <a href="../' + esc(t.r) + '" target="_blank" rel="noopener" title="解説の章を開く">📖</a>' : ""; }
+    function explainHTML(t) {
+      let h = "<p><strong>" + esc(t.t) + "</strong>" + (t.e ? '（' + esc(t.e) + "）" : "") + srcLink(t) + "</p>";
+      h += "<p>" + esc(t.d) + "</p>";
+      if (t.p) h += "<p>💡 " + esc(t.p) + "</p>";
+      const pl = pastLinks(t);
+      if (pl) h += '<p class="muted">過去問：' + pl + "</p>";
+      return h;
+    }
+
+    // 出題順：苦手 → 未出題 → 習得度の低い順、同じならランダム
+    function pickOrder(list) {
+      return shuffle(list.slice()).sort((a, b) => {
+        const ra = rec(a), rb = rec(b);
+        const pa = (weak(a) ? 0 : 1) * 10 + Math.min(ra.b, 5), pb = (weak(b) ? 0 : 1) * 10 + Math.min(rb.b, 5);
+        return pa - pb;
+      });
+    }
+
+    // 選択肢：同じ小分類 → 同じ中分類 → 同じ分野 の順に、表記・説明が重複しない語を選ぶ
+    function distractors(t, dir) {
+      const pools = [
+        TERMS.filter((x) => x.c === t.c && x.s === t.s),
+        TERMS.filter((x) => x.c === t.c && x.s !== t.s),
+        TERMS.filter((x) => x.c !== t.c && CATS[x.c].field === CATS[t.c].field),
+      ];
+      const out = [], seenT = new Set([t.t]), seenD = new Set([t.d]);
+      for (const pool of pools) {
+        for (const x of shuffle(pool.slice())) {
+          if (out.length >= 3) break;
+          if (seenT.has(x.t) || seenD.has(x.d)) continue;
+          if (dir === "d2t" && (t.d.includes(x.t) || x.t.includes(t.t) || t.t.includes(x.t))) continue;  // 説明に答えが透けるものは避ける
+          seenT.add(x.t); seenD.add(x.d);
+          out.push(x);
+        }
+      }
+      return out;
+    }
+
+    /* ---------- 4択テスト ---------- */
+    let test = null;
+    function startTest() {
+      const pool = scope(true);
+      if (pool.length < 1) { alertBox("出題できる語がありません。絞り込みを変えてください。"); return; }
+      const n = Math.min(+$("sel-count").value, pool.length);
+      test = { items: pickOrder(pool).slice(0, n), i: 0, ok: 0, wrong: [], answered: false, dir: $("sel-dir").value };
+      $("test-setup").hidden = true; $("test-result").hidden = true; $("test-run").hidden = false;
+      showQ();
+    }
+    function alertBox(msg) {
+      const r = $("test-result");
+      r.hidden = false;
+      r.innerHTML = '<div class="box-note">' + esc(msg) + "</div>";
+    }
+    function showQ() {
+      const t = test.items[test.i];
+      const dir = test.dir === "mix" ? (Math.random() < 0.5 ? "d2t" : "t2d") : test.dir;
+      test.curDir = dir;
+      const opts = shuffle([t].concat(distractors(t, dir)));
+      test.opts = opts; test.answered = false;
+      $("q-num").textContent = "第" + (test.i + 1) + "問 / " + test.items.length;
+      $("q-cat").textContent = catLabel(t) + " ・ " + t.s;
+      $("q-imp").textContent = STARS[t.i];
+      $("q-score").textContent = "正解 " + test.ok;
+      const qt = $("q-text");
+      qt.className = "q-text" + (dir === "t2d" ? " term" : "");
+      qt.innerHTML = dir === "d2t" ? esc(t.d) + '<div class="muted" style="margin-top:6px">この説明に当てはまる用語は？</div>'
+                                   : esc(t.t) + (t.e ? '<div class="muted" style="font-size:14px;font-weight:400">' + esc(t.e) + "</div>" : "");
+      $("q-choices").innerHTML = opts.map((o, k) => '<button type="button" data-k="' + k + '"><span class="k">' + (k + 1) + "</span>" + esc(dir === "d2t" ? o.t : o.d) + "</button>").join("");
+      $("q-explain").hidden = true;
+      $("btn-next").hidden = true;
+    }
+    function answer(k) {
+      if (!test || test.answered || k >= test.opts.length) return;
+      test.answered = true;
+      const t = test.items[test.i];
+      const ok = test.opts[k] === t;
+      mark(t, ok);
+      if (ok) test.ok += 1; else test.wrong.push(t);
+      [...$("q-choices").children].forEach((b, j) => {
+        b.disabled = true;
+        if (test.opts[j] === t) b.classList.add("correct");
+        else if (j === k) b.classList.add("wrong");
+      });
+      const ex = $("q-explain");
+      ex.hidden = false;
+      let h = '<div class="' + (ok ? "box-ok" : "box-ng") + '">' + (ok ? "⭕ 正解" : "❌ 不正解") + "</div>" + explainHTML(t);
+      if (!ok) {
+        const o = test.opts[k];
+        h += '<p class="muted">選んだ「' + esc(o.t) + "」は：" + esc(o.d) + "</p>";
+      }
+      ex.innerHTML = h;
+      $("btn-next").hidden = false;
+      $("btn-next").focus();
+      updateScope();
+    }
+    function nextQ() {
+      if (!test || !test.answered) return;
+      test.i += 1;
+      if (test.i < test.items.length) { showQ(); return; }
+      finishTest();
+    }
+    function finishTest() {
+      $("test-run").hidden = true; $("test-setup").hidden = false;
+      const r = $("test-result");
+      r.hidden = false;
+      const n = test.items.length, rate = Math.round(test.ok * 100 / n);
+      let h = "<h2 style=\"margin-top:0\">結果：" + test.ok + " / " + n + "（" + rate + "%）</h2>";
+      h += rate >= 80 ? '<div class="box-ok">よくできました。重要度を下げる（★★ 以上・すべて）か、別の分野に進みましょう。</div>'
+                      : '<div class="box-note">間違えた語は「苦手」に入りました。「出題する語：苦手のみ」でもう一度テストしましょう。</div>';
+      if (test.wrong.length) {
+        h += "<h3>間違えた語</h3><div class=\"table-wrap\"><table class=\"list-table\"><tr><th>用語</th><th>説明</th></tr>" +
+          test.wrong.map((t) => '<tr><td class="tt">' + esc(t.t) + srcLink(t) + '</td><td>' + esc(t.d) + (t.p ? '<span class="pt">💡 ' + esc(t.p) + "</span>" : "") + "</td></tr>").join("") +
+          "</table></div>";
+      }
+      r.innerHTML = h;
+      test = null;
+    }
+
+    /* ---------- カード ---------- */
+    let deck = [], deckPos = 0, flipped = false;
+    function buildDeck() {
+      deck = pickOrder(scope(true));
+      deckPos = 0; flipped = false;
+      renderCard();
+    }
+    function renderCard() {
+      const fl = $("flash");
+      $("card-done").hidden = deckPos < deck.length;
+      fl.hidden = $("judge").hidden = deckPos >= deck.length;
+      $("card-progress").textContent = deck.length ? Math.min(deckPos + 1, deck.length) + " / " + deck.length : "";
+      if (deckPos >= deck.length) {
+        $("card-done").innerHTML = '<div class="box-ok">' + (deck.length ? "この範囲のカードを一周しました。" : "出題できる語がありません。絞り込みを変えてください。") + "</div>";
+        return;
+      }
+      const t = deck[deckPos], front = $("sel-cdir").value;
+      fl.classList.toggle("back", flipped);
+      const head = '<div class="side">' + esc(catLabel(t)) + ' ・ <span class="stars">' + STARS[t.i] + "</span>" + (flipped ? " ・ 裏" : " ・ 表（クリックで裏返す）") + "</div>";
+      const termHTML = '<div class="big">' + esc(t.t) + "</div>" + (t.e ? '<div class="sub">' + esc(t.e) + "</div>" : "");
+      const descHTML = "<div>" + esc(t.d) + "</div>" + (t.p ? '<div class="sub" style="margin-top:8px">💡 ' + esc(t.p) + "</div>" : "");
+      fl.innerHTML = head + (front === "term" ? (flipped ? termHTML + '<div style="margin-top:10px">' + descHTML + "</div>" : termHTML)
+                                              : (flipped ? '<div style="margin-bottom:10px">' + esc(t.d) + "</div>" + termHTML + (t.p ? '<div class="sub" style="margin-top:8px">💡 ' + esc(t.p) + "</div>" : "") : "<div>" + esc(t.d) + "</div>"));
+    }
+    function judge(ok) {
+      if (deckPos >= deck.length) return;
+      mark(deck[deckPos], ok);
+      deckPos += 1; flipped = false;
+      renderCard();
+      updateScope();
+    }
+
+    /* ---------- 一覧 ---------- */
+    let listLimit = 100;
+    function renderList() {
+      const q = $("q-search").value.trim().toLowerCase();
+      let rows = scope(false);
+      if (q) rows = rows.filter((t) => (t.t + " " + (t.e || "") + " " + t.d + " " + (t.p || "")).toLowerCase().includes(q));
+      $("list-info").textContent = rows.length + "語" + (rows.length > listLimit ? "（先頭 " + listLimit + "語を表示）" : "");
+      $("list-table").innerHTML = "<tr><th>重要度</th><th>用語</th><th>説明・ポイント</th><th>過去問</th><th>状態</th></tr>" +
+        rows.slice(0, listLimit).map((t) =>
+          '<tr><td class="stars">' + STARS[t.i] + '</td><td class="tt">' + esc(t.t) + srcLink(t) + (t.e ? '<span class="en">' + esc(t.e) + "</span>" : "") +
+          '</td><td>' + esc(t.d) + (t.p ? '<span class="pt">💡 ' + esc(t.p) + "</span>" : "") + '<span class="pt">' + esc(catLabel(t) + " ・ " + t.s) + "</span>" +
+          "</td><td>" + pastLinks(t) + '</td><td class="st-badge">' + (mastered(t) ? '<span class="ok">✓ 習得</span>' : weak(t) ? '<span class="ng">苦手</span>' : "") + "</td></tr>").join("");
+      $("btn-more").hidden = rows.length <= listLimit;
+    }
+
+    /* ---------- まぎらわしい用語 ---------- */
+    function renderPairs() {
+      const f = selField.value, c = selCat.value;
+      const cats = DATA.cats.filter((x) => (!c || String(x.no) === c) && (!f || x.field === f));
+      const html = cats.filter((x) => x.pairs.length).map((x) =>
+        "<h3>" + String(x.no).padStart(2, "0") + " " + esc(x.name) + "</h3>" +
+        x.pairs.map((p) => '<div class="pair"><div class="ab">' + esc(p.a) + '<span class="vs">と</span>' + esc(p.b) + '</div><details><summary>違いを見る</summary><p style="margin:6px 0 0">' + esc(p.diff) + "</p></details></div>").join("")
+      ).join("");
+      $("pairs-list").innerHTML = html || '<p class="muted">この範囲には登録がありません。</p>';
+    }
+
+    /* ---------- 進み具合 ---------- */
+    function renderProgress() {
+      const imp = +selImp.value, f = selField.value;
+      $("prog-list").innerHTML = DATA.cats.filter((c) => !f || c.field === f).map((c) => {
+        const ts = TERMS.filter((t) => t.c === c.no && t.i >= imp);
+        const m = ts.filter(mastered).length, pct = ts.length ? Math.round(m * 100 / ts.length) : 0;
+        return '<div class="prog-row"><a href="#c' + c.no + '" data-cat="' + c.no + '">' + String(c.no).padStart(2, "0") + " " + esc(c.name) + '</a><div class="meter"><div style="width:' + pct + '%"></div></div><span class="num">' + m + " / " + ts.length + "（" + pct + "%）</span></div>";
+      }).join("");
+    }
+
+    /* ---------- 画面切替 ---------- */
+    let view = "test";
+    function show(v) {
+      view = v;
+      document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === v)));
+      ["test", "cards", "list", "pairs", "progress"].forEach((x) => { $("view-" + x).hidden = x !== v; });
+      prefs.view = v; store.set("terms-prefs", prefs);
+      refresh();
+    }
+    function refresh() {
+      updateScope();
+      if (view === "cards") buildDeck();
+      if (view === "list") { listLimit = 100; renderList(); }
+      if (view === "pairs") renderPairs();
+      if (view === "progress") renderProgress();
+    }
+
+    document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => show(b.dataset.view)));
+    selField.addEventListener("change", () => { fillCats(); refresh(); });
+    [selCat, selImp, selStatus].forEach((s) => s.addEventListener("change", refresh));
+    $("btn-start").addEventListener("click", startTest);
+    $("q-choices").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) answer(+b.dataset.k); });
+    $("btn-next").addEventListener("click", nextQ);
+    $("btn-quit").addEventListener("click", () => { if (test) { test.items = test.items.slice(0, test.i + (test.answered ? 1 : 0)); if (test.items.length) finishTest(); else { test = null; $("test-run").hidden = true; $("test-setup").hidden = false; } } });
+    $("flash").addEventListener("click", () => { flipped = !flipped; renderCard(); });
+    $("btn-known").addEventListener("click", () => judge(true));
+    $("btn-learning").addEventListener("click", () => judge(false));
+    $("btn-reshuffle").addEventListener("click", buildDeck);
+    $("sel-cdir").addEventListener("change", () => { flipped = false; renderCard(); });
+    $("q-search").addEventListener("input", () => { listLimit = 100; renderList(); });
+    $("btn-more").addEventListener("click", () => { listLimit += 200; renderList(); });
+    $("prog-list").addEventListener("click", (e) => {
+      const a = e.target.closest("a[data-cat]");
+      if (!a) return;
+      e.preventDefault();
+      selField.value = ""; fillCats(); selCat.value = a.dataset.cat; show("test");
+    });
+    $("btn-reset").addEventListener("click", () => {
+      scope(false).forEach((t) => { delete prog[t.key]; });
+      save(); refresh();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.target.matches("input, select, textarea")) return;
+      if (view === "test" && test) {
+        if (/^[1-4]$/.test(e.key)) { answer(+e.key - 1); e.preventDefault(); }
+        else if (e.key === "Enter" && test.answered) { nextQ(); e.preventDefault(); }
+      } else if (view === "cards") {
+        if (e.key === " ") { flipped = !flipped; renderCard(); e.preventDefault(); }
+        else if (e.key === "ArrowRight") judge(true);
+        else if (e.key === "ArrowLeft") judge(false);
+      }
+    });
+
+    // 初期状態：#c10 のようなハッシュがあれば、その中分類を選ぶ
+    selField.value = prefs.field || "";
+    fillCats();
+    selCat.value = prefs.cat || "";
+    selImp.value = prefs.imp || "3";
+    selStatus.value = prefs.status || "";
+    const m = location.hash.match(/^#c(\d+)$/);
+    if (m && CATS[+m[1]]) { selField.value = ""; fillCats(); selCat.value = m[1]; }
+    show(prefs.view && $("view-" + prefs.view) ? prefs.view : "test");
+  })();
+  </script>
+</body>
+</html>

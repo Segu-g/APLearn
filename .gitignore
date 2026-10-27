@@ -4,3 +4,4 @@ Thumbs.db
 .vscode/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+__pycache__/

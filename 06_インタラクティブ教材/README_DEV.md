@@ -5,7 +5,7 @@
 ## 制約
 
 - **外部ライブラリ・CDN・Webフォントは使わない**（素の HTML / CSS / JavaScript のみ）。
-- **`file://` で開いて動くこと**。`fetch()` や ES Modules（`type="module"`）は使わない。データは `data/*.js` に `window.APL_DATA_xxx = [...]` の形で置き、`<script src>` で読み込む。
+- **`file://` で開いて動くこと**。`fetch()` や ES Modules（`type="module"`）は使わない。データは `data/*.js` に `window.APL_DATA_xxx = [...]` の形で置き、`<script src>` で読み込む。`data/terms.js`（用語ドリル）は `09_用語集/tools/build_terms.py` が生成する。
 - 図・グラフは **インライン SVG** を JavaScript で描く（Canvas でもよい）。色は CSS 変数（`var(--accent)` など）を使い、ライト／ダーク両方で読めるようにする。
 - スマホ幅（360px）でも横スクロールなしで使えるレイアウトにする。
 - 保存が必要な状態（成績・苦手問題など）は `APL.store.get/set`（localStorage を try/catch で包んだもの）を使う。保存できなくても動くこと。
