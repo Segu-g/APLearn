@@ -1,0 +1,116 @@
+/* APLearn 公開サイト（Markdown ページ）用スタイル。色は 06_インタラクティブ教材/assets/style.css と揃える */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #eef1f5;
+  --text: #1d2330;
+  --text-sub: #5a6375;
+  --border: #d9dee7;
+  --accent: #2563eb;
+  --accent-weak: #dbe6fd;
+  --font: "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  --mono: "SFMono-Regular", Consolas, "BIZ UDGothic", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151b;
+    --surface: #1b2029;
+    --surface-2: #252b36;
+    --text: #e6e9ef;
+    --text-sub: #9aa3b5;
+    --border: #343c4a;
+    --accent: #6ea2ff;
+    --accent-weak: #1f3157;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.8;
+}
+a { color: var(--accent); }
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.site-name { font-weight: 700; font-size: 1.1rem; text-decoration: none; color: var(--text); }
+.site-header nav { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .9rem; }
+.site-header nav a { text-decoration: none; }
+.crumbs { max-width: 960px; margin: 12px auto 0; padding: 0 16px; font-size: .85rem; color: var(--text-sub); }
+
+.markdown-body {
+  max-width: 960px;
+  margin: 16px auto 32px;
+  padding: 24px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .markdown-body { margin: 12px 0 24px; padding: 16px; border-left: 0; border-right: 0; border-radius: 0; }
+}
+.markdown-body h1, .markdown-body h2 { padding-bottom: .3em; border-bottom: 1px solid var(--border); }
+.markdown-body h1 { font-size: 1.8rem; margin-top: 0; line-height: 1.4; }
+.markdown-body h2 { font-size: 1.45rem; margin-top: 2em; line-height: 1.4; }
+.markdown-body h3 { font-size: 1.2rem; margin-top: 1.6em; }
+.markdown-body h4 { font-size: 1.05rem; }
+.markdown-body img { max-width: 100%; height: auto; background: #fff; }
+.markdown-body blockquote {
+  margin: 1em 0;
+  padding: .4em 1em;
+  color: var(--text-sub);
+  border-left: 4px solid var(--border);
+}
+.markdown-body code {
+  font-family: var(--mono);
+  font-size: .9em;
+  padding: .1em .35em;
+  background: var(--surface-2);
+  border-radius: 4px;
+}
+.markdown-body pre {
+  padding: 12px 16px;
+  overflow-x: auto;
+  background: var(--surface-2);
+  border-radius: 8px;
+  line-height: 1.5;
+}
+.markdown-body pre code { padding: 0; background: none; }
+.markdown-body pre.mermaid { background: var(--surface); text-align: center; }
+.table-wrap { overflow-x: auto; margin: 1em 0; }
+.markdown-body table { border-collapse: collapse; line-height: 1.6; }
+.markdown-body th, .markdown-body td { padding: 6px 12px; border: 1px solid var(--border); vertical-align: top; min-width: 4.5em; }
+.markdown-body th { background: var(--surface-2); }
+.markdown-body tr:nth-child(2n) td { background: color-mix(in srgb, var(--surface-2) 40%, transparent); }
+.markdown-body details {
+  margin: .8em 0;
+  padding: .4em 1em;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.markdown-body summary { cursor: pointer; font-weight: 600; }
+.markdown-body hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+.markdown-body li.task { list-style: none; }
+.markdown-body li.task input { margin: 0 .4em 0 -1.4em; }
+.dir-list { list-style: none; padding-left: 0; }
+
+.site-footer {
+  max-width: 960px;
+  margin: 0 auto 32px;
+  padding: 0 16px;
+  font-size: .8rem;
+  color: var(--text-sub);
+}
