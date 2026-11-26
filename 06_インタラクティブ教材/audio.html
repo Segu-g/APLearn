@@ -7,7 +7,14 @@
   <link rel="stylesheet" href="assets/style.css">
   <style>
     .layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
-    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+      /* スマホでは プレーヤー → エピソード一覧（枠内でスクロール） → 文字起こし の順 */
+      .layout > section { display: contents; }
+      .player { order: -1; position: static; }
+      .transcript { order: 1; margin-top: 0; }
+      .ep-list { max-height: 55vh; overflow-y: auto; }
+    }
     .ep-list { list-style: none; margin: 0; padding: 0; }
     .ep-list li + li { margin-top: 6px; }
     .ep-list button {
@@ -38,20 +45,47 @@
     .cue .who.himari { color: var(--strat); }
     .cue .txt { flex: 1; }
     .empty { padding: 24px; text-align: center; color: var(--text-sub); }
+    .queue-box { display: grid; gap: 6px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .queue-box .field { display: grid; gap: 4px; font-size: 14px; }
+    .queue-box .opt { display: flex; gap: 6px; align-items: center; font-size: 14px; }
+    .pick-tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .pick-tools[hidden] { display: none; }
+    .pick-tools button { padding: 2px 10px; font-size: 13px; }
+    .ep-list .row-ep { display: flex; gap: 6px; align-items: center; }
+    .ep-list .row-ep > input { flex: none; width: 18px; height: 18px; }
+    .ep-list .row-ep > button { flex: 1; min-width: 0; }
+    .ep-list .group { margin: 14px 0 4px; }
+    .ep-list .group:first-child { margin-top: 0; }
+    .ep-list .group button { padding: 0; border: 0; background: none; color: var(--accent); font-size: 14px; cursor: pointer; text-decoration: underline; }
+    .ep-list .in-queue .num { color: var(--accent); font-weight: 700; }
   </style>
 </head>
 <body data-root="./" data-title="聞き流し講座">
   <main>
     <h1>聞き流し講座</h1>
-    <p class="lead">四国めたん先生とずんだもんの「解説講座」、冥鳴ひまりと春日部つむぎの「科目B攻略編」、略語の「用語聞き流し」を聞けます。セリフをクリックするとその位置から再生します。</p>
+    <p class="lead">四国めたん先生とずんだもんの「解説講座」、冥鳴ひまりと春日部つむぎの「科目B攻略編」、略語の「用語聞き流し」を聞けます。セリフをクリックするとその位置から再生します。シリーズ通しや、チェックした回だけを続けて聴くこともできます（ロック画面やイヤホンの「次へ」にも対応）。</p>
 
     <div id="app" class="layout">
       <nav class="card" aria-label="エピソード一覧">
         <h2 style="margin-top:0">エピソード</h2>
+        <div class="queue-box">
+          <label class="field">連続再生
+            <select id="mode">
+              <option value="series">同じシリーズを続けて</option>
+              <option value="all">全エピソードを続けて</option>
+              <option value="picked">チェックした回だけ続けて</option>
+              <option value="off">1回ずつ止める</option>
+            </select>
+          </label>
+          <label class="opt"><input type="checkbox" id="skipdone"> 聴いた回は飛ばす</label>
+          <label class="opt"><input type="checkbox" id="loop"> 最後まで行ったら最初に戻る</label>
+          <div id="pick-tools" class="pick-tools" hidden>
+            <span class="muted">シリーズ名をクリックでまとめて選択</span>
+            <button type="button" id="pick-clear">選択をすべて外す</button>
+          </div>
+          <div id="queue-info" class="muted"></div>
+        </div>
         <ol id="episodes" class="ep-list"></ol>
-        <label style="display:flex;gap:6px;align-items:center;margin-top:12px">
-          <input type="checkbox" id="autonext" checked> 終わったら次の回へ
-        </label>
       </nav>
 
       <section>
@@ -59,9 +93,16 @@
           <div id="ep-title" style="font-weight:700"></div>
           <div id="ep-summary" class="muted"></div>
           <audio id="audio" controls preload="metadata"></audio>
+          <div class="controls" aria-label="再生操作">
+            <button type="button" id="prev" title="前の回（再生中なら頭から）">⏮ 前へ</button>
+            <button type="button" id="back10">−10秒</button>
+            <button type="button" id="fwd10">＋10秒</button>
+            <button type="button" id="next" title="次の回">次へ ⏭</button>
+          </div>
           <div class="controls" id="speeds" aria-label="再生速度">
             <span class="muted">速度</span>
           </div>
+          <div id="up-next" class="muted" style="margin-top:6px"></div>
         </div>
         <div class="card transcript">
           <div class="row" style="justify-content:space-between;align-items:center">
@@ -92,7 +133,9 @@
     const listEl = document.getElementById("episodes");
     const cuesEl = document.getElementById("cues");
     const follow = document.getElementById("follow");
-    const autonext = document.getElementById("autonext");
+    const modeEl = document.getElementById("mode");
+    const skipdoneEl = document.getElementById("skipdone");
+    const loopEl = document.getElementById("loop");
 
     if (!EPISODES.length) {
       document.getElementById("app").innerHTML =
@@ -101,39 +144,105 @@
     }
 
     const progress = store.get("audio-progress", {}); // { id: { pos, done } }
+    const picked = new Set(store.get("audio-picked", []));
     let current = -1;
     let cueNodes = [];
     let activeCue = -1;
+
+    const groupKey = (ep) => ep.id.replace(/\d+$/, "");
+    const isDone = (ep) => !!(progress[ep.id] && progress[ep.id].done);
 
     function fmt(sec) {
       const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
       return m + ":" + String(s).padStart(2, "0");
     }
 
+    function fmtLong(sec) {
+      const m = Math.round(sec / 60);
+      return m >= 60 ? Math.floor(m / 60) + "時間" + (m % 60 ? (m % 60) + "分" : "") : m + "分";
+    }
+
+    // 連続再生の対象（EPISODES の添字、並びは一覧の順）
+    // manual（前へ・次へボタン）のときは「1回ずつ止める」でも一覧の前後へ移る
+    function queue(manual) {
+      const mode = modeEl.value === "off" && manual ? "all" : modeEl.value;
+      let q;
+      if (mode === "off") return [];
+      if (mode === "picked") q = EPISODES.map((_, i) => i).filter((i) => picked.has(EPISODES[i].id));
+      else if (mode === "series" && current >= 0) q = EPISODES.map((_, i) => i).filter((i) => groupKey(EPISODES[i]) === groupKey(EPISODES[current]));
+      else q = EPISODES.map((_, i) => i);
+      if (skipdoneEl.checked) q = q.filter((i) => i === current || !isDone(EPISODES[i]));
+      return q;
+    }
+
+    function step(dir, manual) {
+      const q = queue(manual);
+      if (!q.length) return -1;
+      const after = dir > 0 ? q.filter((i) => i > current) : q.filter((i) => i < current).reverse();
+      if (after.length) return after[0];
+      if (!loopEl.checked) return -1;
+      const wrap = dir > 0 ? q[0] : q[q.length - 1];
+      return wrap === current && q.length === 1 ? (dir > 0 ? current : -1) : wrap;
+    }
+
+    function renderQueueInfo() {
+      const q = queue();
+      const info = document.getElementById("queue-info");
+      const mode = modeEl.value;
+      document.getElementById("pick-tools").hidden = mode !== "picked";
+      if (mode === "off") info.textContent = "1回聴き終わったら止まります。";
+      else if (!q.length) info.textContent = mode === "picked" ? "下の一覧で聴きたい回にチェックを入れてください。" : "続けて聴ける回がありません。";
+      else {
+        const total = q.reduce((s, i) => s + EPISODES[i].duration, 0);
+        info.textContent = "連続再生：" + q.length + "回・約" + fmtLong(total);
+      }
+      const n = step(1);
+      document.getElementById("up-next").textContent = n >= 0 && n !== current ? "次に再生：" + EPISODES[n].title : "";
+    }
+
+    function setPicked(ids, on) {
+      ids.forEach((id) => (on ? picked.add(id) : picked.delete(id)));
+      store.set("audio-picked", Array.from(picked));
+      renderList();
+    }
+
     function renderList() {
+      const picking = modeEl.value === "picked";
+      const q = new Set(queue());
       listEl.innerHTML = "";
       let group = "";
       EPISODES.forEach((ep, i) => {
-        const g = GROUPS[ep.id.replace(/\d+$/, "")] || "その他";
+        const gk = groupKey(ep);
+        const g = GROUPS[gk] || "その他";
         if (g !== group) {
           group = g;
           const h = document.createElement("li");
-          h.className = "muted";
-          h.style.margin = i ? "14px 0 4px" : "0 0 4px";
-          h.textContent = g;
+          h.className = "muted group";
+          if (picking) {
+            const ids = EPISODES.filter((e) => groupKey(e) === gk).map((e) => e.id);
+            const all = ids.every((id) => picked.has(id));
+            h.innerHTML = '<button type="button">' + esc(g) + "（" + (all ? "まとめて外す" : "まとめて選ぶ") + "）</button>";
+            h.querySelector("button").addEventListener("click", () => setPicked(ids, !all));
+          } else {
+            h.textContent = g;
+          }
           listEl.appendChild(h);
         }
         const li = document.createElement("li");
-        const done = progress[ep.id] && progress[ep.id].done;
+        li.className = "row-ep" + (q.has(i) ? " in-queue" : "");
         li.innerHTML =
+          (picking ? '<input type="checkbox" aria-label="' + esc(ep.title) + 'を連続再生に入れる"' + (picked.has(ep.id) ? " checked" : "") + ">" : "") +
           '<button type="button"' + (i === current ? ' aria-current="true"' : "") + ">" +
           '<span class="num">' + esc(ep.id.replace(/^(ep|b|g)/, "")) + "</span>" +
           '<span class="ttl">' + esc(ep.title.replace(/^(第\d+回|用語聞き流し\d+|科目B攻略\d+)\s*/, "")) +
-          (done ? ' <span class="done">✓ 聴いた</span>' : "") + "</span>" +
+          (isDone(ep) ? ' <span class="done">✓ 聴いた</span>' : "") + "</span>" +
           '<span class="dur">' + fmt(ep.duration) + "</span></button>";
         li.querySelector("button").addEventListener("click", () => load(i, true));
+        const cb = li.querySelector("input");
+        if (cb) cb.addEventListener("change", () => setPicked([ep.id], cb.checked));
         listEl.appendChild(li);
       });
+      renderQueueInfo();
     }
 
     function renderSpeeds() {
@@ -154,6 +263,16 @@
       audio.playbackRate = saved;
     }
 
+    function setMediaSession(ep) {
+      if (!("mediaSession" in navigator) || typeof MediaMetadata === "undefined") return;
+      const voices = Array.from(new Set(ep.cues.map((c) => NAMES[c.s] || c.s)));
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: ep.title,
+        artist: voices.map((v) => "VOICEVOX:" + v).join("、"),
+        album: "APLearn " + (GROUPS[groupKey(ep)] || ""),
+      });
+    }
+
     function load(i, autoplay) {
       current = i;
       const ep = EPISODES[i];
@@ -169,6 +288,7 @@
         audio.playbackRate = store.get("audio-speed", 1);
       });
       if (autoplay) audio.play().catch(() => {});
+      setMediaSession(ep);
 
       cuesEl.innerHTML = "";
       cueNodes = ep.cues.map((c) => {
@@ -186,6 +306,22 @@
         ? "関連資料：" + ep.related.map((p) => '<a href="' + esc(p) + '">' + esc(p.split("/").pop().replace(/\.md$/, "")) + "</a>").join(" ／ ")
         : "";
       renderList();
+    }
+
+    function goNext() {
+      const n = step(1, true);
+      if (n >= 0) load(n, true);
+    }
+
+    function goPrev() {
+      if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+      const p = step(-1, true);
+      if (p >= 0) load(p, true);
+      else audio.currentTime = 0;
+    }
+
+    function seek(d) {
+      audio.currentTime = Math.max(0, Math.min((audio.duration || Infinity) - 0.1, audio.currentTime + d));
     }
 
     audio.addEventListener("timeupdate", () => {
@@ -214,9 +350,36 @@
       const ep = EPISODES[current];
       progress[ep.id] = { pos: 0, done: true };
       store.set("audio-progress", progress);
-      if (autonext.checked && current + 1 < EPISODES.length) load(current + 1, true);
+      const n = step(1);
+      if (n >= 0) load(n, true);
       else renderList();
     });
+
+    document.getElementById("next").addEventListener("click", goNext);
+    document.getElementById("prev").addEventListener("click", goPrev);
+    document.getElementById("back10").addEventListener("click", () => seek(-10));
+    document.getElementById("fwd10").addEventListener("click", () => seek(10));
+    document.getElementById("pick-clear").addEventListener("click", () => setPicked(Array.from(picked), false));
+
+    // ロック画面・イヤホンのボタンからも前後の回へ移れるようにする
+    if ("mediaSession" in navigator) {
+      const ms = navigator.mediaSession;
+      const handlers = {
+        nexttrack: goNext,
+        previoustrack: goPrev,
+        seekbackward: (d) => seek(-((d && d.seekOffset) || 10)),
+        seekforward: (d) => seek((d && d.seekOffset) || 10),
+      };
+      Object.keys(handlers).forEach((k) => { try { ms.setActionHandler(k, handlers[k]); } catch (e) { /* 未対応の操作は無視 */ } });
+    }
+
+    // 連続再生の設定はブラウザに保存する
+    modeEl.value = store.get("audio-mode", "series");
+    skipdoneEl.checked = store.get("audio-skipdone", false);
+    loopEl.checked = store.get("audio-loop", false);
+    modeEl.addEventListener("change", () => { store.set("audio-mode", modeEl.value); renderList(); });
+    skipdoneEl.addEventListener("change", () => { store.set("audio-skipdone", skipdoneEl.checked); renderList(); });
+    loopEl.addEventListener("change", () => { store.set("audio-loop", loopEl.checked); renderQueueInfo(); });
 
     renderSpeeds();
     const last = store.get("audio-last", null);
