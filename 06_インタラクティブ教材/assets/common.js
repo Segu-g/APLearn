@@ -30,12 +30,18 @@
     header.className = "site-header";
     header.innerHTML =
       '<div class="inner">' +
-      '<a class="brand" href="' + root + 'index.html">APLearn</a>' +
+      '<a class="brand" href="' + root + '../README.md" title="README（解説資料のトップ）へ">APLearn</a>' +
       '<span class="crumb"></span>' +
       '<span class="spacer"></span>' +
       '<button class="theme-toggle" type="button" aria-label="表示テーマを切り替え"></button>' +
       "</div>";
-    header.querySelector(".crumb").textContent = title === "APLearn" ? "" : "› " + title;
+    // ロゴは README（解説資料のトップ）へ。教材トップへはパンくずの「インタラクティブ教材」から戻る
+    const crumb = header.querySelector(".crumb");
+    const top = document.createElement("a");
+    top.href = root + "index.html";
+    top.textContent = "インタラクティブ教材";
+    crumb.append("› ", top);
+    if (title !== "APLearn") crumb.append(" › " + title);
     document.body.prepend(header);
 
     const btn = header.querySelector(".theme-toggle");
