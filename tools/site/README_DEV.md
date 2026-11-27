@@ -17,5 +17,6 @@ cd _site && python3 -m http.server 8000    # http://localhost:8000/ で確認
 | インタラクティブ教材の HTML | そのままコピー。JS で組み立てる `.md` リンクは `mdlinks.js` がクリック時に `.html` に読み替える |
 | その他（MP3・画像・JS など） | そのままコピー |
 | README も index.html も無いフォルダ | ファイル一覧ページを自動生成 |
+| （全体） | サイト内検索 `search.html`。見出しごとの検索インデックスを `_site_assets/search/{terms,past,core}.json` に出力（用語集は1語ずつ）。開発者向け文書と内容が重複するページ（最重要用語まとめ・分野別索引・科目B 回別ページ）は対象外。画面の処理は `search.js` |
 
 git 管理下のファイルだけを対象にします（`.` で始まるファイル・フォルダは除外）。`_site/` は `.gitignore` 済み。

@@ -5,6 +5,7 @@
 - それ以外のファイル（インタラクティブ教材の HTML・JS、MP3、画像など）はそのままコピー
 - 見出しのアンカーは GitHub と同じ規則で付けるので、既存の「X.md#見出し」リンクがそのまま使える
 - Mermaid の図はブラウザ側で描画（CDN の mermaid を読み込む）
+- 全文検索：見出しごとの検索インデックス（_site_assets/search/*.json）と検索ページ search.html を作る
 
 使い方:
     python3 tools/site/build_site.py            # _site/ に生成
@@ -12,11 +13,13 @@
 """
 import argparse
 import html
+import json
 import os
 import re
 import shutil
 import subprocess
 import sys
+import unicodedata
 from urllib.parse import unquote
 
 from markdown_it import MarkdownIt
@@ -51,6 +54,64 @@ def inline_text(token):
         if c.type in ("text", "code_inline"):
             parts.append(c.content)
     return "".join(parts)
+
+
+# ---------------------------------------------------------------- 検索インデックス
+# 検索対象から外すもの（開発者向け文書と、ほかのページと内容が重複するページ）
+SEARCH_SKIP = re.compile(r"(^|/)README_DEV\.md$|^tools/|^STYLE_GUIDE\.md$|^09_用語集/00_最重要用語まとめ\.md$"
+                         r"|^08_過去問解説/科目A/分野別索引\.md$|^08_過去問解説/科目B/\d{4}[a-z0-9]+\.md$")
+# インデックスを分ける単位（検索ページは全部を並行して読み込み、届いた順に結果に加える）
+SEARCH_SHARDS = [("terms", "用語集", re.compile(r"^09_用語集/")), ("past", "過去問", re.compile(r"^08_過去問解説/")),
+                 ("core", "解説・その他", re.compile(r""))]
+
+
+def visible_text(token):
+    """inline トークンの表示テキストだけを取り出す（リンクの URL や HTML タグは除く）"""
+    return "".join(c.content for c in (token.children or []) if c.type in ("text", "code_inline"))
+
+
+def search_sections(path, tokens):
+    """見出しごとに [アンカー, 見出し, 本文] を返す。用語集の表は1行（1語）ずつ別の項目にする"""
+    per_row = path.startswith("09_用語集/")
+    out, seen = [], {}
+    anchor, head, buf = "", "", []
+    row, in_table, rows_seen = None, False, set()
+
+    def flush():
+        text = re.sub(r"\s+", " ", " ".join(buf)).strip()
+        if text:
+            out.append([anchor, head, unicodedata.normalize("NFKC", text)])
+
+    for i, t in enumerate(tokens):
+        if t.type == "heading_open":
+            flush()
+            head = inline_text(tokens[i + 1]).strip()
+            anchor, buf = slug(head, seen), []
+        elif t.type == "inline":
+            if i > 0 and tokens[i - 1].type == "heading_open":
+                continue
+            (row if row is not None else buf).append(visible_text(t))
+        elif t.type == "fence" and t.info.strip() != "mermaid":
+            buf.append(t.content)
+        elif t.type == "tbody_open":
+            in_table = True
+        elif t.type == "tbody_close":
+            in_table = False
+        elif per_row and in_table and t.type == "tr_open":
+            row = []
+        elif per_row and in_table and t.type == "tr_close" and row is not None:
+            cells = [c for c in row if c.strip() and not re.fullmatch(r"[★☆ ]+", c)]
+            name = cells[0] if cells else ""
+            # 用語のセルは「用語 📖 英語名」。見出しには用語だけを使い、英語名は本文に回す
+            name, _, en = name.partition("📖")
+            text = re.sub(r"\s+", " ", " ".join([en.strip()] + cells[1:])).strip()
+            key = (name.strip(), text)
+            if name and key not in rows_seen:  # ★★★ のまとめ表など、同じページ内の重複行は1つにする
+                rows_seen.add(key)
+                out.append([anchor, unicodedata.normalize("NFKC", name.strip()), unicodedata.normalize("NFKC", text)])
+            row = None
+    flush()
+    return out
 
 
 def rel_root(path):
@@ -111,7 +172,7 @@ await mermaid.run({{ querySelector: "pre.mermaid" }});
 <body>
 <header class="site-header">
   <a class="site-name" href="{root}index.html">APLearn</a>
-  <nav><a href="{root}06_インタラクティブ教材/index.html">インタラクティブ教材</a><a href="{root}09_用語集/index.html">用語集</a><a href="{root}08_過去問解説/index.html">過去問解説</a></nav>
+  <nav><a href="{root}06_インタラクティブ教材/index.html">インタラクティブ教材</a><a href="{root}09_用語集/index.html">用語集</a><a href="{root}08_過去問解説/index.html">過去問解説</a><a href="{root}search.html" class="nav-search">🔍 検索</a></nav>
 </header>
 {f'<div class="crumbs">{crumb_html}</div>' if crumb_html else ''}
 <main class="markdown-body">
@@ -121,6 +182,18 @@ await mermaid.run({{ querySelector: "pre.mermaid" }});
 {mermaid}
 </body>
 </html>
+"""
+
+
+SEARCH_BODY = """<h1>サイト内検索</h1>
+<form class="search-form" role="search" onsubmit="return false">
+  <input type="search" id="search-q" placeholder="例：RTO、正規化、ゼロトラスト、損益分岐点" autocomplete="off" aria-label="検索語">
+</form>
+<div class="search-areas" id="search-areas" role="group" aria-label="検索する範囲"></div>
+<p class="search-status" id="search-status" aria-live="polite">検索の準備をしています…</p>
+<ol class="search-results" id="search-results"></ol>
+<p><button type="button" id="search-more" hidden>さらに表示</button></p>
+<p class="search-help">スペースで区切ると、すべての語を含む箇所を探します（AND 検索）。ひらがなとカタカナ、全角と半角、英字の大文字と小文字は区別しません（漢字の読みがなでは探せません）。</p>
 """
 
 
@@ -153,10 +226,18 @@ def build(out):
         if rel.endswith(".html") and rel not in tracked:
             generated.add(rel)
 
+    pages, shards = [], {name: [] for name, _, _ in SEARCH_SHARDS}
     for f in files:
         src = os.path.join(ROOT, f)
         if f.endswith(".md"):
-            body, title = render_md(open(src, encoding="utf-8").read())
+            source = open(src, encoding="utf-8").read()
+            body, title = render_md(source)
+            if not SEARCH_SKIP.search(f):
+                secs = search_sections(f, md.parse(source))
+                if secs:
+                    shard = next(name for name, _, rx in SEARCH_SHARDS if rx.search(f))
+                    pages.append([f[:-3] + ".html", title or os.path.basename(f)[:-3]])
+                    shards[shard] += [[len(pages) - 1] + s for s in secs]
             body = fix_md_links(body)
             text = page(f, title or os.path.basename(f)[:-3], body, 'class="mermaid"' in body)
             write(f[:-3] + ".html", text)
@@ -191,8 +272,16 @@ def build(out):
                 src_entries.add((name, is_dir))
             write(f"{d}/index.html", dir_index(d, src_entries))
 
-    os.makedirs(os.path.join(out, ASSET_DIR), exist_ok=True)
-    for a in ("site.css", "mdlinks.js"):
+    write("search.html", page("search.html", "サイト内検索", SEARCH_BODY, False)
+          .replace("</body>", f'<script src="./{ASSET_DIR}/search.js"></script>\n</body>', 1))
+    sd = os.path.join(out, ASSET_DIR, "search")
+    os.makedirs(sd, exist_ok=True)
+    for name, label, _ in SEARCH_SHARDS:
+        with open(os.path.join(sd, name + ".json"), "w", encoding="utf-8") as fp:
+            json.dump({"label": label, "pages": pages, "items": shards[name]}, fp, ensure_ascii=False, separators=(",", ":"))
+    with open(os.path.join(sd, "shards.json"), "w", encoding="utf-8") as fp:
+        json.dump([[name, label] for name, label, _ in SEARCH_SHARDS], fp, ensure_ascii=False)
+    for a in ("site.css", "mdlinks.js", "search.js"):
         shutil.copyfile(os.path.join(HERE, a), os.path.join(out, ASSET_DIR, a))
     open(os.path.join(out, ".nojekyll"), "w").close()
     return written, generated
