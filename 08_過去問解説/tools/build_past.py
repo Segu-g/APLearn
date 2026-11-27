@@ -3,7 +3,8 @@
 
   科目A/data/*.json → 科目A/<id>.md、科目A/分野別索引.md、
                        ../06_インタラクティブ教材/data/past_questions.js
-  科目B/data/*.json → 科目B/問NN_<分野>.md、科目B/README.md
+  科目B/data/*.json → 科目B/問NN_<分野>.md（分野別）、科目B/<id>.md（回別）、科目B/README.md
+  ipa_pdfs.json      → README.md の「回別一覧」（IPA の問題・解答・採点講評 PDF へのリンク）
 
 使い方: python3 tools/build_past.py
 """
@@ -15,6 +16,7 @@ from collections import defaultdict
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 A_DIR = os.path.join(BASE, "科目A")
 B_DIR = os.path.join(BASE, "科目B")
+PDF_JSON = os.path.join(BASE, "ipa_pdfs.json")
 QUIZ_JS = os.path.join(os.path.dirname(BASE), "06_インタラクティブ教材", "data", "past_questions.js")
 
 KANA = "アイウエ"
@@ -231,7 +233,75 @@ def build_b(exams):
             lines += ["### 採点講評のポイント", "", p["comment"], "", "### この問題から学ぶこと", "", p["lessons"], ""]
             lines += [f"<sub>{source_line(ex, p['no'], '午後')}（解答例は IPA 公表の解答例より）</sub>", "", "---", ""]
         write(os.path.join(B_DIR, fn), "\n".join(lines))
+    index += [
+        "",
+        "## 回別（1回分の解答例と採点講評をまとめて見る）",
+        "",
+        "1回分を通して解いたあとの答え合わせ用です。問1〜問11の解答例と採点講評を1ページにまとめています。",
+        "",
+    ]
+    for ex in exams:
+        index.append(f"- [{ex['label']}]({ex['id']}.md)")
+        build_b_exam(ex)
     write(os.path.join(B_DIR, "README.md"), "\n".join(index))
+
+
+def pdf_links(exam_id, area):
+    """IPA の PDF へのリンク（area は 'am' か 'pm'）を「問題・解答例・採点講評」の順で返す"""
+    e = PDFS.get(exam_id, {})
+    names = [("qs", "問題冊子"), ("ans", "解答例" if area == "pm" else "解答")] + ([("cmnt", "採点講評")] if area == "pm" else [])
+    return "・".join(f"[{n}]({e[f'{area}_{k}']})" for k, n in names if e.get(f"{area}_{k}"))
+
+
+def build_b_exam(ex):
+    """1回分（問1〜問11）の解答例・採点講評を1ページにまとめる（スマホで答え合わせしやすいよう表を使わない）"""
+    a_md = os.path.join(A_DIR, f"{ex['id']}.md")
+    lines = [
+        f"# {ex['label']} 科目B（午後）解答例と採点講評",
+        "",
+        "> 1回分の答え合わせ用ページです。各問の **解答例**（IPA 公表）と **採点講評のポイント**（IPA の採点講評の要約）を並べています。"
+        "設問の内容と解き方（オリジナル）は「設問と解き方」を開くと読めます。",
+        "",
+        f"- IPA 公式 PDF：{pdf_links(ex['id'], 'pm')}",
+        f"- 同じ回の科目A（午前）：" + (f"[解説集](../科目A/{ex['id']}.md)・" if os.path.exists(a_md) else "")
+        + f"IPA {pdf_links(ex['id'], 'am')}",
+        "",
+        "## 目次",
+        "",
+    ]
+    for p in ex["problems"]:
+        sel = "必須" if p["no"] == 1 else "選択"
+        lines.append(f"- [問{p['no']} {p['field']}（{sel}）「{p['title']}」](#q{p['no']:02d})")
+    lines += ["", "---", ""]
+    for p in ex["problems"]:
+        i = B_FIELDS.index(p["field"]) + 1
+        guide = f"問{i:02d}_{p['field']}.md#{ex['id']}"
+        lines += [
+            f'<a id="q{p["no"]:02d}"></a>',
+            "",
+            f"## 問{p['no']} {p['field']}「{p['title']}」",
+            "",
+            f"問題冊子 {p['pages']} ページ ／ 難易度 {'★' * int(p.get('difficulty', 2))} ／ [分野別ガイドで詳しく]({guide})",
+            "",
+            "### 解答例",
+            "",
+        ]
+        for qq in p["questions"]:
+            ans = qq["answer"].strip().replace("\n", "　／　")
+            lines.append(f"- **{qq['label']}**：{ans}")
+        lines += ["", "<details><summary>設問と解き方</summary>", ""]
+        for qq in p["questions"]:
+            lines += [
+                f"**{qq['label']}**　{qq['ask']}",
+                "",
+                f"- 解答例：{qq['answer'].strip().replace(chr(10), '　／　')}",
+                f"- 解き方：{qq['howto']}",
+                "",
+            ]
+        lines += ["</details>", "", "### 採点講評のポイント", "", p["comment"], ""]
+        lines += [f"<sub>{source_line(ex, p['no'], '午後')}（解答例は IPA 公表の解答例より、採点講評は要約）</sub>",
+                  "", f"[↑ 目次へ](#目次)", "", "---", ""]
+    write(os.path.join(B_DIR, f"{ex['id']}.md"), "\n".join(lines))
 
 
 # ---------------------------------------------------------------- 全体 README
@@ -254,22 +324,37 @@ def build_readme(a_exams, b_exams):
         "## 収録内容",
         "",
         f"- **科目A（旧午前）**：{n_ex}回分・{sum(len(e['questions']) for e in a_exams)}問。全問の書き起こしとオリジナル解説",
-        f"- **科目B（旧午後）**：{len(b_exams)}回分・{sum(len(e['problems']) for e in b_exams)}問。分野別の解き方ガイド（問題文は IPA の PDF を参照）",
+        f"- **科目B（旧午後）**：{len(b_exams)}回分・{sum(len(e['problems']) for e in b_exams)}問。分野別の解き方ガイドと、回別の解答例・採点講評まとめ（問題文は IPA の PDF を参照）",
         "",
         "## 使い方",
         "",
         "1. まず [インタラクティブ教材の四択クイズ](../06_インタラクティブ教材/quiz.html#past) の「IPA過去問」タブで、1回分を本番形式（80問・150分）で解く。",
         "2. 間違えた問題の解説を読み、関連する解説資料（01〜03）に戻って理解する。",
         "3. [分野別索引](科目A/分野別索引.md) で苦手な中分類の過去問をまとめて解く。",
-        "4. 科目B は [分野別ガイド](科目B/README.md) で、選んだ分野の過去問を PDF で解いてから答え合わせをする。",
+        "4. 科目B は [分野別ガイド](科目B/README.md) で、選んだ分野の過去問を PDF で解いてから答え合わせをする。"
+        "1回分を通して解いたら、下の回別一覧の「解答例・採点講評」で答え合わせをする。",
         "",
-        "## 科目A 回別一覧",
+        "## 回別一覧（問題・解答・採点講評）",
         "",
-        "| 回 | 解説集 |",
-        "|---|---|",
+        "この資料の解説と、IPA 公式の PDF（問題冊子・解答・採点講評）を回ごとにまとめています。",
+        "",
     ]
-    for ex in a_exams:
-        lines.append(f"| {ex['label']} | [{ex['id']}.md](科目A/{ex['id']}.md) |")
+    a_ids = {e["id"] for e in a_exams}
+    b_ids = {e["id"] for e in b_exams}
+    covered = [e for e in PDFS.values() if e["id"] in a_ids | b_ids]
+    older = [e for e in PDFS.values() if e["id"] not in a_ids | b_ids]
+    for e in covered:
+        am = (f"[解説集](科目A/{e['id']}.md)・" if e["id"] in a_ids else "") + f"IPA {pdf_links(e['id'], 'am')}"
+        pm = (f"[解答例・採点講評](科目B/{e['id']}.md)・" if e["id"] in b_ids else "") + f"IPA {pdf_links(e['id'], 'pm')}"
+        lines += [f"### {e['label']}", "", f"- 科目A（午前）：{am}", f"- 科目B（午後）：{pm}", ""]
+    if older:
+        lines += [
+            "<details><summary>それより前の回（IPA の PDF のみ）</summary>",
+            "",
+        ]
+        for e in older:
+            lines.append(f"- **{e['label']}**　午前：{pdf_links(e['id'], 'am')}　／　午後：{pdf_links(e['id'], 'pm')}")
+        lines += ["", "</details>", ""]
     lines += [
         "",
         "## 中分類別の出題数（勉強の優先順位の目安）",
@@ -298,6 +383,16 @@ def build_readme(a_exams, b_exams):
         links = "、".join(f"[{e['label'].replace('年度', '')} 問{q['no']}](科目A/{e['id']}.md#q{q['no']:02d})" for e, q in v[:4])
         lines.append(f"| {k} | {n} | {links} |")
     write(os.path.join(BASE, "README.md"), "\n".join(lines))
+
+
+def load_pdfs():
+    if not os.path.exists(PDF_JSON):
+        return {}
+    with open(PDF_JSON, encoding="utf-8") as f:
+        return {e["id"]: e for e in json.load(f)}
+
+
+PDFS = load_pdfs()
 
 
 def main():

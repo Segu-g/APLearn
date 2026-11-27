@@ -14,9 +14,12 @@ IPA が公表している応用情報技術者試験の過去問題を、出典�
     <id>.md            … data から自動生成する解説集（手で編集しない）
   科目B/
     問NN_<分野>.md      … 分野別の過去問分析と解き方
+    <id>.md            … 1回分（問1〜問11）の解答例と採点講評（data から自動生成）
+  ipa_pdfs.json        … IPA の問題冊子・解答・採点講評 PDF の URL（全回分。README の回別一覧に使う）
 tools/
   build_past.py        … data/*.json → Markdown 解説集とクイズ用 JS を生成
   validate_past.py     … data/*.json の形式・正解・画像の存在を検査
+  fetch_ipa_pdfs.py    … IPA の過去問題ページから PDF の URL を集めて ipa_pdfs.json を更新（新しい回の公表時に手で実行）
 ```
 
 `<id>` は IPA のファイル名に合わせる（例：`2025r07a` = 令和7年度秋期、`2025r07h` = 令和7年度春期、`2020r02o` = 令和2年度10月）。
