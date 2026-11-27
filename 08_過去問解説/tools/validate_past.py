@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""科目A過去問データ（科目A/data/*.json）の検査。使い方: python3 tools/validate_past.py [id ...]"""
+"""過去問データの検査。使い方: python3 tools/validate_past.py [id ...]
+
+科目A/data/*.json：形式・正解・画像。科目B/data/*.json：解答群（choices）と解答例の対応。
+"""
 import json, os, re, sys
 
 BASE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "科目A")
@@ -62,6 +65,41 @@ def check(sid, keys):
     return errs
 
 
+B_BASE = os.path.join(os.path.dirname(BASE), "科目B")
+KANA_RE = re.compile(r"(?<![ァ-ヶー])([ア-ン])(?![ァ-ヶー])")
+
+
+def check_b(sid):
+    """解答群：kind が正しく、記号が重複せず、term には note があり、記号だけの解答例は解答群の記号を指している"""
+    errs = []
+    data = json.load(open(os.path.join(B_BASE, "data", sid + ".json"), encoding="utf-8"))
+    for p in data["problems"]:
+        labels = {q["label"] for q in p["questions"]}
+        seen = set()
+        for g in p.get("choices", []):
+            if g.get("kind") not in ("term", "sentence", "value"):
+                errs.append(f"問{p['no']}: kind が不正 {g.get('kind')}")
+            ks = [it["k"] for it in g["items"]]
+            if len(ks) != len(set(ks)) or not ks:
+                errs.append(f"問{p['no']} {g['targets']}: 記号が空か重複")
+            if g.get("kind") == "term" and any(not it.get("note") for it in g["items"]):
+                errs.append(f"問{p['no']} {g['targets']}: term の説明（note）がない選択肢がある")
+            for t in g["targets"]:
+                if t in seen:
+                    errs.append(f"問{p['no']}: {t} が複数の解答群に入っている")
+                seen.add(t)
+        for q in p["questions"]:
+            a = q["answer"].strip()
+            if not re.fullmatch(r"[ア-ン]([，、, ・]+[ア-ン])*", a):
+                continue
+            g = next((g for g in p.get("choices", []) if q["label"] in g["targets"]), None)
+            if p.get("choices") and not g:
+                errs.append(f"問{p['no']} {q['label']}: 記号の解答例なのに解答群がない")
+            elif g and any(k not in {it["k"] for it in g["items"]} for k in KANA_RE.findall(a)):
+                errs.append(f"問{p['no']} {q['label']}: 解答例 {a} が解答群にない")
+    return errs
+
+
 def main():
     keys = json.load(open(os.path.join(BASE, "answer_keys.json"), encoding="utf-8"))
     ids = sys.argv[1:] or sorted(f[:-5] for f in os.listdir(os.path.join(BASE, "data")) if f.endswith(".json"))
@@ -72,6 +110,13 @@ def main():
         for e in errs[:60]:
             print("  -", e)
         bad += bool(errs)
+    if not sys.argv[1:]:
+        for fn in sorted(os.listdir(os.path.join(B_BASE, "data"))):
+            errs = check_b(fn[:-5])
+            print(f"科目B {fn[:-5]}: {'OK' if not errs else str(len(errs)) + ' 件のエラー'}")
+            for e in errs[:60]:
+                print("  -", e)
+            bad += bool(errs)
     sys.exit(1 if bad else 0)
 
 

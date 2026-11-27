@@ -168,6 +168,96 @@ def build_a(exams):
 
 
 # ---------------------------------------------------------------- 科目B
+KANA_RE = re.compile(r"(?<![ァ-ヶー])([ア-ン])(?![ァ-ヶー])")
+
+
+def group_of(p, label):
+    """設問ラベルが使う解答群（problem["choices"] の要素）を返す。なければ None"""
+    for g in p.get("choices", []):
+        if label in g["targets"]:
+            return g
+    return None
+
+
+def fmt_answer(p, qq):
+    """解答例の記号に選択肢の本文を添える（例：'ク' → 'ク（境界防御）'）"""
+    ans = qq["answer"].strip().replace("\n", "　／　")
+    g = group_of(p, qq["label"])
+    if not g:
+        return ans
+    text = {it["k"]: it["t"] for it in g["items"]}
+    return KANA_RE.sub(lambda m: f"{m.group(1)}（{text[m.group(1)]}）" if m.group(1) in text else m.group(1), ans)
+
+
+def choice_lines(p):
+    """解答群の一覧。正解の選択肢に ✅ と設問名を付け、用語の選択肢には説明を付ける"""
+    groups = p.get("choices", [])
+    if not groups:
+        return []
+    n_terms = sum(len(g["items"]) for g in groups if g["kind"] == "term")
+    summary = "解答群（選択肢" + (f"と、選ばれなかった用語を含む {n_terms} 語の説明" if n_terms else "の一覧") + "）"
+    out = [f"<details><summary>{summary}</summary>", ""]
+    for g in groups:
+        correct = defaultdict(list)
+        for qq in p["questions"]:
+            if qq["label"] in g["targets"]:
+                for k in KANA_RE.findall(qq["answer"]):
+                    correct[k].append(qq["label"])
+        out += [f"**{'、'.join(g['targets'])} の解答群**", ""]
+        for it in g["items"]:
+            mark = f"✅ " if it["k"] in correct else ""
+            who = f"（{'、'.join(correct[it['k']])} の正解）" if it["k"] in correct and len(g["targets"]) > 1 else ""
+            note = f"<br>　{it['note']}" if it.get("note") else ""
+            out.append(f"- {mark}**{it['k']}** {it['t']}{who}{note}")
+        out.append("")
+    out += ["</details>", ""]
+    return out
+
+
+def build_choice_index(exams):
+    """全回の解答群に出た用語（kind が term の選択肢）を分野ごとに集めた説明集"""
+    terms = defaultdict(dict)  # field -> term -> {"note", "uses": [(ex, p, labels, correct)]}
+    for ex in exams:
+        for p in ex["problems"]:
+            for g in p.get("choices", []):
+                if g["kind"] != "term":
+                    continue
+                for it in g["items"]:
+                    ok = [qq["label"] for qq in p["questions"]
+                          if qq["label"] in g["targets"] and it["k"] in KANA_RE.findall(qq["answer"])]
+                    e = terms[p["field"]].setdefault(it["t"], {"note": it.get("note", ""), "uses": []})
+                    e["uses"].append((ex, p, ok))
+    total = sum(len(v) for v in terms.values())
+    lines = [
+        "# 科目B 解答群の用語集",
+        "",
+        f"> 科目B（旧午後）の過去問 {len(exams)}回分で、解答群（選択肢）に出た用語 {total} 語の説明です。"
+        "正解だった用語には ✅ を付けています。正解にならなかった用語も、別の回では正解になったり科目Aで問われたりするので、まとめて覚えておくと効率的です。",
+        "> 用語の説明はオリジナルです。選択肢の用語は IPA 公表の問題冊子から引用しています。",
+        "",
+        "## 目次",
+        "",
+    ]
+    for f in B_FIELDS:
+        if terms.get(f):
+            lines.append(f"- [{f}（{len(terms[f])}語）](#{f})")
+    lines.append("")
+    for f in B_FIELDS:
+        if not terms.get(f):
+            continue
+        lines += [f"## {f}", ""]
+        for t in sorted(terms[f], key=lambda x: x.casefold()):
+            e = terms[f][t]
+            mark = "✅ " if any(ok for _, _, ok in e["uses"]) else ""
+            src = "、".join(
+                f"[{ex['label'].replace('年度', '')} 問{p['no']}{'（' + '・'.join(ok) + ' 正解）' if ok else ''}]({ex['id']}.md#q{p['no']:02d})"
+                for ex, p, ok in e["uses"])
+            lines.append(f"- {mark}**{t}**：{e['note']}<br>　<sub>出題：{src}</sub>")
+        lines.append("")
+    write(os.path.join(B_DIR, "解答群の用語集.md"), "\n".join(lines))
+    return total
+
+
 def build_b(exams):
     by_field = defaultdict(list)
     for ex in exams:
@@ -224,11 +314,12 @@ def build_b(exams):
                     f"#### {qq['label']}",
                     "",
                     f"- **問われていること**：{qq['ask']}",
-                    f"- **解答例**：{qq['answer'].strip().replace(chr(10), '　／　')}",
+                    f"- **解答例**：{fmt_answer(p, qq)}",
                     "",
                     f"**解き方**：{qq['howto']}",
                     "",
                 ]
+            lines += choice_lines(p)
             lines += ["### 必要な知識", ""] + [f"- {k}" for k in p["knowledge"]] + [""]
             lines += ["### 採点講評のポイント", "", p["comment"], "", "### この問題から学ぶこと", "", p["lessons"], ""]
             lines += [f"<sub>{source_line(ex, p['no'], '午後')}（解答例は IPA 公表の解答例より）</sub>", "", "---", ""]
@@ -243,6 +334,11 @@ def build_b(exams):
     for ex in exams:
         index.append(f"- [{ex['label']}]({ex['id']}.md)")
         build_b_exam(ex)
+    if any(p.get("choices") for ex in exams for p in ex["problems"]):
+        n = build_choice_index(exams)
+        index += ["", "## 解答群の用語集", "",
+                  f"解答群（選択肢）に出た用語 {n} 語を、選ばれなかったものも含めて分野別に説明しています："
+                  "[解答群の用語集.md](解答群の用語集.md)"]
     write(os.path.join(B_DIR, "README.md"), "\n".join(index))
 
 
@@ -287,18 +383,18 @@ def build_b_exam(ex):
             "",
         ]
         for qq in p["questions"]:
-            ans = qq["answer"].strip().replace("\n", "　／　")
-            lines.append(f"- **{qq['label']}**：{ans}")
+            lines.append(f"- **{qq['label']}**：{fmt_answer(p, qq)}")
         lines += ["", "<details><summary>設問と解き方</summary>", ""]
         for qq in p["questions"]:
             lines += [
                 f"**{qq['label']}**　{qq['ask']}",
                 "",
-                f"- 解答例：{qq['answer'].strip().replace(chr(10), '　／　')}",
+                f"- 解答例：{fmt_answer(p, qq)}",
                 f"- 解き方：{qq['howto']}",
                 "",
             ]
-        lines += ["</details>", "", "### 採点講評のポイント", "", p["comment"], ""]
+        lines += ["</details>", ""] + choice_lines(p)
+        lines += ["### 採点講評のポイント", "", p["comment"], ""]
         lines += [f"<sub>{source_line(ex, p['no'], '午後')}（解答例は IPA 公表の解答例より、採点講評は要約）</sub>",
                   "", f"[↑ 目次へ](#目次)", "", "---", ""]
     write(os.path.join(B_DIR, f"{ex['id']}.md"), "\n".join(lines))
