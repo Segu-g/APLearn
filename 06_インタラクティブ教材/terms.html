@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="assets/style.css">
   <style>
     [hidden] { display: none !important; }
+    .card-links { margin-top: 10px; font-size: 14px; line-height: 1.8; }
+    .card-links a { margin-right: 10px; }
     .tabs { display: flex; gap: 8px; margin: 16px 0 14px; flex-wrap: wrap; }
     .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
     .meter { height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
@@ -149,6 +151,7 @@
           <strong id="card-progress"></strong>
         </div>
         <button type="button" class="flash" id="flash" aria-live="polite"></button>
+        <div class="card-links" id="card-links" hidden></div>
         <div class="judge" id="judge">
           <button type="button" class="learning" id="btn-learning">まだ（←）</button>
           <button type="button" class="known" id="btn-known">覚えた（→）</button>
@@ -397,6 +400,7 @@
       const fl = $("flash");
       $("card-done").hidden = deckPos < deck.length;
       fl.hidden = $("judge").hidden = deckPos >= deck.length;
+      $("card-links").hidden = true;
       $("card-progress").textContent = deck.length ? Math.min(deckPos + 1, deck.length) + " / " + deck.length : "";
       if (deckPos >= deck.length) {
         $("card-done").innerHTML = '<div class="box-ok">' + (deck.length ? "この範囲のカードを一周しました。" : "出題できる語がありません。絞り込みを変えてください。") + "</div>";
@@ -409,6 +413,11 @@
       const descHTML = "<div>" + esc(t.d) + "</div>" + (t.p ? '<div class="sub" style="margin-top:8px">💡 ' + esc(t.p) + "</div>" : "");
       fl.innerHTML = head + (front === "term" ? (flipped ? termHTML + '<div style="margin-top:10px">' + descHTML + "</div>" : termHTML)
                                               : (flipped ? '<div style="margin-bottom:10px">' + esc(t.d) + "</div>" + termHTML + (t.p ? '<div class="sub" style="margin-top:8px">💡 ' + esc(t.p) + "</div>" : "") : "<div>" + esc(t.d) + "</div>"));
+      // 裏返したら、解説の章と過去問へのリンクを出す（カード本体はボタンなので、リンクはカードの外に置く）
+      const links = (t.r ? '<a href="../' + esc(t.r) + '" target="_blank" rel="noopener">📖 解説を読む</a>' : "") +
+                    (t.x && t.x.length ? "過去問：" + pastLinks(t) : "");
+      $("card-links").innerHTML = links;
+      $("card-links").hidden = !flipped || !links;
     }
     function judge(ok) {
       if (deckPos >= deck.length) return;
